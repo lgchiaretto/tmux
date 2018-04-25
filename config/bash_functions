@@ -1,0 +1,74 @@
+ssh() {
+    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux: server" ]; then
+        #tmux rename-window "$(echo $* | cut -d . -f 1)"
+        tmux rename-window "$(if [ `echo $* | grep '@'` ]; then echo $* | awk -F'@' '{ print toupper($2) }'; else echo $* | awk '{ print toupper($0) }'; fi)"
+        command ssh "$@"
+        tmux set-window-option automatic-rename "on" 1>/dev/null
+    else
+        command ssh "$@"
+    fi
+}
+
+ssh-sync() {
+    HOSTS=$@
+    if [ -z "$HOSTS" ]; then
+       echo -n "Hosts separated by spaces [ENTER]: "
+       read HOSTS
+    fi
+
+    local hosts=( $HOSTS )
+
+    tmux new-window "ssh ${hosts[0]}"
+
+    # We are openning multiple windows with the same machine
+    re='^[0-9]+$'
+
+    if [[ ${hosts[1]} =~ $re ]] ; then
+        i=1
+        while [ $i -lt ${hosts[1]} ]
+        do
+            tmux split-window -h  "ssh ${hosts[0]}"
+            tmux select-layout tiled > /dev/null
+            let "i++"
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    else
+        unset hosts[0];
+        # We are openning multiple windows in different machine
+        for i in "${hosts[@]}"; do
+            tmux split-window -h  "ssh $i"
+            tmux select-layout tiled > /dev/null
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    fi
+}
+
+ssh-multi() {
+    unset hosts[0];
+    HOSTS=$@
+    if [ -z "$HOSTS" ]; then
+       echo -n "Hosts separated by spaces [ENTER]: "
+       read HOSTS
+    fi
+
+    local hosts=( $HOSTS )
+
+    # We are openning multiple windows with the same machine
+    re='^[0-9]+$'
+
+    if [[ ${hosts[1]} =~ $re ]] ; then
+        i=0
+        while [ $i -lt ${hosts[1]} ]
+        do
+            command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
+            let "i++"
+        done
+    else
+        # We are openning multiple windows in different machine
+        for i in "${hosts[@]}"; do
+            command tmux new-window -n $i "ssh $i"
+        done
+    fi
+}
