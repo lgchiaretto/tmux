@@ -1,0 +1,25 @@
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+if [ -f ~/.bash_functions ]; then
+    . ~/.bash_functions
+fi
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# Start tmux automatically when open bash
+if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" != "tmux: server" ]; then
+    tmux attach || tmux new-session -n "$(hostname -s | awk '{ print toupper($0) }')"
+fi
