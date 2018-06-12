@@ -1,13 +1,13 @@
-ssh() {
-    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux: server" ]; then
-        #tmux rename-window "$(echo $* | cut -d . -f 1)"
-        tmux rename-window "$(if [ `echo $* | grep '@'` ]; then echo $* | awk -F'@' '{ print toupper($2) }'; else echo $* | awk '{ print toupper($0) }'; fi)"
-        command ssh "$@"
-        tmux set-window-option automatic-rename "on" 1>/dev/null
-    else
-        command ssh "$@"
-    fi
-}
+#ssh() {
+#    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux: server" ]; then
+#        #tmux rename-window "$(echo $* | cut -d . -f 1)"
+#        tmux rename-window "$(if [ `echo $* | grep '@'` ]; then echo $* | awk -F'@' '{ print toupper($2) }'; else echo $* | awk '{ print toupper($0) }'; fi)"
+#        command ssh "$@"
+#        tmux set-window-option automatic-rename "on" 1>/dev/null
+#    else
+#        command ssh "$@"
+#    fi
+#}
 
 ssh-sync() {
     HOSTS=$@
@@ -62,13 +62,15 @@ ssh-multi() {
         i=0
         while [ $i -lt ${hosts[1]} ]
         do
-            command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
+            #command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
+            command tmux new-window "ssh ${hosts[0]}"
             let "i++"
         done
     else
         # We are openning multiple windows in different machine
         for i in "${hosts[@]}"; do
-            command tmux new-window -n $i "ssh $i"
+            #command tmux new-window -n $i "ssh $i"
+            command tmux new-window "ssh $i"
         done
     fi
 }
