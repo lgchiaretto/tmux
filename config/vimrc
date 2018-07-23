@@ -6,5 +6,22 @@ set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
 set paste
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
-
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
+
+" This is to rename-window when file is opened by vim
+autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+set title
+
+" This is to use with jedi-python
+nnoremap <C-space> <tab>
+set nocompatible              " be iMproved, required
+filetype off                  " required <<========== We can turn it on later
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'davidhalter/jedi-vim'
+call vundle#end()            " required
+filetype plugin indent on    " required
+
+set completeopt-=preview
+
