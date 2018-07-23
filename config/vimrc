@@ -4,7 +4,7 @@ set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
-set paste
+
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
 
