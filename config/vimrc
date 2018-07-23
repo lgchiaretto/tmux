@@ -9,7 +9,7 @@ nnoremap v <c-v> " remap `v` to `Ctrl-v`
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
 
 " This is to rename-window when file is opened by vim
-autocmd BufEnter * let &titlestring = ' ' . expand("%:t")
+autocmd BufEnter * let &titlestring = expand("%:t")
 set title
 
 " This is to use with jedi-python
