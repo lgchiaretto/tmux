@@ -27,4 +27,6 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     call vundle#end()            " required
     filetype plugin indent on    " required
     set completeopt-=preview
+    hi Pmenu ctermbg=black ctermfg=white
+    hi PmenuSel ctermbg=blue ctermfg=white
 endif
