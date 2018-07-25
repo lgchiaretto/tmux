@@ -7,6 +7,7 @@ set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file
 
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
+autocmd FileType python setlocal nu "Only when file is an python format
 
 " This is to rename-window when file is opened by vim
 if exists('$TMUX')
