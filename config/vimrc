@@ -4,10 +4,17 @@ set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
-
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
+
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
+
+" Python files
 autocmd FileType python setlocal nu "Only when file is an python format
+autocmd FileType python inoremap ( ()<Left>
+autocmd FileType python inoremap { {}<Left>
+autocmd FileType python inoremap [ []<Left>
+autocmd FileType python inoremap ' ''<Left>
+autocmd FileType python inoremap " ""<Left>
 
 " This is to rename-window when file is opened by vim
 if exists('$TMUX')
@@ -26,7 +33,8 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'davidhalter/jedi-vim'
     call vundle#end()            " required
     filetype plugin indent on    " required
-    set completeopt-=preview
+    "set completeopt-=preview
+    set completeopt=noselect,menuone
     hi Pmenu ctermbg=black ctermfg=white
     hi PmenuSel ctermbg=blue ctermfg=white
 endif

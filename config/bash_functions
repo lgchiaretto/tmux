@@ -1,5 +1,6 @@
+#!/bin/bash
 #ssh() {
-#    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux: server" ]; then
+#    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux" ]; then
 #        #tmux rename-window "$(echo $* | cut -d . -f 1)"
 #        tmux rename-window "$(if [ `echo $* | grep '@'` ]; then echo $* | awk -F'@' '{ print toupper($2) }'; else echo $* | awk '{ print toupper($0) }'; fi)"
 #        command ssh "$@"
@@ -62,8 +63,7 @@ ssh-multi() {
         i=0
         while [ $i -lt ${hosts[1]} ]
         do
-            #command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
-            command tmux new-window "ssh ${hosts[0]}"
+            command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
             let "i++"
         done
     else
@@ -73,4 +73,41 @@ ssh-multi() {
             command tmux new-window "ssh $i"
         done
     fi
+}
+
+vim-multi() {
+    unset files[0];
+    FILES=$@
+    if [ -z "$FILES" ]; then
+       echo -n "Files separated by spaces [ENTER]: "
+       read FILES
+    fi
+
+    local files=( $FILES )
+
+    for i in "${files[@]}"; do
+        command tmux new-window "vim $i"
+    done
+}
+
+vim-multi-pane() {
+    FILES=$@
+    if [ -z "$FILES" ]; then
+       echo -n "Files separated by spaces [ENTER]: "
+       read FILES
+    fi
+
+    local files=( $FILES )
+
+    tmux new-window -n "Multiple files" "vim ${files[0]}"
+
+    # We are openning multiple windows with the same machine
+    re='^[0-9]+$'
+
+    unset files[0];
+    for i in "${files[@]}"; do
+        tmux split-window -h  "vim $i"
+        tmux select-layout tiled > /dev/null
+    done
+    tmux select-pane -t 0
 }
