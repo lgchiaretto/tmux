@@ -6,16 +6,6 @@ set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
-autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
-
-" Python files
-autocmd FileType python setlocal nu "Only when file is an python format
-autocmd FileType python inoremap ( ()<Left>
-autocmd FileType python inoremap { {}<Left>
-autocmd FileType python inoremap [ []<Left>
-autocmd FileType python inoremap ' ''<Left>
-autocmd FileType python inoremap " ""<Left>
-
 " This is to rename-window when file is opened by vim
 if exists('$TMUX')
     autocmd BufEnter * let &titlestring = expand("%:t")
@@ -38,3 +28,19 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     hi Pmenu ctermbg=black ctermfg=white
     hi PmenuSel ctermbg=blue ctermfg=white
 endif
+
+" Python Files
+autocmd FileType python setlocal nu
+autocmd FileType python inoremap ( ()<Left>
+autocmd FileType python inoremap { {}<Left>
+autocmd FileType python inoremap [ []<Left>
+autocmd FileType python inoremap ' ''<Left>
+autocmd FileType python inoremap " ""<Left>
+" Execute script with no parameters
+autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
+" Execute script with parameters
+autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %' 
+autocmd FileType python set pumheight=15
+
+" YAML Files
+autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
