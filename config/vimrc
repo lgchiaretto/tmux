@@ -4,6 +4,7 @@ set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
+syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
 " This is to rename-window when file is opened by vim
@@ -21,12 +22,10 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'davidhalter/jedi-vim'
+    Plugin 'morhetz/gruvbox'
     call vundle#end()            " required
     filetype plugin indent on    " required
-    "set completeopt-=preview
     set completeopt=noselect,menuone
-    hi Pmenu ctermbg=black ctermfg=white
-    hi PmenuSel ctermbg=blue ctermfg=white
 endif
 
 " Python Files
@@ -44,3 +43,13 @@ autocmd FileType python set pumheight=15
 
 " YAML Files
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
+
+" Change Colorscheme and background color to black
+autocmd FileType yaml,vim,python colorscheme gruvbox
+autocmd FileType yaml,vim,python highlight Normal ctermbg=None
+
+" This must be here due python plugin colors
+if &term =~ '256color'
+    " disable background color erase
+    set t_ut=
+endif
