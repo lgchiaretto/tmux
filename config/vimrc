@@ -33,8 +33,8 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     filetype plugin indent on    " required
     set completeopt-=preview
     " Change Colorscheme and background color to black
-    autocmd FileType yaml,vim,python colorscheme gruvbox
-    autocmd FileType yaml,vim,python highlight Normal ctermbg=None
+    autocmd FileType yaml,vim,python,sh colorscheme gruvbox
+    autocmd FileType yaml,vim,python,sh highlight Normal ctermbg=None
 endif
 
 " Python Files
