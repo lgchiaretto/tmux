@@ -8,7 +8,13 @@ syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
 " This is to rename-window when file is opened by vim
-if exists('$TMUX')
+let g:remoteSession = ($STY == "")
+if !exists('$TMUX')
+    if g:remoteSession
+        autocmd BufEnter * let &titlestring = expand("%:t")
+        set title
+    endif
+else
     autocmd BufEnter * let &titlestring = expand("%:t")
     set title
 endif
@@ -25,7 +31,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'morhetz/gruvbox'
     call vundle#end()            " required
     filetype plugin indent on    " required
-    set completeopt=noselect,menuone
+    set completeopt-=preview
 endif
 
 " Python Files
