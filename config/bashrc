@@ -23,3 +23,5 @@ fi
 #if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" != "tmux: server" ]; then
 #    tmux attach || tmux new-session -n "$(hostname -s | awk '{ print toupper($0) }')"
 #fi
+LS_COLORS=$LS_COLORS:'di=0;34:' ; export LS_COLORS
+eval $(dircolors -b $HOME/.dircolors)
