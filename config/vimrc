@@ -32,6 +32,9 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     call vundle#end()            " required
     filetype plugin indent on    " required
     set completeopt-=preview
+    " Change Colorscheme and background color to black
+    autocmd FileType yaml,vim,python colorscheme gruvbox
+    autocmd FileType yaml,vim,python highlight Normal ctermbg=None
 endif
 
 " Python Files
@@ -49,10 +52,6 @@ autocmd FileType python set pumheight=15
 
 " YAML Files
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2    "Only when file is an yaml format
-
-" Change Colorscheme and background color to black
-autocmd FileType yaml,vim,python colorscheme gruvbox
-autocmd FileType yaml,vim,python highlight Normal ctermbg=None
 
 " This must be here due python plugin colors
 if &term =~ '256color'
