@@ -29,12 +29,19 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'davidhalter/jedi-vim'
     Plugin 'morhetz/gruvbox'
+    Plugin 'rodjek/vim-puppet'
     call vundle#end()            " required
     filetype plugin indent on    " required
     set completeopt-=preview
     " Change Colorscheme and background color to black
-    autocmd FileType yaml,vim,python,sh,conf colorscheme gruvbox
-    autocmd FileType yaml,vim,python,sh,conf highlight Normal ctermbg=None
+    autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
+    autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
+	" Skeleton for a new python file
+	if has("autocmd")
+	  augroup templates
+	    autocmd BufNewFile *.py 0r ~/.vim/templates/skeleton.py
+	  augroup END
+	endif
 endif
 
 " Python Files
