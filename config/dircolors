@@ -1,44 +1,10 @@
-#                                    LS_COLORS
-# Maintainers: Magnus Woldrich <m@japh.se>,
-#              Ryan Delaney <ryan.delaney@gmail.com> OpenGPG: 0D98863B4E1D07B6
-#         URL: https://github.com/trapd00r/LS_COLORS
-#     Version: 0.254
-#     Updated: Tue Mar 29 21:25:30 AEST 2016
-#
-#   This is a collection of extension:color mappings, suitable to use as your
-#   LS_COLORS environment variable. Most of them use the extended color map,
-#   described in the ECMA-48 document; in other words, you'll need a terminal
-#   with capabilities of displaying 256 colors.
-#
-#   As of this writing, around 300 different filetypes/extensions is supported.
-#   That's indeed a lot of extensions, but there's a lot more! Therefore I need
-#   your help.
-#
-#   Fork this project on github, add the extensions you are missing, and send me
-#   a pull request.
-#
-#   For files that usually ends up next to each other, like html, css and js,
-#   try to pick colors that fit nicely together. Filetypes with multiple
-#   possible extensions, like htm and html, should have the same color.
-
-# This program is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-# PARTICULAR PURPOSE.  See the Perl Artistic License for more details.
-#
-# This program is free software: you can redistribute it and/or modify it under
-# the terms of the Perl Artistic License as published by the Perl Foundation,
-# either version 1.0 of the License, or (at your option) any later version.
-#
-# You should have received a copy of the Perl Artistic License along
-# with this program.  If not, see <http://www.perlfoundation.org/artistic_license_1_0>.
-
 # core {{{1
 BLK                   38;5;68
 CAPABILITY            38;5;17
 CHR                   38;5;113;1
 DIR                   38;5;30
 DOOR                  38;5;127
-EXEC                  38;5;208;1
+EXEC                  38;5;112;4
 FIFO                  38;5;126
 FILE                  0
 LINK                  target
@@ -113,16 +79,16 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .odt                  38;5;111
 .rtf                  38;5;111
 # presentation {{{3
-.odp                  38;5;166
-.pps                  38;5;166
-.ppt                  38;5;166
-.pptx                 38;5;166
+.odp                  38;5;172
+.pps                  38;5;172
+.ppt                  38;5;172
+.pptx                 38;5;172
 #   Powerpoint show
-.ppts                 38;5;166
+.ppts                 38;5;172
 #   Powerpoint with enabled macros
-.pptxm                38;5;166;4
+.pptxm                38;5;172;4
 #   Powerpoint show with enabled macros
-.pptsm                38;5;166;4
+.pptsm                38;5;172;4
 # spreadsheet {{{3
 .csv                  38;5;78
 #   Open document spreadsheet
@@ -161,7 +127,12 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 
 # shell {{{2
 .awk                  38;5;172
-.bash                 38;5;172
+.bash_functions       38;5;220;1
+.bash_aliases         38;5;220;1
+.bash_history         38;5;220;1
+.bash_logout          38;5;220;1
+.dircolors            38;5;220;1
+.bash                 38;5;81
 .bat                  38;5;172
 .BAT                  38;5;172
 .sed                  38;5;172
@@ -170,12 +141,14 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .vim                  38;5;172
 
 # interpreted {{{2
-.ahk                  38;5;41
+.ahk                  38;5;220;1
 # python
-.py                   38;5;41
+.py                   38;5;172
+# puppet
+.pp                   38;5;172
 # perl
-.pl                   38;5;208
-.PL                   38;5;160
+.pl                   38;5;172
+.PL                   38;5;172
 .t                    38;5;114
 # sql
 .msql                 38;5;222
@@ -188,27 +161,27 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .r                    38;5;49
 .R                    38;5;49
 # GrADS script
-.gs                   38;5;81
+.gs                   38;5;172
 
 # compiled {{{2
 #
 #   assembly language
-.asm                  38;5;81
+.asm                  38;5;172
 #   LISP
-.cl                   38;5;81
-.lisp                 38;5;81
+.cl                   38;5;172
+.lisp                 38;5;172
 #   lua
-.lua                  38;5;81
+.lua                  38;5;172
 #   Moonscript
-.moon                 38;5;81
+.moon                 38;5;172
 #   C
-.c                    38;5;81
-.C                    38;5;81
+.c                    38;5;172
+.C                    38;5;172
 .h                    38;5;110
 .H                    38;5;110
 .tcc                  38;5;110
 #   C++
-.c++                  38;5;81
+.c++                  38;5;172
 .h++                  38;5;110
 .hpp                  38;5;110
 .hxx                  38;5;110
@@ -217,33 +190,33 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .M                    38;5;110
 .m                    38;5;110
 #   Csharp
-.cc                   38;5;81
-.cs                   38;5;81
-.cp                   38;5;81
-.cpp                  38;5;81
-.cxx                  38;5;81
+.cc                   38;5;172
+.cs                   38;5;172
+.cp                   38;5;172
+.cpp                  38;5;172
+.cxx                  38;5;172
 #   Crystal
-.cr                   38;5;81
+.cr                   38;5;172
 #   Google golang
-.go                   38;5;81
+.go                   38;5;172
 #   fortran
-.f                    38;5;81
-.for                  38;5;81
-.ftn                  38;5;81
+.f                    38;5;172
+.for                  38;5;172
+.ftn                  38;5;172
 #   pascal
 .s                    38;5;110
 .S                    38;5;110
 #   Rust
-.rs                   38;5;81
+.rs                   38;5;172
 #   Swift
 .swift                38;5;219
 #   ?
-.sx                   38;5;81
+.sx                   38;5;172
 #   interface file in GHC - https://github.com/trapd00r/LS_COLORS/pull/9
 .hi                   38;5;110
 #   haskell
-.hs                   38;5;81
-.lhs                  38;5;81
+.hs                   38;5;172
+.lhs                  38;5;172
 
 # binaries {{{2
 # compiled apps for interpreted languages
@@ -271,16 +244,16 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .jsp                  38;5;074;1
 # }}}
 # php {{{2
-.php                  38;5;81
+.php                  38;5;172
 #   CakePHP view scripts and helpers
-.ctp                  38;5;81
+.ctp                  38;5;172
 #   Twig template engine
-.twig                 38;5;81
+.twig                 38;5;172
 # }}}
 # vb/a {{{2
-.vb                   38;5;81
-.vba                  38;5;81
-.vbs                  38;5;81
+.vb                   38;5;172
+.vba                  38;5;172
+.vbs                  38;5;172
 # 2}}}
 # Build stuff {{{2
 *Dockerfile           38;5;155
@@ -643,7 +616,7 @@ STICKY_OTHER_WRITABLE 48;5;235;38;5;139;3
 .vcf                  38;5;7
 .xln                  38;5;7
 #   AppCode files
-.iml                  38;5;166
+.iml                  38;5;172
 #   Xcode files
 .xcconfig             1
 .entitlements         1
