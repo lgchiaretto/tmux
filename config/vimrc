@@ -30,6 +30,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'davidhalter/jedi-vim'
     Plugin 'morhetz/gruvbox'
     Plugin 'rodjek/vim-puppet'
+    Plugin 'Raimondi/delimitMate'
     call vundle#end()            " required
     filetype plugin indent on    " required
     set completeopt-=preview
@@ -46,11 +47,6 @@ endif
 
 " Python Files
 autocmd FileType python setlocal nu
-autocmd FileType python inoremap ( ()<Left>
-autocmd FileType python inoremap { {}<Left>
-autocmd FileType python inoremap [ []<Left>
-autocmd FileType python inoremap ' ''<Left>
-autocmd FileType python inoremap " ""<Left>
 " Execute script with no parameters
 autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
 " Execute script with parameters
