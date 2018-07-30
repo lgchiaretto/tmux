@@ -33,7 +33,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'Raimondi/delimitMate'
     call vundle#end()            " required
     filetype plugin indent on    " required
-    set completeopt-=preview
+    set completeopt=menuone,noselect
     " Change Colorscheme and background color to black
     autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
     autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
