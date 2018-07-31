@@ -31,9 +31,10 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'morhetz/gruvbox'
     Plugin 'rodjek/vim-puppet'
     Plugin 'Raimondi/delimitMate'
+    Plugin 'tomtom/tcomment_vim'
     call vundle#end()            " required
     filetype plugin indent on    " required
-    set completeopt=menuone,noselect
+    set completeopt-=preview
     " Change Colorscheme and background color to black
     autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
     autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
@@ -43,6 +44,8 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
 	    autocmd BufNewFile *.py 0r ~/.vim/templates/skeleton.py
 	  augroup END
 	endif
+    " Comment multiple lines using #
+    let g:tcomment_mapleader_comment_anyway = '#'
 endif
 
 " Python Files
