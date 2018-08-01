@@ -22,8 +22,8 @@ endif
 " This is to use vim modules using Vundle
 if !empty(glob("~/.vim/bundle/Vundle.vim"))
     nnoremap <C-space> <tab>
-    set nocompatible              " be iMproved, required
-    filetype off                  " required <<========== We can turn it on later
+    set nocompatible
+    filetype off                  " required
     set rtp+=~/.vim/bundle/Vundle.vim
     call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
@@ -33,20 +33,42 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     Plugin 'Raimondi/delimitMate'
     Plugin 'tomtom/tcomment_vim'
     Plugin 'terryma/vim-multiple-cursors'
-    call vundle#end()            " required
-    filetype plugin indent on    " required
+    Plugin 'python-mode/python-mode'
+    call vundle#end()
+    filetype plugin indent on
+    "Remove preview when autocomplete vim-jedi
     set completeopt-=preview
     " Change Colorscheme and background color to black
     autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
     autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
+    " Comment multiple lines using #
+    let g:tcomment_mapleader_comment_anyway = '#'
+    " Uncomment lines using g#
+    let g:tcomment_mapleader_uncomment_anyway = 'g#'
+
+    " python-mode
+    " Use python version 2
+    let g:pymode_python = 'python'
+    " python-mode disable all warning
+    let g:pymode_options_colorcolumn = 0
+    " Pylint ignore all warning
+    let g:pymode_lint_ignore = ["W"]
+    " Pylint verify if error when editing (test for now)
+    let g:pymode_lint_on_fly =  1
+    " Documentation
+    let g:pymode_doc_bind = 'K'
+    " Disable python-code to run codes
+    let g:pymode_run = 0
+
+    " map 'q' to close buffer readonly
+    nnoremap <expr> q (!&modifiable ? ':bd!<CR>' : 'q')
+
 	" Skeleton for a new python file
 	if has("autocmd")
 	  augroup templates
 	    autocmd BufNewFile *.py 0r ~/.vim/templates/skeleton.py
 	  augroup END
 	endif
-    " Comment multiple lines using #
-    let g:tcomment_mapleader_comment_anyway = '#'
 endif
 
 " Python Files
