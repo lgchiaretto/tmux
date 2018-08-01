@@ -56,7 +56,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     " Pylint ignore all warning
     let g:pymode_lint_ignore = ["W","E302", "E303"]
     " Pylint verify if error when editing (test for now)
-    let g:pymode_lint_on_fly =  1
+    let g:pymode_lint_on_fly =  0
     " Documentation
     let g:pymode_doc_bind = 'K'
     " Disable python-code to run codes
