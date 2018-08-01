@@ -4,6 +4,7 @@ set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
+set statusline+=\ %P    "percent through file
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
@@ -28,6 +29,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     call vundle#begin()
     Plugin 'VundleVim/Vundle.vim'
     Plugin 'davidhalter/jedi-vim'
+    Plugin 'valloric/youcompleteme'
     Plugin 'morhetz/gruvbox'
     Plugin 'rodjek/vim-puppet'
     Plugin 'Raimondi/delimitMate'
@@ -52,7 +54,7 @@ if !empty(glob("~/.vim/bundle/Vundle.vim"))
     " python-mode disable all warning
     let g:pymode_options_colorcolumn = 0
     " Pylint ignore all warning
-    let g:pymode_lint_ignore = ["W"]
+    let g:pymode_lint_ignore = ["W","E302", "E303"]
     " Pylint verify if error when editing (test for now)
     let g:pymode_lint_on_fly =  1
     " Documentation
@@ -88,3 +90,6 @@ if &term =~ '256color'
     " disable background color erase
     set t_ut=
 endif
+
+let g:ycm_python_binary_path = 'python'
+
