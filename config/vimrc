@@ -22,48 +22,58 @@ endif
 
 " This is to use vim modules using Vundle
 if !empty(glob("~/.vim/bundle/Vundle.vim"))
-    nnoremap <C-space> <tab>
+    "nnoremap <C-space> <tab>
     set nocompatible
     filetype off                  " required
     set rtp+=~/.vim/bundle/Vundle.vim
     call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim'
-    Plugin 'davidhalter/jedi-vim'
-    Plugin 'valloric/youcompleteme'
-    Plugin 'morhetz/gruvbox'
-    Plugin 'rodjek/vim-puppet'
-    Plugin 'Raimondi/delimitMate'
-    Plugin 'tomtom/tcomment_vim'
-    Plugin 'terryma/vim-multiple-cursors'
-    Plugin 'python-mode/python-mode'
+        Plugin 'VundleVim/Vundle.vim'
+        Plugin 'valloric/youcompleteme'
+        Plugin 'davidhalter/jedi-vim'
+        Plugin 'morhetz/gruvbox'
+        Plugin 'rodjek/vim-puppet'
+        Plugin 'Raimondi/delimitMate'
+        Plugin 'tomtom/tcomment_vim'
+        "Plugin 'terryma/vim-multiple-cursors'
+        "Plugin 'python-mode/python-mode'
     call vundle#end()
     filetype plugin indent on
-    "Remove preview when autocomplete vim-jedi
-    set completeopt-=preview
+
+    " gruvbox
     " Change Colorscheme and background color to black
     autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
     autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
+
+    " ycm
+    let g:ycm_autoclose_preview_window_after_completion=1
+    let g:ycm_python_binary_path = 'python'
+
+    " tcomment
     " Comment multiple lines using #
     let g:tcomment_mapleader_comment_anyway = '#'
     " Uncomment lines using g#
     let g:tcomment_mapleader_uncomment_anyway = 'g#'
 
-    " python-mode
-    " Use python version 2
-    let g:pymode_python = 'python'
-    " python-mode disable all warning
-    let g:pymode_options_colorcolumn = 0
-    " Pylint ignore all warning
-    let g:pymode_lint_ignore = ["W","E302", "E303"]
-    " Pylint verify if error when editing (test for now)
-    let g:pymode_lint_on_fly =  0
-    " Documentation
-    let g:pymode_doc_bind = 'K'
-    " Disable python-code to run codes
-    let g:pymode_run = 0
+    "Remove preview when autocomplete vim-jedi
+    set completeopt-=preview
+    let g:jedi#show_call_signatures = 0
 
+    " python-mode
+    " " Use python version 2
+    " let g:pymode_python = 'python'
+    " " python-mode disable all warning
+    " let g:pymode_options_colorcolumn = 0
+    " " Pylint ignore all warning
+    " let g:pymode_lint_ignore = ["W","E302", "E303"]
+    " " Pylint verify if error when editing (test for now)
+    " let g:pymode_lint_on_fly =  0
+    " " Documentation
+    " let g:pymode_doc_bind = 'K'
+    " " Disable python-code to run codes
+    " let g:pymode_run = 0
+    
     " map 'q' to close buffer readonly
-    nnoremap <expr> q (!&modifiable ? ':bd!<CR>' : 'q')
+    " nnoremap <expr> q (!&modifiable ? ':bd!<CR>' : 'q')
 
 	" Skeleton for a new python file
 	if has("autocmd")
@@ -75,7 +85,7 @@ endif
 
 " Python Files
 autocmd FileType python setlocal nu
-autocmd FileType python inoremap <S-tab> <tab>
+" autocmd FileType python inoremap <S-tab> <tab>
 " Execute script with no parameters
 autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
 " Execute script with parameters
@@ -90,6 +100,4 @@ if &term =~ '256color'
     " disable background color erase
     set t_ut=
 endif
-
-let g:ycm_python_binary_path = 'python'
 
