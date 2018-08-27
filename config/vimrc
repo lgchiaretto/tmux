@@ -34,12 +34,11 @@ call plug#begin('~/.vim/plugged')
     Plug 'rodjek/vim-puppet', { 'for': 'puppet' }
     Plug 'Raimondi/delimitMate'
     Plug 'tomtom/tcomment_vim'
-    Plug 'tmux-plugins/vim-tmux'
 
     " gruvbox
     " Change Colorscheme and background color to black
-    autocmd FileType yaml,vim,python,sh,conf,puppet colorscheme gruvbox
-    autocmd FileType yaml,vim,python,sh,conf,puppet highlight Normal ctermbg=None
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux colorscheme gruvbox
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux highlight Normal ctermbg=None
 
     " ycm
     let g:ycm_autoclose_preview_window_after_completion=1
