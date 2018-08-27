@@ -28,12 +28,13 @@ endif
 
 call plug#begin('~/.vim/plugged')
     "nnoremap <C-space> <tab>
-    Plug 'valloric/youcompleteme', { 'for': 'python' }
+    " Plug 'valloric/youcompleteme', { 'for': 'python' }
     Plug 'davidhalter/jedi-vim', { 'for': 'python' }
     Plug 'morhetz/gruvbox'
     Plug 'rodjek/vim-puppet', { 'for': 'puppet' }
     Plug 'Raimondi/delimitMate'
     Plug 'tomtom/tcomment_vim'
+    Plug 'tmux-plugins/vim-tmux'
 
     " gruvbox
     " Change Colorscheme and background color to black
