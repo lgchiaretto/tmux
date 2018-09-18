@@ -63,7 +63,8 @@ ssh-multi() {
         i=0
         while [ $i -lt ${hosts[1]} ]
         do
-            command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
+            #command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
+            command tmux new-window "ssh ${hosts[0]}"
             let "i++"
         done
     else
