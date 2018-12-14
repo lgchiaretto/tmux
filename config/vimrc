@@ -37,8 +37,8 @@ call plug#begin('~/.vim/plugged')
 
     " gruvbox
     " Change Colorscheme and background color to black
-    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux colorscheme gruvbox
-    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux highlight Normal ctermbg=None
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 colorscheme gruvbox
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 highlight Normal ctermbg=None
 
     " ycm
     let g:ycm_autoclose_preview_window_after_completion=1
