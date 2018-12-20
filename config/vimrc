@@ -7,7 +7,9 @@ set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file
 set statusline+=\ %P    "percent through file
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
-set paste
+
+" TODO: Not working with delimitmate 
+" set paste
 
 " This is to rename-window when file is opened by vim
 let g:remoteSession = ($STY == "")
