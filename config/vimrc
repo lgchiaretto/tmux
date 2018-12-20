@@ -7,6 +7,7 @@ set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file
 set statusline+=\ %P    "percent through file
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
+set paste
 
 " This is to rename-window when file is opened by vim
 let g:remoteSession = ($STY == "")
@@ -73,6 +74,10 @@ autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellesc
 " Execute script with parameters
 autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %' 
 autocmd FileType python set pumheight=15
+
+" temporary files on one place (stolen from sryche/vimfiles on github)
+" set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+" set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
 " YAML Files
 " autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys-=<:>    "Only when file is an yaml format
