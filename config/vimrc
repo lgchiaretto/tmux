@@ -8,8 +8,8 @@ set statusline+=\ %P    "percent through file
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
-" TODO: Not working with delimitmate 
-" set paste
+" exec set paste only in this files to not conflict with delimitMate plugin
+autocmd Filetype yaml,vim set paste
 
 " This is to rename-window when file is opened by vim
 let g:remoteSession = ($STY == "")
