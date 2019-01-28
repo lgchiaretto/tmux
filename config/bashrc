@@ -149,7 +149,7 @@ export EDITOR=vim
 # http://stackoverflow.com/questions/9457233/unlimited-bash-history
 export HISTFILESIZE=
 export HISTSIZE=
-export HISTTIMEFORMAT="[%F %T] "
+HISTTIMEFORMAT=`echo -e "\033[38;5;30m" "[%F %T]" "\033[0m"`
 
 umask 022
 #LS_COLORS=$LS_COLORS:'di=0;34:ex=1;32:' ; export LS_COLORS
