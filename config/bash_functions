@@ -19,7 +19,7 @@ ssh-sync() {
 
     local hosts=( $HOSTS )
 
-    tmux new-window "ssh ${hosts[0]}"
+    tmux new-window ssh ${hosts[0]}
 
     # We are openning multiple windows with the same machine
     re='^[0-9]+$'
@@ -28,7 +28,7 @@ ssh-sync() {
         i=1
         while [ $i -lt ${hosts[1]} ]
         do
-            tmux split-window -h  "ssh ${hosts[0]}"
+            tmux split-window -h  ssh ${hosts[0]}
             tmux select-layout tiled > /dev/null
             let "i++"
         done
@@ -38,7 +38,7 @@ ssh-sync() {
         unset hosts[0];
         # We are openning multiple windows in different machine
         for i in "${hosts[@]}"; do
-            tmux split-window -h  "ssh $i"
+            tmux split-window -h  ssh $i
             tmux select-layout tiled > /dev/null
         done
         tmux select-pane -t 0
@@ -64,14 +64,14 @@ ssh-multi() {
         while [ $i -lt ${hosts[1]} ]
         do
             #command tmux new-window -n "${hosts[0]}" "ssh ${hosts[0]}"
-            command tmux new-window "ssh ${hosts[0]}"
+            command tmux new-window ssh ${hosts[0]}
             let "i++"
         done
     else
         # We are openning multiple windows in different machine
         for i in "${hosts[@]}"; do
             #command tmux new-window -n $i "ssh $i"
-            command tmux new-window "ssh $i"
+            command tmux new-window ssh $i
         done
     fi
 }
@@ -87,7 +87,7 @@ vim-multi() {
     local files=( $FILES )
 
     for i in "${files[@]}"; do
-        command tmux new-window "vim $i"
+        command tmux new-window vim $i
     done
 }
 
@@ -100,14 +100,14 @@ vim-multi-pane() {
 
     local files=( $FILES )
 
-    tmux new-window -n "Multiple files" "vim ${files[0]}"
+    tmux new-window vim ${files[0]}
 
     # We are openning multiple windows with the same machine
     re='^[0-9]+$'
 
     unset files[0];
     for i in "${files[@]}"; do
-        tmux split-window -h  "vim $i"
+        tmux split-window -v vim $i
         tmux select-layout tiled > /dev/null
     done
     tmux select-pane -t 0
