@@ -145,6 +145,12 @@ export DOCKER_HOST=tcp://localhost:2375
 export GOPATH=~/go
 export EDITOR=vim
 
+# Undocumented feature which sets the size to "unlimited".
+# http://stackoverflow.com/questions/9457233/unlimited-bash-history
+export HISTFILESIZE=
+export HISTSIZE=
+export HISTTIMEFORMAT="[%F %T] "
+
 umask 022
 #LS_COLORS=$LS_COLORS:'di=0;34:ex=1;32:' ; export LS_COLORS
 eval $(dircolors -b $HOME/.dircolors)
