@@ -5,6 +5,7 @@ set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (as
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
 set statusline+=\ %P    "percent through file
+set cursorline
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
