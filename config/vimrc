@@ -4,13 +4,13 @@ set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
 set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
-set statusline+=\ %P    "percent through file
+set statusline=%=%l/%L
 set cursorline
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
 
 " exec set paste only in this files to not conflict with delimitMate plugin
-autocmd Filetype yaml,vim set paste
+" autocmd Filetype yaml,vim set paste
 
 " This is to rename-window when file is opened by vim
 let g:remoteSession = ($STY == "")
@@ -84,7 +84,7 @@ autocmd FileType python set pumheight=15
 
 " YAML Files
 " autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys-=<:>    "Only when file is an yaml format
-autocmd FileType yaml setlocal et ts=2 sts=2 sw=2 indentkeys=0{,0},:,0#,!^F,O,e,-    "Only when file is an yaml format"
+autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys=0{,0},:,0#,!^F,O,e,-    "Only when file is an yaml format"
 
 " This must be here due python plugin colors
 if &term =~ '256color'
