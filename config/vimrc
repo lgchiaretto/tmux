@@ -8,6 +8,7 @@ set statusline=%=%l/%L
 set cursorline
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
+set pastetoggle=<F1>
 
 " exec set paste only in this files to not conflict with delimitMate plugin
 " autocmd Filetype yaml,vim set paste
@@ -75,7 +76,7 @@ autocmd FileType python setlocal nu
 " Execute script with no parameters
 autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
 " Execute script with parameters
-autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %' 
+autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %'
 autocmd FileType python set pumheight=15
 
 " temporary files on one place (stolen from sryche/vimfiles on github)
