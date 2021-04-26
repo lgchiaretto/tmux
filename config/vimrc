@@ -6,10 +6,9 @@ set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
 set statusline=%=%l/%L
 set cursorline
+set paste
 syntax on
 nnoremap v <c-v> " remap `v` to `Ctrl-v`
-set pastetoggle=<F1>
-set paste
 
 " exec set paste only in this files to not conflict with delimitMate plugin
 " autocmd Filetype yaml,vim set paste
@@ -77,7 +76,7 @@ autocmd FileType python setlocal nu
 " Execute script with no parameters
 autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
 " Execute script with parameters
-autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %'
+autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %' 
 autocmd FileType python set pumheight=15
 
 " temporary files on one place (stolen from sryche/vimfiles on github)
@@ -93,5 +92,3 @@ if &term =~ '256color'
     " disable background color erase
     set t_ut=
 endif
-
-set paste
