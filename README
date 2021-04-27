@@ -1,13 +1,4 @@
 ## tmux version
 
-The config files works with tmux > 2.4
+The config files works with tmux 3
 
-## Installing using Ansible ##
-
-Command:
-
-ansible-playbook install-tmux.yaml --extra-vars "userdir=<USER_DIR>" --inventory <INVENTORY_FILE> --user <REMOTE_USER> --become
-
-Example:
-
-ansible-playbook install-tmux.yaml --extra-vars "userdir=/home/student" --inventory hosts --user student --become
