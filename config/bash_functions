@@ -46,6 +46,31 @@ ssh-sync() {
     fi
 }
 
+tmux-multi-pane() {
+    HOSTS=$@
+    local hosts=( $HOSTS )
+
+    tmux new-window
+    i=1
+    while [ $i -lt ${hosts[0]} ]
+    do
+        tmux split-window -h
+        tmux select-layout tiled > /dev/null
+        let "i++"
+    done
+    tmux select-pane -t 0
+    #tmux set-window-option synchronize-panes on > /dev/null
+}
+
+tmux-multi-window() {
+    i=0
+    while [ $i -lt $@ ]
+    do
+        command tmux new-window
+        let "i++"
+    done
+}
+
 ssh-multi() {
     unset hosts[0];
     HOSTS=$@
