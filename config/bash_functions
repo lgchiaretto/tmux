@@ -10,7 +10,7 @@
 #    fi
 #}
 
-ssh-sync() {
+tmux-sync-ssh() {
     HOSTS=$@
     if [ -z "$HOSTS" ]; then
        echo -n "Hosts separated by spaces [ENTER]: "
@@ -46,13 +46,19 @@ ssh-sync() {
     fi
 }
 
-tmux-multi-pane() {
-    HOSTS=$@
-    local hosts=( $HOSTS )
+tmux-multi-panes() {
+    unset panes[0];
+    panes=$@
+    if [ -z "$panes" ]; then
+       echo -n "How many panes to open in a window [ENTER]: "
+       read PANES
+    else
+       PANES=$panes
+    fi
 
     tmux new-window
     i=1
-    while [ $i -lt ${hosts[0]} ]
+    while [ $i -lt $PANES ]
     do
         tmux split-window -h
         tmux select-layout tiled > /dev/null
@@ -62,16 +68,25 @@ tmux-multi-pane() {
     #tmux set-window-option synchronize-panes on > /dev/null
 }
 
-tmux-multi-window() {
+tmux-multi-windows() {
+    unset windows[0];
+    windows=$@
+    if [ -z "$windows" ]; then
+       echo -n "How many windows to open [ENTER]: "
+       read WINDOWS
+    else
+       WINDOWS=$windows
+    fi
+
     i=0
-    while [ $i -lt $@ ]
+    while [ $i -lt $WINDOWS ]
     do
         command tmux new-window
         let "i++"
     done
 }
 
-ssh-multi() {
+tmux-multi-ssh() {
     unset hosts[0];
     HOSTS=$@
     if [ -z "$HOSTS" ]; then
@@ -101,7 +116,7 @@ ssh-multi() {
     fi
 }
 
-vim-multi() {
+tmux-multi-vim() {
     unset files[0];
     FILES=$@
     if [ -z "$FILES" ]; then
@@ -116,7 +131,7 @@ vim-multi() {
     done
 }
 
-vim-multi-pane() {
+tmux-multi-vim-pane() {
     FILES=$@
     if [ -z "$FILES" ]; then
        echo -n "Files separated by spaces [ENTER]: "
