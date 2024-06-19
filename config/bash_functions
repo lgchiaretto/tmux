@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #ssh() {
 #    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux" ]; then
 #        #tmux rename-window "$(echo $* | cut -d . -f 1)"
@@ -46,6 +46,48 @@ tmux-sync-ssh() {
     fi
 }
 
+tmux-sync-all-ocp4() {
+    #HOSTS=$(oc get nodes --no-headers -o jsonpath='{.items[*].status.addresses[0].address}' | sed 's/ /,/g')
+    HOSTS=$(oc get nodes --no-headers -o jsonpath='{.items[*].status.addresses[0].address}')
+
+    local hosts=( $HOSTS )
+
+    tmux new-window ssh ${hosts[0]}
+
+    # We are openning multiple windows with the same machine
+    re='^[0-9]+$'
+
+    if [[ ${hosts[1]} =~ $re ]] ; then
+        i=1
+        while [ $i -lt ${hosts[1]} ]
+        do
+            tmux split-window -h  ssh core@${hosts[0]}
+            tmux select-layout tiled > /dev/null
+            let "i++"
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    else
+        unset hosts[0];
+        # We are openning multiple windows in different machine
+        for i in "${hosts[@]}"; do
+            tmux split-window -h  ssh core@$i
+            tmux select-layout tiled > /dev/null
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    fi
+}
+
+ossh(){
+  IP=$(oc get nodes $@ --no-headers -o jsonpath='{.status.addresses[0].address}')
+  # if [ -z $IP ]; then
+	# echo "Are you connected to the OCP cluster? Did you type a correct node?"
+  # else
+    ssh core@$IP
+  # fi
+}
+
 tmux-multi-panes() {
     unset panes[0];
     panes=$@
@@ -60,7 +102,7 @@ tmux-multi-panes() {
     i=1
     while [ $i -lt $PANES ]
     do
-        tmux split-window -h
+        tmux split-window -h date
         tmux select-layout tiled > /dev/null
         let "i++"
     done
@@ -151,4 +193,16 @@ tmux-multi-vim-pane() {
         tmux select-layout tiled > /dev/null
     done
     tmux select-pane -t 0
+}
+
+defunct(){
+    echo "Children:"
+    ps -ef | head -n1
+    ps -ef | grep defunct
+    echo "------------------------------"
+    echo "Parents:"
+    ppids="$(ps -ef | grep defunct | awk '{ print $3 }')"
+    echo "$ppids" | while read ppid; do
+        ps -A | grep "$ppid"
+    done
 }

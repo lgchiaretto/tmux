@@ -8,7 +8,7 @@ case $- in
       *) return;;
 esac
 
-
+export TERM=xterm-256color
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -34,7 +34,7 @@ esac
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+# force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
@@ -46,6 +46,8 @@ if [ -n "$force_color_prompt" ]; then
 	color_prompt=
     fi
 fi
+
+color_prompt=yes
 
 parse_git_branch() {
   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
@@ -71,13 +73,14 @@ fi
 unset color_prompt force_color_prompt
 
 # If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
+#case "$TERM" in
+#xterm*|rxvt*)
+#    #PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+#    PS1="\[\033[38;5;112m\]\u\[\]\[\033[38;5;15m\]@\[\]\[\033[38;5;172m\]\h\[\]\[\033[38;5;15m\]:\[\]\[\033[38;5;30m\]\w/\[\]\[(B[m\]\[\033[38;5;112m\]\$(parse_git_branch)\[\]\[\033[38;5;15m\] "
+#    ;;
+#*)
+#    ;;
+#esac
 
 # enable color support of ls and also add handy aliases
 if [ -x /usr/bin/dircolors ]; then
@@ -136,8 +139,8 @@ fi
 
 # export GOPATH=/usr/local/go
 export EDITOR=vim
-export GOPATH=~/auto
-export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.dropbox-dist/
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.dropbox-dist/:~/.local/bin/
 
 umask 022
 #LS_COLORS=$LS_COLORS:'di=0;34:ex=1;32:' ; export LS_COLORS
@@ -148,18 +151,14 @@ eval $(dircolors -b $HOME/.dircolors)
 # export VAULT_SKIP_VERIFY=true
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=bg+:#000000,spinner:#fe8019,hl:#928374,fg:#ffffff,header:#928374,info:#fabd2f,pointer:#fe8019,marker:#fe8019,fg+:#458588,prompt:#fe8019,hl+:#fe8019 --height 40% --border"
 
-
-
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-complete -C /usr/local/bin/vault vault
 
 # Undocumented feature which sets the size to "unlimited".
 # http://stackoverflow.com/questions/9457233/unlimited-bash-history
 export HISTSIZE=
 export HISTFILESIZE=
 # don't put duplicate lines or lines starting with space in the history.
-export HISTCONTROL=ignoreboth:erasedups
+export HISTCONTROL=ignoredups:erasedups
 #export HISTTIMEFORMAT=`echo -e "\033[38;5;30m" "[%F %T]" "\033[0m"`
 
 # append to the history file, don't overwrite it
@@ -177,3 +176,37 @@ export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; histor
 bind '"\e[A": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
 
 export GO111MODULE=off
+#export KUBECONFIG=/root/tam/auth/kubeconfig
+
+#export KUBECONFIG=~/temp/openshift-install-config/auth/kubeconfig
+export LIBVIRT_DEFAULT_URI=qemu:///system
+
+#JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.232.b09-0.el8_0.x86_64/jre/
+#PATH=$JAVA_HOME/bin:$PATH export PATH JAVA_HOME
+#export  JAVA_HOME  PATH
+
+export GOVC_USERNAME='administrator@chiaretto.local'
+export GOVC_PASSWORD=''
+export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
+
+# eval "$(omg completion bash)"
+
+
+#pactl set-default-sink 5
+
+# >>> conda initialize >>>
+# # !! Contents within this block are managed by 'conda init' !!
+# __conda_setup="$('/usr/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/usr/etc/profile.d/conda.sh" ]; then
+#         . "/usr/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/usr/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
+# <<< conda initialize <<<
+
+force_color_prompt=yes
