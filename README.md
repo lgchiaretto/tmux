@@ -6,6 +6,7 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Executing](#executing)
 - [Key Shortcuts](#key-shortcuts)
 - [Additional Features](#additional-features)
 
@@ -18,9 +19,6 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
 - **Tmux Plugin Manager (TPM)** for plugin management
 - **Git**
 
-  ```
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-  ```
 
 ## Installation
 
@@ -36,11 +34,11 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
     cp .tmux.conf ~/.tmux.conf
   ```
 
-Restart Tmux to load the new configuration:
+## Executing
 
-  ```
-    tmux source-file ~/.tmux.conf
-  ```
+- Run `tmux` on terminal
+- Dettach tmux: `prefix + d`
+- Attach an existing tmux session run `tmux a` on terminal 
 
 ## Key Shortcuts
 
@@ -54,8 +52,6 @@ Restart Tmux to load the new configuration:
   - Switch between windows:`Shift + ←` or `Shift + →`
   - Change window position: `Ctrl + Shift + ←` or `Ctrl + Shift + →` 
   - Rename window: Press `prefix + ,` and enter the new name.
-  - Rename session: Press `prefix + .` and enter the new name.
-  - Select session: `prefix + s`
   - Window tree: `prefix + w` to see a navigable window tree.
   - Kill current window: ` prefix + k`
 
@@ -73,6 +69,8 @@ Restart Tmux to load the new configuration:
 ### Sessions and Navigation
 
   - Create a new session: `prefix + n` (prompts for a session name)
+  - Rename session: Press `prefix + .` and enter the new name.
+  - Select session: `prefix + s`
   - Choose buffer to paste from: `prefix + b`
   - Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
   - Reload tmux configuration: `prefix + r`
@@ -96,6 +94,9 @@ Restart Tmux to load the new configuration:
   - tmux-better-mouse-mode: Enhanced mouse support.
   - tmux-temp: Displays CPU temperature.
 
-To install plugins, open Tmux and press `prefix + I`.
+To install plugins, open Tmux, clone the `tmux-plugins` repo and press `prefix + I`.
 
+  ```
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  ```
 
