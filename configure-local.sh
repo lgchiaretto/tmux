@@ -21,4 +21,6 @@ sudo cp {tmux,oc} /usr/local/bin/
 echo "Installing tmuxp"
 sudo dnf install -y python3-pip -q
 pip3 install tmuxp -q
+echo "Copying tmux-sessions dir to '$USER' home"
+cp -R tmux-sessions ~/
 echo "Done"
