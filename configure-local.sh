@@ -19,6 +19,6 @@ chmod +x oc
 echo Copying files to /usr/local/bin 
 sudo cp {tmux,oc} /usr/local/bin/
 echo "Installing tmuxp"
-sudo dnf install -y python3-pip > /dev/null
-pip3 install tmuxp > /dev/null
+sudo dnf install -y python3-pip -q
+pip3 install tmuxp -q
 echo "Done"
