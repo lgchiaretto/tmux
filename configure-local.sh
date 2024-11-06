@@ -16,4 +16,6 @@ wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.17.3/openshi
 tar xzf openshift-client-linux.tar.gz
 echo Copying files to /usr/local/bin 
 sudo cp {tmux,oc} /usr/local/bin/
+echo "Installing tmuxp"
+pip install tmuxp
 echo "Done"

@@ -1,0 +1,11 @@
+session_name: UPGRADE
+start_directory: /labs/funny-flanders
+windows:
+  - window_name: upgrade check
+    layout: 990d,318x81,0,0[318x40,0,0,7,318x40,0,41{159x40,0,41,8,158x40,160,41[158x24,160,41,9,158x15,160,66,10]}]
+    focus: true
+    panes:
+      - watch "oc get pods -A -o wide | grep -E '0/|CrashLoopBackOff' | grep -v Completed"
+      - watch oc get co
+      - watch oc adm upgrade
+      - watch oc get nodes
