@@ -14,10 +14,10 @@ wget -q --no-check-certificate 'https://docs.google.com/uc?export=download&id=15
 echo Downloading oc client
 wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.17.3/openshift-client-linux.tar.gz
 tar xzf openshift-client-linux.tar.gz
-chmod +x tmux
-chmod +x oc
 echo Copying files to /usr/local/bin 
 sudo cp {tmux,oc} /usr/local/bin/
+sudo chmod +x /usr/local/bin/tmux
+sudo chmod +x /usr/local/bin/oc
 echo "Installing tmuxp"
 sudo dnf install -y python3-pip -q
 pip3 install tmuxp -q
