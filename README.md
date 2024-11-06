@@ -15,7 +15,8 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
 
 - **Tmux** version 3.4
 - **Vim** for file editing (optional).
-- **Tmux Plugin Manager (TPM)** for plugin management.
+- **Tmux Plugin Manager (TPM)** for plugin management
+- **Git**
 
   ```
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -65,6 +66,8 @@ Restart Tmux to load the new configuration:
   - Resize pane: Alt + Shift + ←, →, ↑, ↓
   - Move pane positions: Alt + ↑, ↓
   - Sync all panes: `prefix + a` (toggles synchronization on/off)
+  - Move pane to a new window: `prefix + m`
+  - Join pane in a window: `prefix + p` and select the pane to join in a window
 
 ### Sessions and Navigation
 
