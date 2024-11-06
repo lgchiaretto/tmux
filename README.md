@@ -1,6 +1,6 @@
 # Tmux Configuration
 
-This repository contains a custom `.tmux.conf` configuration file to improve productivity while using Tmux, a terminal multiplexer. Below is a detailed explanation of the key shortcuts and features configured.
+This repository contains a custom `.tmux.conf` configuration file to improve productivity while using Tmux
 
 ## Table of Contents
 
@@ -57,6 +57,7 @@ Restart Tmux to load the new configuration:
   - Rename session: Press `prefix + .` and enter the new name.
   - Select session: `prefix + s`
   - Window tree: `prefix + w` to see a navigable window tree.
+  - Kill current window: ` prefix + k`
 
 ### Pane Management
 
@@ -73,10 +74,9 @@ Restart Tmux to load the new configuration:
 
   - Create a new session: `prefix + n` (prompts for a session name)
   - Choose buffer to paste from: `prefix + b`
-  - Reverse search in terminal: `prefix + /`
-  - Reload configuration: `prefix + r`
+  - Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
+  - Reload tmux configuration: `prefix + r`
   - Edit .tmux.conf: `prefix + e`
-  - Kill current window: ` prefix + k`
   - Kill session: `prefix + K` (with confirmation prompt)
   - Kill all sessions: `prefix + D` (with confirmation prompt)
 
@@ -84,7 +84,6 @@ Restart Tmux to load the new configuration:
 
   - Quick copy with mouse: Enables direct copy to clipboard upon selection.
   - Paste from clipboard: `C-v`
-  - Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
 
 ## Additional Features
 
