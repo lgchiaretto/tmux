@@ -44,7 +44,7 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
 
 #### Global Prefix
 
-⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`. This means that any Tmux command that typically requires `Ctrl + b` now uses `Ctrl + s` instead.
+⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`. This means that any Tmux command that typically requires `Ctrl + b` as `prefix` now uses `Ctrl + s` instead.
 
 #### Window Management
 
