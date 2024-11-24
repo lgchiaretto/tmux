@@ -48,7 +48,7 @@ This repository contains a custom `.tmux.conf` configuration file to improve pro
 
 #### Window Management
 
-  - Create a new window:`Ctrl + t`
+  - Create a new window:`Ctrl + t` or `prefix + t`
   - Switch between windows:`Shift + ←` or `Shift + →`
   - Change window position: `Ctrl + Shift + ←` or `Ctrl + Shift + →` 
   - Rename window: Press `prefix + ,` and enter the new name.
