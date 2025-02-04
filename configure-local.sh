@@ -11,7 +11,7 @@ cp ocp-project.tmux ocp-cluster.tmux /home/$USER/.tmux/
 chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc}
 chown -R $USER:$GROUP /home/$USER/.tmux/
 echo Downloading tmux
-wget -q --no-check-certificate 'https://docs.google.com/uc?export=download&id=15gI-MP8HyaJ65WIH-F3-TSl_pOQuPjEB' -O tmux
+wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O tmux
 echo Downloading oc client
 wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.21/openshift-client-linux.tar.gz
 tar xzf openshift-client-linux.tar.gz
