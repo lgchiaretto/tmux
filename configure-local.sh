@@ -7,7 +7,7 @@ echo "Configuring .bashrc, vimrc and .tmux.conf files"
 cp {.bashrc,.tmux.conf,.vimrc} /home/$USER
 sudo cp .tmux.conf /etc/tmux.conf
 mkdir -p /home/$USER/.tmux/
-cp ocp-project.tmux ocp-cluster.tmux /home/$USER/.tmux/
+cp ocp-project.tmux ocp-cluster.tmux fzf-url.sh /home/$USER/.tmux/
 chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc}
 chown -R $USER:$GROUP /home/$USER/.tmux/
 echo Downloading tmux
