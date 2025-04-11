@@ -85,15 +85,13 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - Rename session: Press `prefix + .` and enter the new name.
 - Select session: `prefix + s`
 - Choose buffer to paste from: `prefix + b`
-    - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type the string to initiate a fuzzy search.
+    - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type search terms to initiate a fuzzy search on all buffers
 - Kill session: `prefix + K` (with confirmation prompt)
 - Kill all sessions: `prefix + D` (with confirmation prompt)
 
 ## Additional Keybindings
 
-- Quick copy with mouse: Enables direct copy to clipboard upon selection.
-- Paste from clipboard: `C-v`
-- Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
+- Reverse search in tmux pane/window: Press `prefix + /` to open search mode, then type search terms.
 - Edit .tmux.conf: `prefix + e`
 - Reload tmux configuration: `prefix + R`
 
@@ -119,10 +117,6 @@ The following keybindings are defined in the custom `.tmux.conf` file:
   - Select and paste a pod name: `prefix + p`
   - Select and paste a project name: `prefix + P`
   - Select and open a route: `prefix + r`
-
-### Reload Configuration
-
-- Reload `.tmux.conf`: `prefix + R`
 
 ## Additional Features
 
