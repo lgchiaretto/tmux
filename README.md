@@ -64,10 +64,10 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 
 - Create a new window:`Ctrl + t` or `prefix + t`
 - Switch between windows:`Shift + ←` or `Shift + →`
-  - Change window position: `Ctrl + Shift + ←` or `Ctrl + Shift + →`
+- Change window position: `Ctrl + Shift + ←` or `Ctrl + Shift + →`
 - Rename window: Press `prefix + ,` and enter the new name.
 - Window tree: `prefix + w` to see a navigable window tree.
-  - Kill current window: ` prefix + k`
+- Kill current window: ` prefix + k`
 
 ### Pane Management
 
@@ -75,27 +75,26 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - Vertical split: `prefix + -`
 - Navigate between panes: Ctrl + ←, →, ↑, ↓
 - Resize pane: Alt + Shift + ←, →, ↑, ↓
-  - Move pane positions: Alt + ↑, ↓
-  - Sync all panes: `prefix + a` (toggles synchronization on/off)
+- Move pane positions: Alt + ↑, ↓
+- Sync all panes: `prefix + a` (toggles synchronization on/off)
 - Move pane to a new window: `prefix + m`
-  - Join pane in a window: `prefix + p` and select the pane to join in a window
 
 ### Sessions
 
 - Create a new session: `prefix + N` (prompts for a session name)
 - Rename session: Press `prefix + .` and enter the new name.
-  - Select session: `prefix + s`
+- Select session: `prefix + s`
 - Choose buffer to paste from: `prefix + b`
-  - Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
-  - Reload tmux configuration: `prefix + R`
-  - Edit .tmux.conf: `prefix + e`
-  - Kill session: `prefix + K` (with confirmation prompt)
-  - Kill all sessions: `prefix + D` (with confirmation prompt)
+- Kill session: `prefix + K` (with confirmation prompt)
+- Kill all sessions: `prefix + D` (with confirmation prompt)
 
 ## Additional Keybindings
 
-  - Quick copy with mouse: Enables direct copy to clipboard upon selection.
-  - Paste from clipboard: `C-v`
+- Quick copy with mouse: Enables direct copy to clipboard upon selection.
+- Paste from clipboard: `C-v`
+- Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
+- Edit .tmux.conf: `prefix + e`
+- Reload tmux configuration: `prefix + R`
 
 ### Clipboard and Search
 
