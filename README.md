@@ -8,8 +8,17 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
 - [Installation](#installation)
 - [Usage](#usage)
 - [Key Shortcuts](#key-shortcuts)
+  - [Global Prefix](#global-prefix)
+  - [Window Management](#window-management)
+  - [Pane Management](#pane-management)
+  - [Sessions](#sessions)
+  - [Additional Keybindings](#additional-keybindings)
+  - [Clipboard and Search](#clipboard-and-search)
+  - [Fuzzy Search Utilities](#fuzzy-search-utilities)
+  - [OpenShift Utilities](#openshift-utilities)
 - [Additional Features](#additional-features)
 - [Predefined Sessions](#predefined-sessions)
+  - [Available Sessions](#available-sessions)
 - [Plugins](#plugins)
 
 ---
