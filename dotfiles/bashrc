@@ -1,0 +1,77 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# -------------------- Interactive Shell Check --------------------
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# -------------------- Environment Variables --------------------
+export TERM=xterm-256color
+export EDITOR=vim
+export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.dropbox-dist/:~/.local/bin/
+export LIBVIRT_DEFAULT_URI=qemu:///system
+export GO111MODULE=off
+export GOVC_USERNAME='administrator@chiaretto.local'
+export GOVC_PASSWORD='VMware1!VMware1!'
+export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
+
+# -------------------- Shell Options --------------------
+shopt -s checkwinsize
+shopt -s histappend
+
+# -------------------- History Configuration --------------------
+export HISTSIZE=
+export HISTFILESIZE=
+export HISTCONTROL=ignoredups:erasedups
+export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r;"
+
+# -------------------- Prompt Configuration --------------------
+color_prompt=yes
+parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+if [ "$color_prompt" = yes ]; then
+  PS1="\[\e[38;5;142m\]\u\[\e[0m\]@\[\e[38;5;214m\]\h\[\e[0m\]:\[\e[38;5;109m\]\w\[\e[0m\]\[\e[38;5;175m\]\$(parse_git_branch)\[\e[0m\]\$ "
+else
+  PS1="\[\e[0m\]\u@\h:\w\$ "
+fi
+unset color_prompt
+
+# -------------------- Aliases --------------------
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# -------------------- FZF Configuration --------------------
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=bg+:#000000,spinner:#fe8019,hl:#928374,fg:#ffffff,header:#928374,info:#fabd2f,pointer:#fe8019,marker:#fe8019,fg+:#458588,prompt:#fe8019,hl+:#fe8019 --height 40% --border"
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# -------------------- Additional Scripts --------------------
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+if [ -f ~/.bash_functions ]; then
+    . ~/.bash_functions
+fi
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# -------------------- Miscellaneous --------------------
+umask 022
+eval $(dircolors -b $HOME/.dircolors)
+bind '"\e[A": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
+
+

@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-content=$(tmux capture-pane -J -p -e | \
-  sed -r 's/\x1B\[[0-9;]*[mK]//g' | \
-  grep -oE '\b((http|https)://[a-zA-Z0-9.-]+|[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b' | \
-  sort -u)
+content=$(tmux capture-pane -J -p -e -S - | \
+    sed -r 's/\x1B\[[0-9;]*[mK]//g' | \
+    grep -oE '\b((http|https):\/\/[a-z0-9.-]+(\/\S*)?|[a-z0-9.-]+\.[a-z]{2,}(\/\S*)?)\b' | \
+    sort | uniq)
 
 if [ -z "$content" ]; then
     tmux display 'No URLs found'
     exit
 fi
 
-chosen=$(echo "$content" | fzf-tmux)
+chosen=$(echo "$content" | fzf-tmux  --header="Select the URL" --layout=reverse -h 40 -p "50%,50%" --exact)
 
 if [ -n "$chosen" ]; then
   case "$1" in
