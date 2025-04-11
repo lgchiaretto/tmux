@@ -1,6 +1,7 @@
 # Tmux Configuration and Usage Guide
 
 This repository contains a custom `.tmux.conf` configuration file and related scripts to enhance productivity while using Tmux.
+This repository contains a custom `.tmux.conf` configuration file and related scripts to enhance productivity using Tmux. This Tmux is optimized for use with `OpenShift` administration.
 
 ## Table of Contents
 
