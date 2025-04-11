@@ -14,7 +14,7 @@ log "Cloning fzf repository"
 git clone https://github.com/junegunn/fzf.git > /dev/null 2>&1
 cd fzf > /dev/null 2>&1
 log "Installing fzf"
-./install > /dev/null 2>&1
+./install --key-bindings --completion --update-rc > /dev/null 2>&1
 
 log "Configuring .bashrc, vimrc and .tmux.conf files"
 cp dotfiles/bashrc /home/$USER/.bashrc > /dev/null 2>&1
