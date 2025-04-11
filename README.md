@@ -1,4 +1,4 @@
-# Tmux Configuration
+# Tmux Configuration and Usage Guide
 
 This repository contains a custom `.tmux.conf` configuration file and related scripts to enhance productivity while using Tmux.
 
@@ -6,9 +6,11 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Executing](#executing)
+- [Usage](#usage)
 - [Key Shortcuts](#key-shortcuts)
 - [Additional Features](#additional-features)
+- [Predefined Sessions](#predefined-sessions)
+- [Plugins](#plugins)
 
 ---
 
@@ -19,6 +21,8 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
 - **Tmux Plugin Manager (TPM)** for plugin management
 - **Git**
 - **Python 3** and `tmuxp` for session management
+- **fzf** for fuzzy searching
+- **OpenShift CLI (`oc`)** for OpenShift integration
 
 ## Installation
 
@@ -41,11 +45,12 @@ Alternatively, you can manually copy the `.tmux.conf` file:
 cp dotfiles/tmux.conf ~/.tmux.conf
 ```
 
-## Executing
+## Usage
 
 - Start Tmux: Run `tmux` in the terminal.
 - Detach from a session: `prefix + d`
 - Reattach to an existing session: `tmux a`
+- Reload configuration: `prefix + R`
 
 ## Key Shortcuts
 
@@ -53,7 +58,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 
 ### Global Prefix
 
-⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`. All Tmux commands now use `Ctrl + s` as the prefix.
+⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `prefix`. All Tmux commands now use `prefix` as the prefix.
 
 ### Window Management
 
@@ -77,12 +82,12 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 
 ### Sessions
 
-- Create a new session: `prefix + n` (prompts for a session name)
+- Create a new session: `prefix + N` (prompts for a session name)
 - Rename session: Press `prefix + .` and enter the new name.
   - Select session: `prefix + s`
 - Choose buffer to paste from: `prefix + b`
   - Reverse search terminal history: Press `prefix + /` to open search mode, then type search terms.
-  - Reload tmux configuration: `prefix + r`
+  - Reload tmux configuration: `prefix + R`
   - Edit .tmux.conf: `prefix + e`
   - Kill session: `prefix + K` (with confirmation prompt)
   - Kill all sessions: `prefix + D` (with confirmation prompt)
@@ -92,24 +97,39 @@ The following keybindings are defined in the custom `.tmux.conf` file:
   - Quick copy with mouse: Enables direct copy to clipboard upon selection.
   - Paste from clipboard: `C-v`
 
+### Clipboard and Search
+
+- Copy selection: Use the mouse to select text.
+- Paste from clipboard: `Ctrl + v`
+- Search backward in copy mode: `prefix + /`
+
+### Fuzzy Search Utilities
+
+- Open a file or directory (using `locate` linux command): `Ctrl + x`
+- Search and open URLs in a pane:
+  - Open: `prefix + u`
+  - Copy: `prefix + y`
+- OpenShift utilities:
+  - Select context: `prefix + c`
+  - View pod logs: `prefix + l`
+  - Select a node name: `prefix + n`
+  - Select cluster operators: `prefix + o`
+  - Select a pod name: `prefix + p`
+  - Select a project name: `prefix + P`
+  - Search and Open routes: `prefix + r`
+- Ansible variable files: `prefix + v`
+
+### Reload Configuration
+
+- Reload `.tmux.conf`: `prefix + R`
+
 ## Additional Features
 
 - **Mouse Support**: Enables mouse interaction for pane resizing, window switching, and scrolling.
 - **Clipboard Integration**: Automatically copies selected text to the system clipboard.
 - **Enhanced History**: Increases the scrollback buffer to 50,000 lines.
 - **256-Color Support**: Improves theme visualization.
-- **Plugins**:
-  - `tmux-open`: Opens URLs directly in the browser.
-  - `tmux-better-mouse-mode`: Enhances mouse support.
-  - `tmux-temp`: Displays CPU temperature.
-
-To install plugins, open Tmux, clone the `tmux-plugins` repo and press `prefix + I`.
-
-1. Clone the TPM repository:
-   ```bash
-   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-   ```
-2. Open Tmux and press `prefix + I` to install the plugins.
+- **Custom Status Bar**: Displays session, cluster, and system information.
 
 ## Predefined Sessions
 
@@ -119,9 +139,21 @@ The `tmux-sessions` directory contains predefined session configurations for `tm
 tmuxp load <session-name>
 ```
 
-## Additional Notes
+### Available Sessions
 
-- The `configure-local.sh` script downloads the Tmux binary and OpenShift CLI (`oc`) for convenience.
-- Ensure you have `sudo` privileges to execute the script.
+- **INSTALL**: For monitoring OpenShift installation.
+- **UPGRADE**: For monitoring OpenShift upgrades.
+
+## Plugins
+
+This configuration includes the following plugins:
+
+- `tmux-battery`: Displays battery status.
+- `tmux-better-mouse-mode`: Enhances mouse support.
+- `tmux-temp`: Displays CPU temperature.
+
+To install plugins, open Tmux and press `prefix + I`.
 
 ---
+
+For more details, refer to the `.tmux.conf` file or the scripts in the `fzf-files/` directory.
