@@ -110,14 +110,13 @@ The following keybindings are defined in the custom `.tmux.conf` file:
   - Open: `prefix + u`
   - Copy: `prefix + y`
 - OpenShift utilities:
-  - Select context: `prefix + c`
+  - Select and change to OpenShift context (project): `prefix + c`
   - View pod logs: `prefix + l`
   - Select a node name: `prefix + n`
   - Select cluster operators: `prefix + o`
   - Select a pod name: `prefix + p`
   - Select a project name: `prefix + P`
   - Search and Open routes: `prefix + r`
-- Ansible variable files: `prefix + v`
 
 ### Reload Configuration
 
