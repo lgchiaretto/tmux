@@ -85,6 +85,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - Rename session: Press `prefix + .` and enter the new name.
 - Select session: `prefix + s`
 - Choose buffer to paste from: `prefix + b`
+    - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type the string to initiate a fuzzy search.
 - Kill session: `prefix + K` (with confirmation prompt)
 - Kill all sessions: `prefix + D` (with confirmation prompt)
 
