@@ -58,7 +58,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 
 ### Global Prefix
 
-⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `prefix`. All Tmux commands now use `Ctrl + s` as the prefix.
+⚠️ The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`. All Tmux commands now use `Ctrl + s` as the prefix.
 
 ### Window Management
 
