@@ -109,14 +109,16 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - Search and open URLs (with http(s):// or not) in a pane:
   - Open: `prefix + u`
   - Copy: `prefix + y`
-- OpenShift utilities:
-  - Select and change to OpenShift context (project): `prefix + c`
-  - View pod logs: `prefix + l`
-  - Select and paste a node name: `prefix + n`
-  - Select and paste a cluster operator: `prefix + o`
-  - Select and paste a pod name: `prefix + p`
-  - Select and paste a project name: `prefix + P`
-  - Select and open a route: `prefix + r`
+
+### OpenShift utilities:
+
+ - Select and change to OpenShift context (project): `prefix + c`
+ - View pod logs: `prefix + l`
+ - Select and paste a node name: `prefix + n`
+ - Select and paste a cluster operator: `prefix + o`
+ - Select and paste a pod name: `prefix + p`
+ - Select and paste a project name: `prefix + P`
+ - Select and open a route: `prefix + r`
 
 ## Additional Features
 
