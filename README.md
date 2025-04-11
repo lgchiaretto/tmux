@@ -100,23 +100,25 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 ### Clipboard and Search
 
 - Copy selection: Use the mouse to select text.
+- Copy a selection to be pasted outside tmux (i.e., a browser): use the mouse to select text while pressing `Shift` and press `right-click` mouse button.
 - Paste from clipboard: `Ctrl + v`
+- Paste a text copied outside of tmux (i.e., a browser): `Ctrl + Shift + v`
 - Search backward in copy mode: `prefix + /`
 
 ### Fuzzy Search Utilities
 
-- Open a file or directory (using `locate` linux command): `Ctrl + x`
-- Search and open URLs in a pane:
+- Open a file or directory (`locate` service must be running): `Ctrl + x`
+- Search and open URLs (with http(s):// or not) in a pane:
   - Open: `prefix + u`
   - Copy: `prefix + y`
 - OpenShift utilities:
   - Select and change to OpenShift context (project): `prefix + c`
   - View pod logs: `prefix + l`
-  - Select a node name: `prefix + n`
-  - Select cluster operators: `prefix + o`
-  - Select a pod name: `prefix + p`
-  - Select a project name: `prefix + P`
-  - Search and Open routes: `prefix + r`
+  - Select and paste a node name: `prefix + n`
+  - Select and paste a cluster operator: `prefix + o`
+  - Select and paste a pod name: `prefix + p`
+  - Select and paste a project name: `prefix + P`
+  - Select and open a route: `prefix + r`
 
 ### Reload Configuration
 
