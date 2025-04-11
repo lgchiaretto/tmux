@@ -20,6 +20,7 @@ log "Configuring .bashrc, vimrc and .tmux.conf files"
 cp dotfiles/bashrc /home/$USER/.bashrc > /dev/null 2>&1
 cp dotfiles/tmux.conf /home/$USER/.tmux.conf > /dev/null 2>&1
 cp dotfiles/vimrc /home/$USER/.vimrc > /dev/null 2>&1
+cp dotfiles/dircolors /home/$USER/.dircolors > /dev/null 2>&1
 
 log "Creating .tmux directory"
 mkdir -p /home/$USER/.tmux/ > /dev/null 2>&1
