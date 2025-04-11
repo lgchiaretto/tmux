@@ -137,7 +137,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 The `tmux-sessions` directory contains predefined session configurations for `tmuxp`. To load a session, run:
 
 ```bash
-tmuxp load <session-name>
+tmuxp load <session-name-file>
 ```
 
 ### Available Sessions
