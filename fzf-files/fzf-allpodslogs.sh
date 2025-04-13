@@ -11,9 +11,9 @@ elif [ -z "$project_name" -a $? -eq 1 ]; then
 fi
 
 mapfile -t selected_pods_and_namespaces < <(
-  oc get pods -A --field-selector=status.phase=Running --no-headers -o custom-columns="NAMESPACE:.metadata.namespace,POD:.metadata.name" |
-    fzf-tmux --prompt="Select the pods > " --multi --header="Select the OpenShift pods (NAMESPACE | POD):" --layout=reverse -h 40 -p "50%,50%" --exact |
-    awk '{print $1 " " $2}'
+    oc get pods -A --field-selector=status.phase=Running --no-headers -o custom-columns="NAMESPACE:.metadata.namespace,POD:.metadata.name" |
+        fzf-tmux --prompt="Select the pods > " --multi --header="Select the OpenShift pods (NAMESPACE | POD):" --layout=reverse -h 40 -p "50%,50%" --exact --bind "ctrl-a:toggle-all" |
+        awk '{print $1 " " $2}'
 )
 
 [[ ${#selected_pods_and_namespaces[@]} -eq 0 ]] && exit
