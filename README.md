@@ -151,7 +151,8 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 ### OpenShift utilities:
 
  - Select and change to OpenShift context (project): `prefix + c`
- - View pod logs: `prefix + l`
+ - View pod logs in the current project: `prefix + l`
+ - View pod logs in all projects: `prefix + L`
  - Select and paste a node name: `prefix + n`
  - Select and paste a cluster operator: `prefix + o`
  - Select and paste an OpenShift API resource available in the cluster: `Ctrl + o`
