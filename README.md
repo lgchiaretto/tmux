@@ -38,8 +38,37 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
 Clone this repository and execute the `configure-local.sh` script to set up the environment:
 
 ```bash
-./configure-local.sh
+./configure-local.sh [OPTIONS]
 ```
+
+The `configure-local.sh` script now supports the following optional parameters:
+
+- `--download-tmux`: Installs the Tmux binary in `/usr/local/bin`.
+- `--download-oc`: Installs the OpenShift CLI (`oc`) in `/usr/local/bin`.
+
+### Examples
+
+1. To perform a full setup:
+  ```bash
+  ./configure-local.sh --download-tmux --download-oc
+  ```
+
+2. To download OpenShift CLI without downloading tmux:
+  ```bash
+  ./configure-local.sh --download-oc
+  ```
+
+3. To download Tmux without downloading OpenShift CLI:
+  ```bash
+  ./configure-local.sh --download-tmux
+  ```
+
+4. To not download Tmux and OpenShift CLI:
+  ```bash
+  ./configure-local.sh
+  ```
+
+Run `./configure-local.sh --help` for more details on available options.
 
 This script will:
 - Copy `.bashrc`, `.vimrc`, and `.tmux.conf` to your home directory.
@@ -125,6 +154,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
  - View pod logs: `prefix + l`
  - Select and paste a node name: `prefix + n`
  - Select and paste a cluster operator: `prefix + o`
+ - Select and paste an OpenShift API resource available in the cluster: `Ctrl + o`
  - Select and paste a pod name: `prefix + p`
  - Select and paste a project name: `prefix + P`
  - Select and open a route: `prefix + r`
