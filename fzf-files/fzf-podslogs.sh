@@ -10,9 +10,12 @@ elif [ -z "$project_name" -a $? -eq 1 ]; then
     exit 0
 fi
 
-session_name="${project_name}-logs"
+session_name="logs"
 
-tmux new-session -d -s "$session_name"
+if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -d -s "$session_name"
+    tmux rename-window -t "$session_name:0" "DELETEME"
+fi
 
 mapfile -t selected_pods < <(
   oc get pods --field-selector=status.phase=Running --no-headers -o custom-columns=":metadata.name" |
@@ -20,10 +23,10 @@ mapfile -t selected_pods < <(
 
 [[ ${#selected_pods[@]} -eq 0 ]] && exit
 
-first_container=""
-window_created=false
+processed_deployments=()
 
 for pod in "${selected_pods[@]}"; do
+    deployment=$(oc get pod "$pod" -o jsonpath="{.metadata.ownerReferences[?(@.kind=='ReplicaSet')].name}" | sed 's/-[a-z0-9]\{9\}$//')
 
     mapfile -t containers < <(oc get pod "$pod" -o jsonpath="{.spec.containers[*].name}")
 
@@ -31,22 +34,27 @@ for pod in "${selected_pods[@]}"; do
     container_count=$(echo "$final_containers" | wc -l)
 
     if [[ -z "$first_container" ]]; then
-        if [[ $container_count -eq 1 ]]; then
+      if [[ $container_count -eq 1 ]]; then
           first_container="${containers[0]}"
-        else
-          first_container=$(echo "$final_containers" | fzf-tmux --header="Select the pods container:" --layout=reverse -h 40 -p "50%,50%")
+          else
+            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the pods container:" --layout=reverse -h 40 -p "50%,50%")
           [[ -z "$first_container" ]] && continue
-        fi
+      fi
     fi
     formatted_pod="${pod:0:15}..${pod: -15}"
+
+    if tmux list-windows -t "$session_name" | grep -q "$formatted_pod"; then
+        continue
+    fi
+  
+    tmux send-keys -t "$(tmux display-message -p '#{pane_id}')" "history -s oc logs -f $pod -c $first_container" C-m
     tmux new-window -t "$session_name" -n "$formatted_pod" "oc logs -f $pod -c $first_container;bash"
     window_created=true
 done
 
-tmux kill-window -t "$session_name:0"
-
-if $window_created; then
-    tmux select-window -t "$session_name:0"
+if tmux list-windows -t "$session_name" | grep -q "DELETEME"; then
+    tmux kill-window -t "$session_name:0"
 fi
 
+tmux select-window -t "$session_name:0"
 tmux switch-client -t "$session_name"

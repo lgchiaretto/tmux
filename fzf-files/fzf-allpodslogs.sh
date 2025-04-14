@@ -11,7 +11,7 @@ elif [ -z "$project_name" -a $? -eq 1 ]; then
 fi
 
 mapfile -t selected_pods_and_namespaces < <(
-    oc get pods -A --field-selector=status.phase=Running --no-headers -o custom-columns="NAMESPACE:.metadata.namespace,POD:.metadata.name" |
+    oc get pods -A --field-selector=status.phase=Running --no-headers -o jsonpath="{range .items[*]}{.metadata.namespace}{'\t'}{.metadata.name}{'\n'}{end}" |
         fzf-tmux --prompt="Select the pods > " --multi --header="Select the OpenShift pods (NAMESPACE | POD):" --layout=reverse -h 40 -p "50%,50%" --exact --bind "ctrl-a:toggle-all" |
         awk '{print $1 " " $2}'
 )
@@ -24,43 +24,43 @@ for line in "${selected_pods_and_namespaces[@]}"; do
     namespace_map["$namespace"]=1
 done
 
-selected_namespaces=("${!namespace_map[@]}")
+session_name="logs"
 
-if [[ ${#selected_namespaces[@]} -gt 1 ]]; then
-    session_name="logs"
-else
-    session_name="logs" # FIX this
+if ! tmux has-session -t "$session_name" 2>/dev/null; then
+    tmux new-session -d -s "$session_name"
+    tmux rename-window -t "$session_name:0" "DELETEME"
 fi
-
-tmux new-session -d -s "$session_name"
 
 first_container=""
 window_created=false
 
 processed_namespaces=()
 
+declare -A deployment_container_map
+
 for line in "${selected_pods_and_namespaces[@]}"; do
     namespace=$(echo "$line" | awk '{print $1}')
     pod=$(echo "$line" | awk '{print $2}')
 
-    mapfile -t containers < <(oc get pod "$pod" -n "$namespace" -o jsonpath="{.spec.containers[*].name}")
+    deployment=$(echo "$pod" | rev | cut -d'-' -f2- | rev)
 
-    final_containers=$(echo "${containers[@]}" | tr ' ' '\n')
-    container_count=$(echo "$final_containers" | wc -l)
-
-    first_container=""
-    if [[ $container_count -eq 1 ]]; then
-        first_container="${containers[0]}"
-    elif [[ ! " ${processed_namespaces[@]} " =~ " ${namespace} " ]]; then
-        first_container=$(echo "$final_containers" | fzf-tmux --header="Select the container for pod $pod in namespace $namespace:" --layout=reverse -h 40 -p "50%,50%")
-        [[ -z "$first_container" ]] && continue
-        processed_namespaces+=("$namespace")
+    if [[ -n "${deployment_container_map["$namespace/$deployment"]}" ]]; then
+        first_container="${deployment_container_map["$namespace/$deployment"]}"
     else
-        first_container="${containers[0]}"
-    fi
+        mapfile -t containers < <(oc get pod "$pod" -n "$namespace" -o jsonpath="{.spec.containers[*].name}")
 
-    if [[ "$first_container" == *" "* ]]; then
-        first_container=$(echo "$first_container" | awk '{print $1}')
+        final_containers=$(echo "${containers[@]}" | tr ' ' '\n')
+        container_count=$(echo "$final_containers" | wc -l)
+
+        if [[ $container_count -eq 1 ]]; then
+            first_container="${containers[0]}"
+        else
+            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the container for pod $pod in namespace $namespace:" --layout=reverse -h 40 -p "50%,50%")
+            [[ -z "$first_container" ]] && continue
+        fi
+
+        first_container=$(echo "$first_container" | awk '{$1=$1};1')
+        deployment_container_map["$namespace/$deployment"]="$first_container"
     fi
 
     formatted_pod="${pod:0:15}..${pod: -15}"
@@ -70,14 +70,16 @@ for line in "${selected_pods_and_namespaces[@]}"; do
     fi
 
     if [[ -n "$first_container" ]]; then
-        tmux new-window -t "$session_name" -n "$formatted_pod" "oc logs -f $pod -n $namespace -c $first_container;bash"
+        tmux new-window -t "$session_name" -n "$formatted_pod" "oc logs -f $pod -n $namespace -c $first_container; bash"
     else
-        tmux new-window -t "$session_name" -n "$formatted_pod" "oc logs -f $pod -n $namespace;bash"
+        tmux new-window -t "$session_name" -n "$formatted_pod" "oc logs -f $pod -n $namespace; bash"
     fi
     window_created=true
 done
 
-# Switch to window 0 in the logs session
-tmux select-window -t "$session_name:0"
+if tmux list-windows -t "$session_name" | grep -q "DELETEME"; then
+    tmux kill-window -t "$session_name:0"
+fi
 
+tmux select-window -t "$session_name:0"
 tmux switch-client -t "$session_name"
