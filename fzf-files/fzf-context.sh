@@ -7,7 +7,6 @@ if [[ ! -f "$KUBECONFIG" ]]; then
     exit 0
 fi
 
-# Parse contexts and clusters from kubeconfig
 declare -A CONTEXTS
 while IFS= read -r line; do
     cluster_full="${line%% *}"
@@ -25,7 +24,6 @@ fi
 FILTER=${1:-}
 current_context=$(oc config current-context)
 
-# Fetch namespaces for all contexts in parallel
 declare -A CLUSTERS_PROJECTS
 for cluster in "${!CONTEXTS[@]}"; do
     {
