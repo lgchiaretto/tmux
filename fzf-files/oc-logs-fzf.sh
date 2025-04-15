@@ -1,13 +1,15 @@
 #!/bin/bash
 pod="$1"
+project_name=$(oc project -q)
 containers=$(oc get pod "$pod" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)
 count=$(echo "$containers" | wc -w)
 
 if [ "$count" -eq 1 ]; then
-    tmux new-window -n "oc logs $pod" "bash -i -c 'oc logs -f $pod; exec bash'"
+    tmux new-window -n "logs $pod" "bash -i -c 'history -s oc logs -n $project_name $pod ; oc logs $pod -n $project_name; exec bash'"
 else
     container=$(echo "$containers" | tr ' ' '\n' | fzf-tmux --header="Select container for pod $pod" --layout=reverse -h 10)
     if [ -n "$container" ]; then
-        tmux new-window -n "oc logs $pod" "bash -i -c 'oc logs -f $pod -c $container; exec bash'"
+        formatted_pod="${pod:0:15}..${container: -15}"
+        tmux new-window -n "logs $formatted_pod" "bash -i -c 'history -s oc logs -n $project_name $pod -c $container; oc logs -n $project_name $pod -c $container; exec bash'"
     fi
 fi

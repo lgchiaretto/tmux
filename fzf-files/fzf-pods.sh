@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Get pods with their status
 pods=$(timeout 2s oc get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers)
 
 if [ -z "$pods" -a $? -eq 0 ]; then
@@ -29,19 +28,22 @@ selected_pod=$(
         --with-nth=1,2 \
         --ansi \
         --bind 'ctrl-l:execute-silent(
-            tmux new-window -n "oc describe pod {1}" "/usr/local/bin/oc-logs-fzf.sh {1}"
+            tmux new-window -n "logs pod {1}" "/usr/local/bin/oc-logs-fzf.sh {1}"
         )+abort' \
         --bind 'ctrl-d:execute-silent(
-            tmux new-window -n "oc describe pod {1}" "oc describe pod {1} | less; tmux select-window -t \"oc describe pod {1}\""
+            tmux new-window -n "describe pod {1}" "oc describe pod {1} | less; tmux select-window -t \"describe pod {1}\""
         )+abort' \
         --bind 'ctrl-e:execute-silent(
-            tmux new-window -n "oc edit pod {1}" "oc edit pod {1}; tmux select-window -t \"oc edit pod {1}\""
-        )+abort'\
+            tmux new-window -n "edit pod {1}" "oc edit pod {1}; tmux select-window -t \"edit pod {1}\""
+        )+abort' \
+        --expect=enter \
 )
 
-# if [ -n "$selected_pod" ]; then
-#     tmux send-keys "$selected_pod"
-# else
-#     tmux display -d 3000 "No pod selected"
-#     exit 0
-# fi
+if [ "$selected_pod" ]; then
+    pod_name=
+    tmux send-keys $(echo "$selected_pod" | tail -n1 | awk '{print $1}')
+fi
+
+if [ $? -ne 0 ]; then
+    exit 0
+fi
