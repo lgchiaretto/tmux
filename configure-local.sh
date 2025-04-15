@@ -75,6 +75,12 @@ if [[ "$@" == *"--download-oc"* ]]; then
     sudo chmod +x /usr/local/bin/oc > /dev/null 2>&1
 fi
 
+log "Creating oc-logs-fzf.sh script"
+cp oc-logs-fzf.sh /usr/local/bin/ > /dev/null 2>&1
+
+log "Setting executable permissions for oc-logs-fzf.sh"
+sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
+
 log "Installing tmuxp"
 sudo dnf install -y python3-pip -q > /dev/null 2>&1
 pip3 install tmuxp -q > /dev/null 2>&1

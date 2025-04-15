@@ -21,24 +21,27 @@ colored_pods=$(echo "$pods" | awk '{
 
 selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
-        --header=$'Select the OpenShift pod:\n\n[Enter] Select pod name  [Ctrl-d] Describe  [Ctrl-e] Edit  [Esc] Exit\n\n' \
+        --header=$'[Enter] Select pod name  [Ctrl-d] Describe  [Ctrl-e] Edit  [Ctrl-l] Logs  [Esc] Exit\n\n' \
         --layout=reverse \
         -h 40 \
         -p "50%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \
+        --bind 'ctrl-l:execute-silent(
+            tmux new-window -n "oc describe pod {1}" "/usr/local/bin/oc-logs-fzf.sh {1}"
+        )+abort' \
         --bind 'ctrl-d:execute-silent(
-            echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc describe pod {}" "oc describe pod {} | less; tmux select-window -t \"oc describe pod {}\""
-        )' \
+            tmux new-window -n "oc describe pod {1}" "oc describe pod {1} | less; tmux select-window -t \"oc describe pod {1}\""
+        )+abort' \
         --bind 'ctrl-e:execute-silent(
-            echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc edit pod {}" "oc edit pod {}; tmux select-window -t \"oc edit pod {}\""
-        )' | awk '{print $1}'\
+            tmux new-window -n "oc edit pod {1}" "oc edit pod {1}; tmux select-window -t \"oc edit pod {1}\""
+        )+abort'\
 )
 
-if [ -n "$selected_pod" ]; then
-    tmux send-keys "$selected_pod"
-else
-    tmux display -d 3000 "No pod selected"
-    exit 0
-fi
+# if [ -n "$selected_pod" ]; then
+#     tmux send-keys "$selected_pod"
+# else
+#     tmux display -d 3000 "No pod selected"
+#     exit 0
+# fi

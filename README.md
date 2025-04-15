@@ -140,6 +140,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - Paste from clipboard: `Ctrl + v`
 - Paste a text copied outside of tmux (i.e., a browser): `Ctrl + Shift + v`
 - Search backward in copy mode: `prefix + /`
+- Copy the entire window buffer to the system clipboard: `Ctrl + Shift + y`
 
 ### Fuzzy Search Utilities
 
