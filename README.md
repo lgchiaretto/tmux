@@ -220,13 +220,14 @@ The `fzf-files` utilities provide additional functionality for managing OpenShif
 - **Search and select a pod (`prefix + p`)**  
   Opens a list of pods in the current project. After selecting a pod, you can:
   - **Describe the pod**: Press `Ctrl + d` to execute `oc describe pod <pod-name>`.
+  - **Edit the pod**: Press `Ctrl + e` to execute `oc edit pod <pod-name>`.
   - **View pod logs**: Press `Ctrl + l` to execute `oc logs <pod-name>`.
+
   - **Select the pod name**: Press `Enter`
 
 - **Search and select a project (`prefix + P`)**  
   Opens a list of all OpenShift projects. After selecting a project, you can:
-  - **Switch to the project**: Press `Ctrl + s` to execute `oc project <project-name>`.
-  - **Delete the project**: Press `Ctrl + x` to execute `oc delete project <project-name>`.
+  - **Switch to the project**: Press `Ctrl + p` to execute `oc project <project-name>`.
   - **Select the project name**: Press `Enter`
 
 - **Search and select a node (`prefix + n`)**  
