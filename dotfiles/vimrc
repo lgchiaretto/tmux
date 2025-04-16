@@ -9,6 +9,10 @@ set statusline=%=%l/%L " Display current line and total lines in the status bar
 set cursorline      " Highlight the current line
 set encoding=utf-8  " Set file encoding to UTF-8
 set paste           " Enable paste mode
+set wildmenu       " Enable command-line completion
+set wildmode=longest:full,full " Command-line completion mode
+set smartindent    " Enable smart indentation
+" set number
 
 " Syntax highlighting
 syntax on           " Enable syntax highlighting
@@ -41,7 +45,6 @@ endif
 
 " Plugin management
 call plug#begin('~/.vim/plugged')
-    Plug 'davidhalter/jedi-vim', { 'for': 'python' } " Python autocompletion
     Plug 'morhetz/gruvbox'                          " Gruvbox colorscheme
     Plug 'Raimondi/delimitMate'                     " Auto-completion for brackets
     Plug 'tomtom/tcomment_vim'                      " Commenting plugin
@@ -49,29 +52,12 @@ call plug#begin('~/.vim/plugged')
 call plug#end()
 
 " Gruvbox settings
-autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 colorscheme gruvbox
-autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 highlight Normal ctermbg=None
-
-" Jedi-vim settings
-set completeopt-=preview " Disable preview window for autocompletion
-let g:jedi#show_call_signatures = 0 " Disable call signatures in Jedi
+autocmd FileType yaml,vim,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 colorscheme gruvbox
+autocmd FileType yaml,vim,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 highlight Normal ctermbg=None
 
 " TComment settings
 let g:tcomment_mapleader_comment_anyway = '#' " Use '#' for commenting
 let g:tcomment_mapleader_uncomment_anyway = 'g#' " Use 'g#' for uncommenting
-
-" Skeleton for new Python files
-if has("autocmd")
-    augroup templates
-        autocmd BufNewFile *.py 0r ~/.vim/templates/skeleton.py
-    augroup END
-endif
-
-" Python-specific settings
-autocmd FileType python setlocal nu " Enable line numbers
-autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr> " Run script without parameters
-autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %'<cr> " Run script with parameters
-autocmd FileType python set pumheight=15 " Set popup menu height
 
 " YAML-specific settings
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys=0{,0},:,0#,!^F,O,e,- " YAML indentation rules
