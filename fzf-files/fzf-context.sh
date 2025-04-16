@@ -57,7 +57,7 @@ if [[ -n "$selected_cluster_project" ]]; then
     project="${selected_cluster_project##*/}"
     oc config use-context "${CONTEXTS[$cluster]}" > /dev/null 2>&1
     oc project "$project" > /dev/null 2>&1
-    tmux display -d 1000 "You are connected to the cluster $cluster and project $project."
+    # tmux display -d 1000 "You are connected to the cluster $cluster and project $project."
 else
-    tmux display -d 5000 "No cluster/project selected. Goodbye!"
+     tmux display -d 5000 "No cluster/project selected. Goodbye!"
 fi
