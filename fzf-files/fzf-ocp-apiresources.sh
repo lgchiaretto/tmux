@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
 
-project_name=$(oc project -q)
+project_name=$(timeout 0.2 oc project -q)
 
-if [ -z "$project_name" -a $? -eq 0 ]; then
+if [ -z "$project_name" ] && [ $? -eq 0 ]; then
   tmux display -d 5000 'No resource found'
   exit 0
-elif [ -z "$project_name" -a $? -eq 1 ]; then
+elif [ -z "$project_name" ] && [ $? -eq 1 ]; then
   tmux display -d 5000 'No resource found. Are you connected on any OpenShift cluster?'
   exit 0
 fi
 
-action=$(oc api-resources --sort-by=name -o name | fzf-tmux --exact --layout=reverse -h 40 -p "50%,50%" --prompt="Choose a resource: ")
+action=$(oc api-resources | tail -n +2 | fzf-tmux --exact --layout=reverse -h 40 -p "100%,50%" | awk '{print $1}')
 
-tmux send-keys $action
-
-# if [ -z "$action" ]; then
-#   tmux display -d 5000 'No action selected'
-#   exit 0
-# fi
+tmux send-keys "$action"
