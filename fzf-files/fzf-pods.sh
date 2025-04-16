@@ -22,7 +22,7 @@ selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
         --header=$'-------------------------- Help --------------------------
 [Enter]     Print pod name
-[TAB]       Print pod name
+[Tab]       Print pod name
 [Ctrl-d]    Run "oc describe <pod> | less"
 [Ctrl-e]    Run "oc edit <pod>"
 [Ctrl-l]    Run "oc logs <pod>"

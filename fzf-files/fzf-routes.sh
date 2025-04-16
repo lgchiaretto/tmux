@@ -10,7 +10,7 @@ fi
 chosen=$(echo "$content" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
 [Enter]     Print route name
-[TAB]       Print route name
+[Tab]       Print route name
 [Ctrl-e]    Run "oc edit <route>"
 [Ctrl-d]    Run "oc describe <route> | less"
 [Ctrl-o]    open the route on firefox

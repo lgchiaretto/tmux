@@ -12,6 +12,7 @@ selected_operator=$(
         --ansi \
         --header=$'--------------------------- Help ---------------------------
 [Enter]     Print cluster operator name
+[Tab]       Print cluster operator name
 [Ctrl-d]    Run "oc describe <cluster operator> | less"
 [Ctrl-e]    Run "oc edit <cluster operator>"
 [Esc]       Exit

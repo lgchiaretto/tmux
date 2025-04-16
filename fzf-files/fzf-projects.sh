@@ -10,7 +10,7 @@ fi
 selected_project=$(echo "$projects" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
 [Enter]           Print project name
-[TAB]             Print project name
+[Tab]             Print project name
 [Ctrl-p] - Esc    Run "oc project <project>"
 [Esc]             Exit
 ----------------------------------------------------------\n\n' \

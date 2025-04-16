@@ -13,7 +13,7 @@ fi
 chosen=$(echo "$content" | fzf-tmux \
   --header=$'--------------------------------- Help ---------------------------------
 [Enter]     Print the URL or IP
-[TAB]       Print the URL or IP
+[Tab]       Print the URL or IP
 [Ctrl-o]    Open the URL in Firefox
 [Ctrl-c]    Copy the URL or IP to clipboard
 [Esc]       Exit

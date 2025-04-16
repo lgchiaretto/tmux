@@ -22,7 +22,7 @@ selected_node=$(
     echo -e "$colored_nodes" | fzf-tmux \
         --header=$'------------------- Help -------------------
 [Enter]     Print node name
-[TAB]       Print node name
+[Tab]       Print node name
 [Ctrl-d]    Run "oc describe <node> | less"
 [Ctrl-e]    Run "oc edit <node>"
 [Esc]       Exit
