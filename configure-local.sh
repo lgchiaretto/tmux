@@ -37,8 +37,8 @@ log "Changing directory to /home/$USER"
 cd /home/$USER > /dev/null 2>&1
 
 log "Cloning fzf repository"
-git clone https://github.com/junegunn/fzf.git > /dev/null 2>&1
-cd fzf > /dev/null 2>&1
+git clone https://github.com/junegunn/fzf.git .fzf> /dev/null 2>&1
+cd .fzf > /dev/null 2>&1
 log "Installing fzf"
 ./install --key-bindings --completion --update-rc > /dev/null 2>&1
 cd $TMUX_DIR > /dev/null 2>&1
