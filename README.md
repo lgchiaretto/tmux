@@ -12,9 +12,9 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
 - [Usage](#usage)
 - [Key Shortcuts](#key-shortcuts)
   - [Global Prefix](#global-prefix)
+  - [Sessions](#sessions)
   - [Window Management](#window-management)
   - [Pane Management](#pane-management)
-  - [Sessions](#sessions)
   - [Additional Keybindings](#additional-keybindings)
   - [Clipboard and Search](#clipboard-and-search)
   - [Fuzzy Search Utilities](#fuzzy-search-utilities)
@@ -114,6 +114,18 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 
 ---
 
+---
+
+### Sessions
+
+- **Create a new session**: `prefix + N` (prompts for a session name)
+- **Rename session**: Press `prefix + .` and enter the new name.
+- **Select session**: `prefix + s`
+- **Choose buffer to paste from**: `prefix + b`
+  - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type search terms to initiate a fuzzy search on all buffers.
+- **Kill session**: `prefix + K` (with confirmation prompt)
+- **Kill all sessions**: `prefix + D` (with confirmation prompt)
+
 ### Window Management
 
 - **Create a new window**: `Ctrl + t` or `prefix + t`
@@ -134,18 +146,6 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 - **Move pane positions**: `Alt + ↑`, `↓`
 - **Sync all panes**: `prefix + a` (toggles synchronization on/off)
 - **Move pane to a new window**: `prefix + m`
-
----
-
-### Sessions
-
-- **Create a new session**: `prefix + N` (prompts for a session name)
-- **Rename session**: Press `prefix + .` and enter the new name.
-- **Select session**: `prefix + s`
-- **Choose buffer to paste from**: `prefix + b`
-  - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type search terms to initiate a fuzzy search on all buffers.
-- **Kill session**: `prefix + K` (with confirmation prompt)
-- **Kill all sessions**: `prefix + D` (with confirmation prompt)
 
 ---
 
