@@ -1,6 +1,6 @@
 #!/usr/bin/bash -x
 
-selected_file=$(locate -i "" | fzf-tmux --header="Type to search for a file:" --layout=reverse -p "50%,50%" --exact )
+selected_file=$(locate -i "" | fzf-tmux --header="Type to search for a file:" --layout=reverse -p "50%,50%" --exact --bind 'tab:accept')
 
 if [ -n "$selected_file" ]; then
     if [ -f "$selected_file" ]; then

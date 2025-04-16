@@ -48,7 +48,7 @@ if [[ ! -s /tmp/clusters_projects.$$ ]]; then
     exit 0
 fi
 
-selected_cluster_project=$(fzf-tmux --header="Select the OCP context" --layout=reverse -h 40 -p "50%,50%" --query="$FILTER" --exact < /tmp/clusters_projects.$$)
+selected_cluster_project=$(fzf-tmux --header="Select the OCP context" --layout=reverse -h 40 -p "50%,50%" --query="$FILTER" --bind 'tab:accept' --exact < /tmp/clusters_projects.$$)
 
 rm -f /tmp/clusters_projects.$$
 
