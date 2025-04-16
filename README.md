@@ -171,9 +171,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
 ### Fuzzy Search Utilities
 
 - **Open a file or directory** (requires `locate` service): `Ctrl + x`
-- **Search and open URLs**:
-  - **Open**: `prefix + u`
-  - **Copy**: `prefix + y`
+- **Search and print or open URLs/IPs**: `prefix + TAB`
 
 ---
 

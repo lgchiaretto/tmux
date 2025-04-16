@@ -7,11 +7,20 @@ if [ -z "$projects" ]; then
     exit 0
 fi
 
-selected_project=$(echo "$projects" | fzf-tmux  --header="Select the OpenShift project:" --layout=reverse -h 40 -p "50%,50%" --exact)
+selected_project=$(echo "$projects" | fzf-tmux \
+     --header=$'-------------------------- Help --------------------------
+[Enter]           Print project name
+[Ctrl-p] - Esc    Run "oc project <project>"
+[Esc]             Exit
+----------------------------------------------------------\n\n' \
+    --layout=reverse \
+    -h 40 \
+    -p "23%,50%" \
+    --exact \
+    --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \
+    --expect=enter \
+)
 
 if [ -n "$selected_project" ]; then
     tmux send-keys "$selected_project"
-else
-    tmux display -d 3000 "No project selected"
-    exit 0
 fi
