@@ -14,7 +14,7 @@ action=$(oc api-resources --sort-by=name -o name | fzf-tmux --layout=reverse -h 
 
 tmux send-keys $action
 
-if [ -z "$action" ]; then
-  tmux display -d 5000 'No action selected'
-  exit 0
-fi
+# if [ -z "$action" ]; then
+#   tmux display -d 5000 'No action selected'
+#   exit 0
+# fi

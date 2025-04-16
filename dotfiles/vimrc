@@ -1,5 +1,4 @@
 set bg=dark         " dark bg when console background is black
-set nu
 set tabstop=4       " (ts) width (in spaces) that a <tab> is displayed as
 set softtabstop=4   " (sts) makes spaces feel like tabs (like deleting)
 set shiftwidth=4    " (sw) width (in spaces) used in each step of autoindent (aswell as << and >>)
@@ -7,6 +6,94 @@ set autoindent      " (ai) turn on auto-indenting (great for programers)
 set expandtab       " (et) expand tabs to spaces (use :retab to redo entire file)
 set statusline=%=%l/%L
 set cursorline
-set paste
+
+" maybe to fix copy on vim
+" set mouse=a
+
 syntax on
+nnoremap v <c-v> " remap `v` to `Ctrl-v`
+
+" exec set paste only in this files to not conflict with delimitMate plugin
+" autocmd Filetype yaml,vim set paste
+
+" This is to rename-window when file is opened by vim
+let g:remoteSession = ($STY == "")
+if !exists('$TMUX')
+    if g:remoteSession
+        autocmd BufEnter * let &titlestring = expand("%:t")
+        set title
+    endif
+else
+    autocmd BufEnter * let &titlestring = expand("%:f")
+    set title
+endif
+
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+      \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/plugged')
+    "nnoremap <C-space> <tab>
+    " Plug 'valloric/youcompleteme', { 'for': 'python' }
+    Plug 'davidhalter/jedi-vim', { 'for': 'python' }
+    Plug 'morhetz/gruvbox'
+    Plug 'Raimondi/delimitMate'
+    Plug 'tomtom/tcomment_vim'
+    Plug 'tpope/vim-surround'
+
+    " gruvbox
+    " Change Colorscheme and background color to black
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 colorscheme gruvbox
+    autocmd FileType yaml,vim,python,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2 highlight Normal ctermbg=None
+
+    " ycm
+    let g:ycm_autoclose_preview_window_after_completion=1
+    let g:ycm_python_binary_path = 'python'
+    set encoding=utf-8
+
+    " tcomment
+    " Comment multiple lines using #
+    let g:tcomment_mapleader_comment_anyway = '#'
+    " Uncomment lines using g#
+    let g:tcomment_mapleader_uncomment_anyway = 'g#'
+
+    "Remove preview when autocomplete vim-jedi
+    set completeopt-=preview
+    let g:jedi#show_call_signatures = 0
+
+    " map 'q' to close buffer readonly
+    nnoremap <expr> q (!&modifiable ? ':bd!<CR>' : 'q')
+
+    " Skeleton for a new python file
+    if has("autocmd")
+      augroup templates
+        autocmd BufNewFile *.py 0r ~/.vim/templates/skeleton.py
+      augroup END
+    endif
+call plug#end()
+
+" Python Files
+autocmd FileType python setlocal nu
+" Execute script with no parameters
+autocmd FileType python nnoremap <buffer> <F5> :exec '!clear && python' shellescape(@%, 1)<cr>
+" Execute script with parameters
+autocmd FileType python nnoremap <buffer> <F6> :exec '!clear && python %' 
+autocmd FileType python set pumheight=15
+
+" temporary files on one place (stolen from sryche/vimfiles on github)
+" set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+" set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+
+" YAML Files
+" autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys-=<:>    "Only when file is an yaml format
 autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys=0{,0},:,0#,!^F,O,e,-    "Only when file is an yaml format"
+
+" This must be here due python plugin colors
+if &term =~ '256color'
+    " disable background color erase
+    set t_ut=
+endif
+
+set paste
