@@ -10,6 +10,7 @@ fi
 chosen=$(echo "$content" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
 [Enter]     Print route name
+[TAB]       Print route name
 [Ctrl-e]    Run "oc edit <route>"
 [Ctrl-d]    Run "oc describe <route> | less"
 [Ctrl-o]    open the route on firefox
@@ -20,6 +21,7 @@ chosen=$(echo "$content" | fzf-tmux \
     -p "50%,50%" \
     --exact \
     --with-nth=1,2,3 \
+    --bind 'tab:accept' \
     --bind 'ctrl-e:execute-silent(
         tmux new-window -n "edit route" "oc edit route -n {1} {2}"
     )+abort' \

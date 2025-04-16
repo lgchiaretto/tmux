@@ -19,7 +19,7 @@ fi
 
 mapfile -t selected_pods < <(
   oc get pods --field-selector=status.phase=Running --no-headers -o custom-columns=":metadata.name" |
-    fzf-tmux --prompt="Select the pods > " --multi --bind "ctrl-a:toggle-all" --header="Select the OpenShift pods:" --layout=reverse -h 40 -p "50%,50%"  --exact)
+    fzf-tmux --prompt="Select the pods > " --multi --bind "ctrl-a:toggle-all" --header="Select the OpenShift pods:" --layout=reverse -h 40 -p "50%,50%"  --exact --bind 'tab:accept')
 
 [[ ${#selected_pods[@]} -eq 0 ]] && exit
 
@@ -37,7 +37,7 @@ for pod in "${selected_pods[@]}"; do
       if [[ $container_count -eq 1 ]]; then
           first_container="${containers[0]}"
           else
-            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the pods container:" --layout=reverse -h 40 -p "50%,50%")
+            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the pods container:" --layout=reverse -h 40 -p "50%,50%" --exact --bind 'tab:accept') 
           [[ -z "$first_container" ]] && continue
       fi
     fi

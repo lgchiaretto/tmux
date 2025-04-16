@@ -20,6 +20,7 @@ selected_operator=$(
         -h 40 \
         -p "25%,45" \
         --exact \
+        --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(
             echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc describe co {}" "oc describe co {} | less; tmux select-window -t \"oc describe co {}\""
         )+abort' \

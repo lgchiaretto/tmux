@@ -10,6 +10,7 @@ fi
 selected_project=$(echo "$projects" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
 [Enter]           Print project name
+[TAB]             Print project name
 [Ctrl-p] - Esc    Run "oc project <project>"
 [Esc]             Exit
 ----------------------------------------------------------\n\n' \
@@ -17,6 +18,7 @@ selected_project=$(echo "$projects" | fzf-tmux \
     -h 40 \
     -p "23%,50%" \
     --exact \
+     --bind 'tab:accept' \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \
     --expect=enter \
 )

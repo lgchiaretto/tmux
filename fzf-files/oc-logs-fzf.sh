@@ -7,7 +7,7 @@ count=$(echo "$containers" | wc -w)
 if [ "$count" -eq 1 ]; then
     tmux new-window -n "logs $pod" "bash -i -c 'history -s oc logs -n $project_name $pod ; oc logs $pod -n $project_name; exec bash'"
 else
-    container=$(echo "$containers" | tr ' ' '\n' | fzf-tmux --header="Select container for pod $pod" --layout=reverse -h 10)
+    container=$(echo "$containers" | tr ' ' '\n' | fzf-tmux --header="Select container for pod $pod" --layout=reverse -h 10 --exact --bind 'tab:accept')
     if [ -n "$container" ]; then
         formatted_pod="${pod:0:15}..${container: -15}"
         tmux new-window -n "logs $formatted_pod" "bash -i -c 'history -s oc logs -n $project_name $pod -c $container; oc logs -n $project_name $pod -c $container; exec bash'"

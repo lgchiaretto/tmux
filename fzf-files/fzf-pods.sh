@@ -22,6 +22,7 @@ selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
         --header=$'-------------------------- Help --------------------------
 [Enter]     Print pod name
+[TAB]       Print pod name
 [Ctrl-d]    Run "oc describe <pod> | less"
 [Ctrl-e]    Run "oc edit <pod>"
 [Ctrl-l]    Run "oc logs <pod>"
@@ -33,6 +34,7 @@ selected_pod=$(
         --exact \
         --with-nth=1,2 \
         --ansi \
+        --bind 'tab:accept' \
         --bind 'ctrl-l:execute-silent(
             tmux new-window -n "logs pod {1}" "/usr/local/bin/oc-logs-fzf.sh {1}"
         )+abort' \

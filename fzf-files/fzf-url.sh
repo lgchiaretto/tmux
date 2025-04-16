@@ -13,6 +13,7 @@ fi
 chosen=$(echo "$content" | fzf-tmux \
   --header=$'--------------------------------- Help ---------------------------------
 [Enter]     Print the URL or IP
+[TAB]       Print the URL or IP
 [Ctrl-o]    Open the URL in Firefox
 [Ctrl-c]    Copy the URL or IP to clipboard
 [Esc]       Exit
@@ -23,6 +24,7 @@ chosen=$(echo "$content" | fzf-tmux \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
   --bind 'ctrl-o:execute-silent(firefox {})+abort' \
+  --bind 'tab:accept' \
   --expect=enter \
 )
 if [ -n "$chosen" ]; then

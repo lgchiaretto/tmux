@@ -22,6 +22,7 @@ selected_node=$(
     echo -e "$colored_nodes" | fzf-tmux \
         --header=$'------------------- Help -------------------
 [Enter]     Print node name
+[TAB]       Print node name
 [Ctrl-d]    Run "oc describe <node> | less"
 [Ctrl-e]    Run "oc edit <node>"
 [Esc]       Exit
@@ -32,6 +33,7 @@ selected_node=$(
         --exact \
         --with-nth=1,2 \
         --ansi \
+        --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(
             tmux new-window -n "describe node {1}" "oc describe node {1} | less; tmux select-window -t \"describe node {1}\""
         )+abort' \
