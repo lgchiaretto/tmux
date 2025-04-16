@@ -10,17 +10,22 @@ fi
 selected_operator=$(
     echo "$operators" | fzf-tmux \
         --ansi \
-        --header=$'Select the OpenShift Cluster Operator:\n\n[Enter] Select Cluster Operator name [Ctrl-D] Describe  [Ctrl-E] Edit\n\n' \
+        --header=$'--------------------------- Help ---------------------------
+[Enter]     Print cluster operator name
+[Ctrl-d]    Run "oc describe <cluster operator> | less"
+[Ctrl-e]    Run "oc edit <cluster operator>"
+[Esc]       Exit
+------------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "50%,40" \
+        -p "25%,45" \
         --exact \
         --bind 'ctrl-d:execute-silent(
             echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc describe co {}" "oc describe co {} | less; tmux select-window -t \"oc describe co {}\""
-        )' \
+        )+abort' \
         --bind 'ctrl-e:execute-silent(
             echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc edit co {}" "oc edit co {}; tmux select-window -t \"oc edit co {}\""
-        )' | awk '{print $1}'
+        )+abort' | awk '{print $1}'
 )
 
 if [ -n "$selected_operator" ]; then

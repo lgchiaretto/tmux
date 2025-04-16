@@ -43,16 +43,16 @@ log "Installing fzf"
 ./install --key-bindings --completion --update-rc > /dev/null 2>&1
 cd $TMUX_DIR > /dev/null 2>&1
 log "Copying .bashrc, .vimrc, .dircolors, .inputrc and .tmux.conf files"
-cp dotfiles/bashrc /home/$USER/.bashrc > /dev/null 2>&1
-cp dotfiles/tmux.conf /home/$USER/.tmux.conf > /dev/null 2>&1
-cp dotfiles/vimrc /home/$USER/.vimrc > /dev/null 2>&1
-cp dotfiles/dircolors /home/$USER/.dircolors > /dev/null 2>&1
-cp dotfiles/inputrc /home/$USER/.inputrc > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/bashrc /home/$USER/.bashrc > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/tmux.conf /home/$USER/.tmux.conf > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/vimrc /home/$USER/.vimrc > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/dircolors /home/$USER/.dircolors > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/inputrc /home/$USER/.inputrc > /dev/null 2>&1
 
 log "Creating .tmux directory"
 mkdir -p /home/$USER/.tmux/ > /dev/null 2>&1
 log "Copying fzf-files to .tmux directory"
-cp fzf-files/* /home/$USER/.tmux/ > /dev/null 2>&1
+cp $TMUX_DIR/fzf-files/* /home/$USER/.tmux/ > /dev/null 2>&1
 log "Changing ownership of configuration files"
 chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc} > /dev/null 2>&1
 chown -R $USER:$GROUP /home/$USER/.tmux/ > /dev/null 2>&1

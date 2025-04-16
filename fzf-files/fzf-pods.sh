@@ -20,10 +20,16 @@ colored_pods=$(echo "$pods" | awk '{
 
 selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
-        --header=$'[Enter] Select pod name  [Ctrl-d] Describe  [Ctrl-e] Edit  [Ctrl-l] Logs  [Esc] Exit\n\n' \
+        --header=$'-------------------------- Help --------------------------
+[Enter]     Print pod name
+[Ctrl-d]    Run "oc describe <pod> | less"
+[Ctrl-e]    Run "oc edit <pod>"
+[Ctrl-l]    Run "oc logs <pod>"
+[Esc]       Exit
+----------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "50%,50%" \
+        -p "23%,40%" \
         --exact \
         --with-nth=1,2 \
         --ansi \
