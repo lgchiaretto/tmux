@@ -13,8 +13,18 @@ fi
 mapfile -t selected_pods_and_namespaces < <(
     oc get pods -A --field-selector=status.phase=Running --no-headers -o jsonpath="{range .items[*]}{.metadata.namespace}{'\t'}{.metadata.name}{'\n'}{end}" |
         column -t -s $'\t' |
-        fzf-tmux --prompt="Select the pods > " --multi --header="Select the OpenShift pods (NAMESPACE | POD):" --layout=reverse -h 40 -p "50%,50%" --exact --bind "ctrl-a:toggle-all" |
-        awk '{print $1 " " $2}'
+        fzf-tmux \
+        --header=$'----------------------------------------------------- Help ------------------------------------------------------
+[Enter]     Show pod(s) logs
+[Tab]       Select pod to show log
+[Esc]       Exit
+-----------------------------------------------------------------------------------------------------------------\n\n' \
+        --multi \
+        --layout=reverse \
+        -h 40 \
+        -p "42%,50%" \
+        --exact \
+        | awk '{print $1 " " $2}'
 )
 
 [[ ${#selected_pods_and_namespaces[@]} -eq 0 ]] && exit

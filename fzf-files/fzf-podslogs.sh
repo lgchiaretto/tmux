@@ -18,8 +18,21 @@ if ! tmux has-session -t "$session_name" 2>/dev/null; then
 fi
 
 mapfile -t selected_pods < <(
-  oc get pods --field-selector=status.phase=Running --no-headers -o custom-columns=":metadata.name" |
-    fzf-tmux --prompt="Select the pods > " --multi --bind "ctrl-a:toggle-all" --header="Select the OpenShift pods:" --layout=reverse -h 40 -p "50%,50%"  --exact)
+    oc get pods --field-selector=status.phase=Running --no-headers -o custom-columns=":metadata.name" |
+        fzf-tmux \
+            --header=$'-------------------------- Help --------------------------
+[Enter]     Show pod(s) logs
+[Tab]       Select pod to show log
+[Ctrl-a]    Select all pods
+[Esc]       Exit
+----------------------------------------------------------\n\n' \
+            --multi \
+            --bind "ctrl-a:toggle-all" \
+            --layout=reverse \
+            -h 40 \
+            -p "50%,50%" \
+            --exact
+)
 
 [[ ${#selected_pods[@]} -eq 0 ]] && exit
 
