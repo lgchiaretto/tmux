@@ -246,7 +246,7 @@ The `fzf-files` utilities provide additional functionality for managing OpenShif
   - **Describe the operator**: Press `Ctrl + d` to execute `oc describe co <operator-name>`.
 
 - **Search and select an OpenShift API Resource (`prefix + o`)**
-  Opens a list of Custom Resource Definitions (CRD) in the cluster. After selecting an api-resource, you can:
+  Opens a list of API resources available in the cluster. After selecting an api-resource, you can:
   - **Select the api-resource name**: Press `Enter`
 
 These bindings leverage `fzf` to provide an efficient and interactive way to manage OpenShift resources. Ensure that the required scripts and dependencies are installed for these features to work seamlessly.
