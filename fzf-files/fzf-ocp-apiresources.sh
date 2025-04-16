@@ -10,7 +10,7 @@ elif [ -z "$project_name" -a $? -eq 1 ]; then
   exit 0
 fi
 
-action=$(oc api-resources --sort-by=name -o name | fzf-tmux --layout=reverse -h 40 -p "50%,50%" --prompt="Choose a resource: ")
+action=$(oc api-resources --sort-by=name -o name | fzf-tmux --exact --layout=reverse -h 40 -p "50%,50%" --prompt="Choose a resource: ")
 
 tmux send-keys $action
 
