@@ -7,7 +7,7 @@ selected_file=$(
         -p "70%,70%" \
         --exact \
         --bind 'tab:accept' \
-        --preview '[[ -f {} ]] && cat {} || ls -l {}' \
+        --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" --style=plain {} || ls -l {}' \
         --preview-window=right:60% \
         --bind 'change:reload(locate -i "" || true)' \
         --query ""
