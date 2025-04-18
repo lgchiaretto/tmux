@@ -48,6 +48,7 @@ cp $TMUX_DIR/dotfiles/tmux.conf /home/$USER/.tmux.conf > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/vimrc /home/$USER/.vimrc > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/dircolors /home/$USER/.dircolors > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/inputrc /home/$USER/.inputrc > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/bash_functions /home/$USER/.bash_functions > /dev/null 2>&1
 
 log "Creating .tmux directory"
 mkdir -p /home/$USER/.tmux/ > /dev/null 2>&1
