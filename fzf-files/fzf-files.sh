@@ -5,15 +5,18 @@ selected_file=$(
         --header=$'---------------------------------- Help ----------------------------------
 [Enter]     Open file or directory
 [Ctrl-c]    Copy the content of the file to clipboard
+[Tab]       Print the file or directory in the terminal
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \
         --layout=reverse \
         -p "70%,70%" \
         --exact \
+        --wrap \
         --bind 'tab:accept' \
         --bind 'ctrl-c:execute-silent([[ -f {} ]] && xclip -selection clipboard -i < {} && tmux display-message -d 1000 "Copied")+abort' \
+        --bind 'tab:execute-silent(tmux send-keys -l {})+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -l {}' \
-        --preview-window=right:60% \
+        --preview-window=right:60%:wrap \
         --query ""
 )
 
