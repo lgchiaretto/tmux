@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-actions="Create cluster\nDestroy cluster\nExport 'kube:admin' kubeconfig\nStart cluster"
+actions="Create cluster\nDestroy cluster\nExport 'kube:admin' kubeconfig\nLogin with 'kubeadmin' user\nStart cluster"
 
 selected_action=$(
     echo -e "$actions" | fzf-tmux \
@@ -10,7 +10,7 @@ selected_action=$(
 ----------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "23%,17%" \
+        -p "23%,19%" \
         --ansi \
         --sort \
         --expect=enter
@@ -31,6 +31,9 @@ if [ "$action" ]; then
             ;;
         "Destroy cluster")
             /usr/local/bin/ocpdestroycluster
+            ;;
+        "Login with 'kubeadmin' user")
+            /usr/local/bin/ocplogin
             ;;
     esac
 fi
