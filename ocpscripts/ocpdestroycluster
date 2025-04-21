@@ -1,0 +1,30 @@
+#!/bin/bash                                                                                                                                                                                                                                             
+
+selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
+  ! -name 'backup-20230903' \
+  ! -name '*-files' \
+  ! -name 'quay-*' \
+  -exec basename {} \; | while read -r dir; do
+    vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+    echo "$dir / $vmwarenotes"
+  done)
+
+if [ -z "$selection_list" ]; then
+  #echo "No cluster found."
+  exit 0
+fi
+
+selected_entry=$(echo "$selection_list" | fzf-tmux --header="Select the clustername to be destroyed" --layout=reverse -p "50%,50%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
+
+if [ -z "$selected_entry" ]; then
+ # echo "No cluster selected."
+  exit 0
+fi
+
+read -p "Are you sure you want to destroy the cluster '$selected_entry'? (y/N): " confirm
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+#  echo "Operation canceled."
+  exit 0
+fi
+
+/usr/local/bin/destroycluster.py -i /vms/clusters/$selected_entry/$selected_entry.json -n $selected_entry

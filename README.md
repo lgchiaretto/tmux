@@ -236,7 +236,7 @@ This configuration includes several keybindings specifically designed to simplif
 
 - **Mouse Support**: Enables mouse interaction for pane resizing, window switching, and scrolling.
 - **Clipboard Integration**: Automatically copies selected text to the system clipboard.
-- **Enhanced History**: Increases the scrollback buffer to 50,000 lines.
+- **Enhanced History**: Increases the scrollback buffer to 1.000.000 lines.
 - **256-Color Support**: Improves theme visualization.
 - **Custom Status Bar**: Displays session, cluster, and system information.
 
