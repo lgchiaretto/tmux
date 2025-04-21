@@ -2,14 +2,15 @@ session_name: INSTALL
 start_directory: /labs/funny-flanders
 windows:
 - window_name: create check
-  layout: 990d,318x81,0,0[318x40,0,0,7,318x40,0,41{159x40,0,41,8,158x40,160,41[158x24,160,41,9,158x15,160,66,10]}]
   focus: true
+  layout: 990d,318x81,0,0[318x40,0,0,7,318x40,0,41{159x40,0,41,8,158x40,160,41[158x24,160,41,9,158x15,160,66,10]}]
   options:
     automatic-rename: 'off'
   shell_command_before:
-  - export KUBECONFIG=$(pwd)/auth/kubeconfig
+    - export KUBECONFIG=$(pwd)/auth/kubeconfig
+    - tmux select-window -t INSTALL:'create check'
   panes:
-  - watch -n2 "oc get pods -A -o wide | grep -E '0/|CrashLoopBackOff|Terminating' | grep -v Completed"
-  - watch -n2 oc get co
-  - watch -n2  "oc get csr | grep -i Pending"
-  - watch -n2 oc get nodes
+    - watch -n2 "oc get pods -A -o wide | grep -E '0/|CrashLoopBackOff|Terminating' | grep -v Completed"
+    - watch -n2 oc get co
+    - watch -n2 "oc get csr | grep -i Pending"
+    - watch -n2 oc get nodes
