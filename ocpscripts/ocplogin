@@ -9,11 +9,11 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
     echo "$dir / $vmwarenotes"
   done)
 
-selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to login:\n\n' --layout=reverse -p "50%,50%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
+selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to login:\n\n' --layout=reverse -p "30%,20%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
 
 if [ -z "$selected_entry" ]; then
-  echo "No directory selected."
-  exit 1
+#  echo "No directory selected."
+  exit 0
 fi
 
  tmux send-keys "oc login https://api.$selected_entry.chiaret.to:6443 -u kubeadmin -p $(cat /vms/clusters/$selected_entry/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m

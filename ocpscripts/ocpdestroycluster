@@ -21,10 +21,20 @@ if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
-read -p "Are you sure you want to destroy the cluster '$selected_entry'? (y/N): " confirm
+temp_file=$(mktemp)
+
+tmux new-window -n "destroy: $selected_entry" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$selected_entry\\\"? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
+
+while [ ! -s "$temp_file" ]; do
+  sleep 1
+done
+
+confirm=$(cat "$temp_file")
+rm -f "$temp_file"
+
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-#  echo "Operation canceled."
   exit 0
 fi
 
-/usr/local/bin/destroycluster.py -i /vms/clusters/$selected_entry/$selected_entry.json -n $selected_entry
+tmux send-keys "/usr/local/bin/destroycluster.py -i /vms/clusters/$selected_entry/$selected_entry.json -n $selected_entry" C-m
+
