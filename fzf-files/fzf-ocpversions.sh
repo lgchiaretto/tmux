@@ -51,7 +51,7 @@ if [ -s "$combined_output" ]; then
   ocpversion=$(cat "$combined_output" | fzf-tmux \
               --layout=reverse \
               -h 40 \
-              -p "19%,37%" \
+              -p "38%,50%" \
               --bind enter:accept
   )
 else
