@@ -9,7 +9,7 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
     echo "$dir / $vmwarenotes"
   done)
 
-selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to start the virtual machines:\n\n' --layout=reverse -p "30%,20%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
+selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to start the virtual machines:\n\n' --layout=reverse -p "38%,50%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
 
 if [ -z "$selected_entry" ]; then
 	  exit 0
