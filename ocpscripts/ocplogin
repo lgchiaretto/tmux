@@ -12,7 +12,6 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
 selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to login:\n\n' --layout=reverse -p "30%,20%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
 
 if [ -z "$selected_entry" ]; then
-#  echo "No directory selected."
   exit 0
 fi
 
