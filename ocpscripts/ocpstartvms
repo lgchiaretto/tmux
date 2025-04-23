@@ -7,7 +7,12 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
   -exec basename {} \; | while read -r dir; do
     vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
     ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-    echo "$dir / $ocpversion / $vmwarenotes"
+    if [ -z "$header_printed" ]; then
+      printf "%-30s %-20s %-50s\n" "Cluster Name" "OCP Version" "Description"
+      printf "%-30s %-20s %-50s\n" "-------------" "-----------" "------------"
+      header_printed=true
+    fi
+    printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
   done)
 
 if [ -z "$selection_list" ]; then
