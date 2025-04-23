@@ -8,11 +8,11 @@ CACHE_FILE="/vms/clusters/.ocp_versions_cache"
 
 temp_dir=$(mktemp -d)
 combined_output="$temp_dir/combined.out"
-printf "%s\n" "-----------------------------------------------" >> "$combined_output"
-        printf "%-20s %-30s\n" "Version" "Created Date" >> "$combined_output"
+#printf "%s\n" "-----------------------------------------------" >> "$combined_output"
+#printf "%-20s %-30s\n" "Version" "Created Date" >> "$combined_output"
 for channel in "${channels[@]}"; do
     {
-        printf "%-10s %-30s\n" "-------" "------------------------------------"
+        #printf "%-10s %-30s\n" "-------" "------------------------------------"
                                 
         releases=$(curl -s "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/" | \
           grep -oP "href=\"$channel\.[0-9]+/" | \
@@ -25,6 +25,7 @@ for channel in "${channels[@]}"; do
             created_date=$(curl -s "$release_url" | grep "^Created:" | cut -d':' -f2- | xargs -I{} date -d "{}" +"+%c")
             printf "%-10s %-30s\n" "$version" "$created_date"
         done
+        echo ""-----------------------------------------------""
     } >> "$combined_output"
 done
 

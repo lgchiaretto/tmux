@@ -3,8 +3,10 @@
 CACHE_FILE="/vms/clusters/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
-    selected_version=$(cat "$CACHE_FILE" | \
-                       fzf-tmux \
+    selected_version=$(cat "$CACHE_FILE" | fzf-tmux \
+                       --header=$'-----------------------------------------------
+Version             Created Date
+-----------------------------------------------\n' \
                        --layout=reverse \
                        -h 40 \
                        -p "40%,52%" \
@@ -15,3 +17,5 @@ if [ -f "$CACHE_FILE" ]; then
 else
     exit 0
 fi
+
+
