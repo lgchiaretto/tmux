@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-actions="Create cluster\nDestroy cluster\nEdit install configs\nExport 'kube:admin' kubeconfig\nLogin with 'kubeadmin' user\nStart cluster"
+actions="1 - Create cluster\n2 - Destroy cluster\n3 - Edit install configs\n4 - Export 'kube:admin' kubeconfig\n5 - Login with 'kubeadmin' user\n6 - Start cluster"
 
 selected_action=$(
     echo -e "$actions" | fzf-tmux \
@@ -20,22 +20,22 @@ action=$(echo "$selected_action" | tail -n1)
 
 if [ "$action" ]; then
     case "$action" in
-        "Start cluster")
+        "6 - Start cluster")
             /usr/local/bin/ocpstartvms
             ;;
-        "Export 'kube:admin' kubeconfig")
+        "4 - Export 'kube:admin' kubeconfig")
             /usr/local/bin/ocpexportkubeconfig
             ;;
-        "Create cluster")
+        "1 - Create cluster")
             /usr/local/bin/ocpcreatecluster
             ;;
-        "Destroy cluster")
+        "2 - Destroy cluster")
             /usr/local/bin/ocpdestroycluster
             ;;
-        "Login with 'kubeadmin' user")
+        "5 - Login with 'kubeadmin' user")
             /usr/local/bin/ocplogin
             ;;
-        "Edit install configs")
+        "3 - Edit install configs")
             /usr/local/bin/ocpvariablesfiles
             ;;
     esac

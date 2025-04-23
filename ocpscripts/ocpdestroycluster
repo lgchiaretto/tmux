@@ -6,7 +6,8 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
   ! -name 'quay-*' \
   -exec basename {} \; | while read -r dir; do
     vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-    echo "$dir / $vmwarenotes"
+    ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+    echo "$dir / $ocpversion / $vmwarenotes"
   done)
 
 if [ -z "$selection_list" ]; then
@@ -14,7 +15,7 @@ if [ -z "$selection_list" ]; then
   exit 0
 fi
 
-selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to be destroyed\n\n' --layout=reverse -p "38%,50%" --delimiter=' / ' --with-nth=1,2 | awk -F ' / ' '{print $1}')
+selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Select the clustername to be destroyed\n\n' --layout=reverse -p "38%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk -F ' / ' '{print $1}')
 
 if [ -z "$selected_entry" ]; then
   exit 0
