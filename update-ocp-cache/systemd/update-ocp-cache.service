@@ -1,0 +1,11 @@
+[Unit]
+Description=Update OCP Versions Cache
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/update_ocp_cache.sh
+User=root
+Environment=HOME=/root
+
+[Install]
+WantedBy=multi-user.target
