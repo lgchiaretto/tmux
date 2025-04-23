@@ -27,6 +27,7 @@ mapfile -t selected_pods < <(
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
             --multi \
+            --bind "ctrl-a:toggle-all" \
             --layout=reverse \
             -h 40 \
             -p "50%,50%" \
