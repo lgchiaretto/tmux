@@ -10,6 +10,7 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
   done)
 
 if [ -z "$selection_list" ]; then
+  tmux display-message -d 5000 "No clusters found"
   exit 0
 fi
 
