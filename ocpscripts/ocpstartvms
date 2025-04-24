@@ -1,14 +1,27 @@
 #!/bin/bash
 
+clusters() {
+  local dir="$1"
+  FOLDER_VMWARE="/CHIARETTO/vm/$1"
+  VMMASTER0=$(govc ls "${FOLDER_VMWARE}" | grep "master-0")
+  VMMASTER0STATE=$(govc vm.info -json "$VMMASTER0" | jq -r '.virtualMachines[0].runtime.powerState')
+  vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  if [ "$VMMASTER0STATE" = "poweredOn" ]; then
+    printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
+  else
+    printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
+  fi
+}
+
 selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
   ! -name 'backup-20230903' \
   ! -name '*-files' \
   ! -name 'quay-*' \
   -exec basename {} \; | while read -r dir; do
-    vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-    ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-    printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
+    clusters "$dir"
   done)
+
 
 if [ -z "$selection_list" ]; then
   tmux display-message -d 5000 "No clusters found"
