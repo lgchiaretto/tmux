@@ -9,5 +9,5 @@ buffer=$(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}" | fzf-tmux --wr
 
 # Check if a buffer was selected
 if [ -n "$buffer" ]; then
-  tmux send-keys $(echo "$buffer" | tail -n1 | awk '{print $1}')
+  tmux send-keys "$(echo "$buffer" | tail -n1)"
 fi
