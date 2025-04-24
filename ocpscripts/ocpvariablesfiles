@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
+#files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
 
 actions="1 - IPI 3-node cluster\n2 - IPI Single node cluster\n3 - UPI 3-node cluster with platform 'none'\n4 - UPI 3-node cluster with platform 'vsphere'\n5 - UPI 3-node cluster with 'ODF' and platform 'none'\n6 - UPI Single node cluster with platform 'none'\n7 - UPI Single node cluster with platform 'vsphere'\n8 - UPI Single node cluster with 'OCP Virt' and platform 'none'\n9 - UPI Single node cluster with 'ODF' and platform 'none'"
@@ -52,12 +52,7 @@ if [ -n "$selected_file" ]; then
     esac
 fi
 
-
-
-if [ -n "$selected_file" ]; then
-    tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-$selected_file.json" "vim /vms/clusters/variables-files/ansible-vars-$selected_file.json; tmux wait-for -S vim-done"
-    tmux wait-for vim-done
-else
+if [ -z "$selected_file" ]; then
     tmux display -d 3000 "No file selected"
     exit 0
 fi

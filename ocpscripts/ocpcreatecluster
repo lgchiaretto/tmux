@@ -1,13 +1,67 @@
 #!/usr/bin/env bash
 
-files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
+#files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
-selected_file=$(echo "$files" | sort | fzf-tmux --header=$'Select a variable file:\n\n' --layout=reverse  -h 40 -p -p "38%,50%" --exact)
+
+actions="1 - IPI 3-node cluster\n2 - IPI Single node cluster\n3 - UPI 3-node cluster with platform 'none'\n4 - UPI 3-node cluster with platform 'vsphere'\n5 - UPI 3-node cluster with 'ODF' and platform 'none'\n6 - UPI Single node cluster with platform 'none'\n7 - UPI Single node cluster with platform 'vsphere'\n8 - UPI Single node cluster with 'OCP Virt' and platform 'none'\n9 - UPI Single node cluster with 'ODF' and platform 'none'"
+
+
+selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "38%,50%" --exact)
+
+
+variablesfile=$(echo "$selected_file" | tail -n1)
 
 if [ -n "$selected_file" ]; then
-    tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-$selected_file.json" "vim /vms/clusters/variables-files/ansible-vars-$selected_file.json; tmux wait-for -S vim-done"
-    tmux wait-for vim-done
+    case "$variablesfile" in
+        "1 - IPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-3node.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "2 - IPI Single node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-sno.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "3 - UPI 3-node cluster with platform 'none'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "4 - UPI 3-node cluster with platform 'vsphere'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-vsphere.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "5 - UPI 3-node cluster with 'ODF' and platform 'none'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-odf-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "6 - UPI Single node cluster with platform 'none'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "7 - UPI Single node cluster with platform 'vsphere'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-vsphere.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "8 - UPI Single node cluster with 'OCP Virt' and platform 'none'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-ocpvirt-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "9 - UPI Single node cluster with 'ODF' and platform 'none'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-odf-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+    esac
+fi
 
+if [ -n "$selected_file" ]; then
     temp_file=$(mktemp)
 
     tmux new-window -n "create cluster" "bash -c 'read -p \"Are you sure you want to create the cluster? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
@@ -23,13 +77,9 @@ if [ -n "$selected_file" ]; then
       exit 0
     fi
 
-    tmux send-keys "/usr/local/bin/createcluster.py -i /vms/clusters/variables-files/ansible-vars-$selected_file.json" C-m
-
+    tmux send-keys "/usr/local/bin/createcluster.py -i $file" C-m
 else
 #    tmux display -d 3000 "No file selected"
     exit 0
 fi
-
-
-
 
