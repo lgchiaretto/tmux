@@ -34,4 +34,4 @@ if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
- tmux send-keys "oc login https://api.$selected_entry.chiaret.to:6443 -u kubeadmin -p $(cat /vms/clusters/$selected_entry/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+tmux new-window -n "login: $selected_entry" "oc login https://api.$selected_entry.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$selected_entry/auth/kubeadmin-password) --insecure-skip-tls-verify;bash"
