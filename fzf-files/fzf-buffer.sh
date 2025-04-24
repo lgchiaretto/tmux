@@ -1,5 +1,5 @@
 #!/bin/bash
-buffer=$(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}" | fzf-tmux --wrap --reverse --height=40 -p80%,50% --preview "echo {} | fold -s -w 100" | awk -F': ' '{print $2}')
+buffer=$(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}" | fzf-tmux --wrap --reverse | awk -F': ' '{print $2}')
 
 
 # bind b display-popup  -w 80% -h 50% -E "sh -c '
