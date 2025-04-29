@@ -18,11 +18,11 @@ selected_project=$(echo "$projects" | fzf-tmux \
     -h 40 \
     -p "23%,50%" \
     --exact \
-     --bind 'tab:accept' \
+    --bind 'tab:accept' \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \
     --expect=enter \
 )
 
 if [ -n "$selected_project" ]; then
-    tmux send-keys "$selected_project"
+    tmux send-keys $(echo "$selected_project" | tail -n1 | awk '{print $1}')
 fi
