@@ -23,7 +23,7 @@ selected_node=$(
         --header=$'------------------- Help -------------------
 [Enter]     Print node name
 [Tab]       Print node name
-[Ctrl-d]    Run "oc describe <node> | less"
+[Ctrl-d]    Run "oc describe <node>"
 [Ctrl-e]    Run "oc edit <node>"
 [Esc]       Exit
 --------------------------------------------\n\n' \
@@ -35,10 +35,10 @@ selected_node=$(
         --ansi \
         --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(
-            tmux new-window -n "describe node {1}" "oc describe node {1} | less; tmux select-window -t \"describe node {1}\""
+            tmux send-keys "oc describe node {1}" C-m;
         )+abort' \
         --bind 'ctrl-e:execute-silent(
-            tmux new-window -n "edit node {1}" "oc edit node {1}; tmux select-window -t \"edit node {1}\""
+            tmux send-keys "oc edit node {1}" C-m;
         )+abort' \
         --expect=enter \
 )

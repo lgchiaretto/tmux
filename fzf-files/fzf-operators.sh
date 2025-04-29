@@ -13,7 +13,7 @@ selected_operator=$(
         --header=$'--------------------------- Help ---------------------------
 [Enter]     Print cluster operator name
 [Tab]       Print cluster operator name
-[Ctrl-d]    Run "oc describe <cluster operator> | less"
+[Ctrl-d]    Run "oc describe <cluster operator>"
 [Ctrl-e]    Run "oc edit <cluster operator>"
 [Esc]       Exit
 ------------------------------------------------------------\n\n' \
@@ -23,10 +23,10 @@ selected_operator=$(
         --exact \
         --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(
-            echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc describe co {}" "oc describe co {} | less; tmux select-window -t \"oc describe co {}\""
+            tmux send-keys "oc describe co {1}" C-m;
         )+abort' \
         --bind 'ctrl-e:execute-silent(
-            echo {} | awk "{print \$1}" | xargs -I {} tmux new-window -n "oc edit co {}" "oc edit co {}; tmux select-window -t \"oc edit co {}\""
+            tmux send-keys "oc edit co {1}" C-m;
         )+abort' | awk '{print $1}'
 )
 

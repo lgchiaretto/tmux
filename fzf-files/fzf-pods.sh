@@ -23,14 +23,14 @@ selected_pod=$(
         --header=$'-------------------------- Help --------------------------
 [Enter]     Print pod name
 [Tab]       Print pod name
-[Ctrl-d]    Run "oc describe <pod> | less"
+[Ctrl-d]    Run "oc describe <pod>"
 [Ctrl-e]    Run "oc edit <pod>"
 [Ctrl-l]    Run "oc logs <pod>"
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "25%,40%" \
+        -p "25%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \
