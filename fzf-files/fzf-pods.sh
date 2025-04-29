@@ -24,6 +24,7 @@ selected_pod=$(
 [Enter]     Print pod name
 [Tab]       Print pod name
 [Ctrl-d]    Run "oc describe <pod> | less"
+[Ctrl-D]    Run "oc delete <pod>"
 [Ctrl-e]    Run "oc edit <pod>"
 [Ctrl-l]    Run "oc logs <pod>"
 [Esc]       Exit
@@ -40,6 +41,9 @@ selected_pod=$(
         )+abort' \
         --bind 'ctrl-d:execute-silent(
             tmux new-window -n "describe pod {1}" "oc describe pod {1} | less; tmux select-window -t \"describe pod {1}\""
+        )+abort' \
+        --bind 'ctrl-D:execute-silent(
+            tmux new-window -d -n "delete pod {1}" "oc delete pod {1}"; tmux display -d 5000 "Pod {1} deleted"
         )+abort' \
         --bind 'ctrl-e:execute-silent(
             tmux new-window -n "edit pod {1}" "oc edit pod {1}; tmux select-window -t \"edit pod {1}\""
