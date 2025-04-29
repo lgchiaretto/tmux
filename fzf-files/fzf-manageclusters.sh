@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-actions="1 - Create cluster\n2 - Destroy cluster\n3 - Edit install configs\n4 - Export 'kube:admin' kubeconfig\n5 - Login with 'kubeadmin' user\n6 - Start cluster\n7 - List OpenShift releases available on quay.chiaret.to"
+actions="1 - Create cluster\n2 - Destroy cluster\n3 - Edit install configs\n4 - Export 'kube:admin' kubeconfig\n5 - Login with 'kubeadmin' user\n6 - Start cluster\n7 - Stop cluster\n8 - List OpenShift releases available on quay.chiaret.to"
 
 selected_action=$(
     echo -e "$actions" | fzf-tmux \
@@ -20,6 +20,9 @@ action=$(echo "$selected_action" | tail -n1)
 
 if [ "$action" ]; then
     case "$action" in
+        "7 - Stop cluster")
+            /usr/local/bin/ocpstopvms
+            ;;
         "6 - Start cluster")
             /usr/local/bin/ocpstartvms
             ;;
@@ -38,7 +41,7 @@ if [ "$action" ]; then
         "3 - Edit install configs")
             /usr/local/bin/ocpvariablesfiles
             ;;
-        "7 - List OpenShift releases available on quay.chiaret.to")/
+        "8 - List OpenShift releases available on quay.chiaret.to")/
             /usr/local/bin/ocpreleasesonquay
             ;;
     esac
