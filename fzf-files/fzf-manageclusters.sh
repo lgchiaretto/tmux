@@ -13,6 +13,7 @@ selected_action=$(
         -p "38%,50%" \
         --ansi \
         --sort \
+        --exact \
         --expect=enter
 )
 
