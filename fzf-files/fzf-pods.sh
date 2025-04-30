@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-pods=$(timeout 2s oc get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase --no-headers)
+pods=$(timeout 2s oc get pods -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,NODE:.spec.nodeName --no-headers)
 
 if [ -z "$pods" -a $? -eq 0 ]; then
     tmux display -d 5000 'No pod found'
@@ -12,28 +12,29 @@ fi
 
 colored_pods=$(echo "$pods" | awk '{
     if ($2 != "Running" && $2 != "Succeeded" && $2 != "Completed") {
-        printf "\033[31m%s\t%s\033[0m\n", $1, $2  # Red for error or non-Running statuses
+        printf "\033[31m%s\t%s\t%s\033[0m\n", $1, $2, $3  # Red for error or non-Running statuses
     } else {
-        printf "%s\t%s\n", $1, $2
+        printf "%s\t%s\t%s\n", $1, $2, $3
     }
 }' | column -t) 
 
 selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
-        --header=$'-------------------------- Help --------------------------
+        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
 [Enter]     Print pod name
 [Tab]       Print pod name
 [Ctrl-d]    Run "oc describe <pod>"
 [Ctrl-e]    Run "oc edit <pod>"
 [Ctrl-l]    Run "oc logs <pod>"
 [Esc]       Exit
-----------------------------------------------------------\n\n' \
+----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "25%,50%" \
+        -p "50%,50%" \
         --exact \
-        --with-nth=1,2 \
+        --with-nth=1,2,3 \
         --ansi \
+        --wrap \
         --bind 'tab:accept' \
         --bind 'ctrl-l:execute-silent(
             tmux send-keys "/usr/local/bin/oc-logs-fzf.sh {1}" C-m;
