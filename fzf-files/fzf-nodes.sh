@@ -10,6 +10,44 @@ elif [ -z "$nodes" -a $? -eq 1 ]; then
     exit 0
 fi
 
+oc_describe_fzf() {
+    local node="$1"
+    tmux new-window -n "desc:$node" "oc describe node \"$node\"; bash"
+}
+
+oc_edit_fzf() {
+    local node="$1"
+    tmux new-window -n "edit:$node" "oc edit node \"$node\""
+}
+
+ossh_fzf() {
+    local node="$1"
+    tmux new-window -n "ssh:$node" "source ~/.bash_functions && ossh \"$node\""
+}
+
+if [[ "$1" == "--action-wrapper" ]]; then
+    action="$2"
+    shift 2
+
+    for node in "$@"; do
+        case "$action" in
+            logs)
+                oc_logs_fzf "$node"
+                ;;
+            describe)
+                oc_describe_fzf "$node"
+                ;;
+            edit)
+                oc_edit_fzf "$node"
+                ;;
+            ossh)
+                ossh_fzf "$node"
+                ;;
+        esac
+    done
+    exit 0
+fi
+
 colored_nodes=$(echo "$nodes" | awk '{
     if ($2 != "Ready") {
         printf "\033[31m%s\t%s\033[0m\n", $1, $2  # Red for error or non-Running statuses
@@ -20,29 +58,28 @@ colored_nodes=$(echo "$nodes" | awk '{
 
 selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
-        --header=$'------------------- Help -------------------
+        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
 [Enter]     Print node name
 [Tab]       Print node name
 [Ctrl-a]    Select all nodes
-[Ctrl-d]    Run "oc describe <node>"
-[Ctrl-e]    Run "oc edit <node>"
+[Ctrl-d]    Run "oc describe <node>" in new tmux window
+[Ctrl-e]    Run "oc edit <node>" in new tmux window
+[Ctrl-s]    SSH to node in new tmux window
 [Esc]       Exit
---------------------------------------------\n\n' \
+----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "100%,50%"  \
+        -p "100%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \
+        --wrap \
         --multi \
-        --bind 'ctrl-d:execute-silent(
-            tmux send-keys "oc describe node {1}" C-m;
-        )+abort' \
-        --bind 'ctrl-e:execute-silent(
-            tmux send-keys "oc edit node {1}" C-m;
-        )+abort' \
+        --bind 'ctrl-d:execute-silent('"$0"' --action-wrapper describe {+1})+abort' \
+        --bind 'ctrl-e:execute-silent('"$0"' --action-wrapper edit {+1})+abort' \
+        --bind 'ctrl-s:execute-silent('"$0"' --action-wrapper ossh {+1})+abort' \
         --bind 'ctrl-a:toggle-all' \
-        --expect=enter \
+        --expect=enter
 )
 
 if [ -n "$selected_nodes" ]; then
@@ -51,10 +88,10 @@ if [ -n "$selected_nodes" ]; then
 
     while IFS= read -r line; do
         node_name=$(awk '{print $1 " "}' <<< "$line")
-        tmux send-keys "$node_name" 
+        tmux send-keys "$node_name"
     done <<< "$nodes"
 fi
 
 if [ $? -ne 0 ]; then
-    exit 0
+exit 0
 fi
