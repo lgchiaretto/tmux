@@ -6,7 +6,7 @@
 actions="1 - IPI 3-node cluster\n2 - IPI Single node cluster\n3 - UPI 3-node cluster with platform 'none'\n4 - UPI 3-node cluster with platform 'vsphere'\n5 - UPI 3-node cluster with 'ODF' and platform 'none'\n6 - UPI Single node cluster with platform 'none'\n7 - UPI Single node cluster with platform 'vsphere'\n8 - UPI Single node cluster with 'OCP Virt' and platform 'none'\n9 - UPI Single node cluster with 'ODF' and platform 'none'"
 
 
-selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "38%,50%" --exact)
+selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "100%,50%" --exact)
 
 
 variablesfile=$(echo "$selected_file" | tail -n1)
