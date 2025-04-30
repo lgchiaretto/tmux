@@ -16,7 +16,7 @@ selected_project=$(echo "$projects" | fzf-tmux \
 ----------------------------------------------------------\n\n' \
     --layout=reverse \
     -h 40 \
-    -p "23%,50%" \
+    -p "100%,50%" \
     --exact \
     --bind 'tab:accept' \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \

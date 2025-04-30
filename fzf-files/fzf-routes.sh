@@ -12,21 +12,21 @@ chosen=$(echo "$content" | fzf-tmux \
 [Enter]     Print route name
 [Tab]       Print route name
 [Ctrl-e]    Run "oc edit <route>"
-[Ctrl-d]    Run "oc describe <route> | less"
+[Ctrl-d]    Run "oc describe <route>"
 [Ctrl-o]    open the route on firefox
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
     --layout=reverse \
     -h 40 \
-    -p "50%,50%" \
+    -p "100%,50%" \
     --exact \
     --with-nth=1,2,3 \
     --bind 'tab:accept' \
     --bind 'ctrl-e:execute-silent(
-        tmux new-window -n "edit route" "oc edit route -n {1} {2}"
+        tmux send-keys "oc edit -n {1} {2}" C-m;
     )+abort' \
     --bind 'ctrl-d:execute-silent(
-        tmux new-window -n "describe route" "oc describe route -n {1} {2} | less"
+        tmux send-keys "oc describe route -n {1} {2}" C-m;
     )+abort' \
     --bind 'ctrl-o:execute-silent(
          echo {3} | xargs firefox

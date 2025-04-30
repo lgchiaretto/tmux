@@ -30,7 +30,7 @@ mapfile -t selected_pods < <(
             --bind "ctrl-a:toggle-all" \
             --layout=reverse \
             -h 40 \
-            -p "50%,50%" \
+            -p "100%,50%" \
             --exact
 )
 
@@ -50,7 +50,7 @@ for pod in "${selected_pods[@]}"; do
       if [[ $container_count -eq 1 ]]; then
           first_container="${containers[0]}"
           else
-            first_container=$(echo "$final_containers" | fzf-tmux -wrap --header="Select the pods container:" --layout=reverse -h 40 -p "50%,50%" --exact) 
+            first_container=$(echo "$final_containers" | fzf-tmux -wrap --header="Select the pods container:" --layout=reverse -h 40 -p "100%,50%" --exact) 
           [[ -z "$first_container" ]] && continue
       fi
     fi

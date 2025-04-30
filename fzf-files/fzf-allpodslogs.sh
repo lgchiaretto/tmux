@@ -22,7 +22,7 @@ mapfile -t selected_pods_and_namespaces < <(
         --multi \
         --layout=reverse \
         -h 40 \
-        -p "42%,50%" \
+        -p "100%,50%" \
         --exact \
         | awk '{print $1 " " $2}'
 )
@@ -66,7 +66,7 @@ for line in "${selected_pods_and_namespaces[@]}"; do
         if [[ $container_count -eq 1 ]]; then
             first_container="${containers[0]}"
         else
-            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the container for pod $pod in namespace $namespace:" --layout=reverse -h 40 -p "50%,50%")
+            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the container for pod $pod in namespace $namespace:" --layout=reverse -h 40 -p "100%,50%")
             [[ -z "$first_container" ]] && continue
         fi
 

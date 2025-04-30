@@ -20,7 +20,7 @@ chosen=$(echo "$content" | fzf-tmux \
 -----------------------------------------------------------------------\n\n' \
   --layout=reverse \
   -h 40 \
-  -p "28%,50%" \
+  -p "100%,50%" \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
   --bind 'ctrl-o:execute-silent(firefox {})+abort' \
