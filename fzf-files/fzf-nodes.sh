@@ -18,11 +18,12 @@ colored_nodes=$(echo "$nodes" | awk '{
     }
 }' | column -t) 
 
-selected_node=$(
+selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
         --header=$'------------------- Help -------------------
 [Enter]     Print node name
 [Tab]       Print node name
+[Ctrl-a]    Select all nodes
 [Ctrl-d]    Run "oc describe <node>"
 [Ctrl-e]    Run "oc edit <node>"
 [Esc]       Exit
@@ -33,19 +34,25 @@ selected_node=$(
         --exact \
         --with-nth=1,2 \
         --ansi \
-        --bind 'tab:accept' \
+        --multi \
         --bind 'ctrl-d:execute-silent(
             tmux send-keys "oc describe node {1}" C-m;
         )+abort' \
         --bind 'ctrl-e:execute-silent(
             tmux send-keys "oc edit node {1}" C-m;
         )+abort' \
+        --bind 'ctrl-a:toggle-all' \
         --expect=enter \
 )
 
-if [ "$selected_node" ]; then
-    node_name=
-    tmux send-keys $(echo "$selected_node" | tail -n1 | awk '{print $1}')
+if [ -n "$selected_nodes" ]; then
+    pressed_key=$(head -n1 <<< "$selected_nodes")
+    nodes=$(tail -n +2 <<< "$selected_nodes")
+
+    while IFS= read -r line; do
+        node_name=$(awk '{print $1 " "}' <<< "$line")
+        tmux send-keys "$node_name" 
+    done <<< "$nodes"
 fi
 
 if [ $? -ne 0 ]; then

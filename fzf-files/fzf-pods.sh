@@ -35,7 +35,7 @@ selected_pod=$(
         --with-nth=1,2,3 \
         --ansi \
         --wrap \
-        --bind 'tab:accept' \
+        --multi \
         --bind 'ctrl-l:execute-silent(
             tmux send-keys "/usr/local/bin/oc-logs-fzf.sh {1}" C-m;
         )+abort' \
@@ -45,13 +45,26 @@ selected_pod=$(
         --bind 'ctrl-e:execute-silent(
             tmux send-keys "oc edit pod {1}" C-m;
         )+abort' \
+        --bind 'ctrl-a:toggle-all' \
         --expect=enter \
 )
 
-if [ "$selected_pod" ]; then
-    pod_name=
-    tmux send-keys $(echo "$selected_pod" | tail -n1 | awk '{print $1}')
+#if [ "$selected_pod" ]; then
+#    pod_name=
+#    tmux send-keys $(echo "$selected_pod" | tail -n1 | awk '{print $1}')
+#fi
+
+
+if [ -n "$selected_pod" ]; then
+    pressed_key=$(head -n1 <<< "$selected_pod")
+    nodes=$(tail -n +2 <<< "$selected_pod")
+
+    while IFS= read -r line; do
+        node_name=$(awk '{print $1 " "}' <<< "$line")
+        tmux send-keys "$node_name" 
+    done <<< "$nodes"
 fi
+
 
 if [ $? -ne 0 ]; then
     exit 0
