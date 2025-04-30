@@ -46,6 +46,44 @@ tmux-sync-ssh() {
     fi
 }
 
+
+tmux-sync-ossh() {
+    HOSTS=$@
+    if [ -z "$HOSTS" ]; then
+       echo -n "Hosts separated by spaces [ENTER]: "
+       read HOSTS
+    fi
+
+    local hosts=( $HOSTS )
+
+    tmux new-window bash -i -c "ossh ${hosts[0]}"
+
+    # We are openning multiple windows with the same machine
+    re='^[0-9]+$'
+
+    if [[ ${hosts[1]} =~ $re ]] ; then
+        i=1
+        while [ $i -lt ${hosts[1]} ]
+        do
+            tmux split-window -h bash -i -c "ossh ${hosts[0]}"
+            tmux select-layout tiled > /dev/null
+            let "i++"
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    else
+        unset hosts[0];
+        # We are openning multiple windows in different machine
+        for i in "${hosts[@]}"; do
+            tmux split-window -h bash -i -c "ossh $i"
+            tmux select-layout tiled > /dev/null
+        done
+        tmux select-pane -t 0
+        tmux set-window-option synchronize-panes on > /dev/null
+    fi
+}
+
+
 tmux-sync-all-ocp4() {
     #HOSTS=$(oc get nodes --no-headers -o jsonpath='{.items[*].status.addresses[0].address}' | sed 's/ /,/g')
     HOSTS=$(oc get nodes --no-headers -o jsonpath='{.items[*].status.addresses[0].address}')
