@@ -1,17 +1,27 @@
 #!/bin/bash
 
+check_vcenter() {
+    timeout 0.3 govc about >/dev/null 2>&1
+}
+
 clusters() {
   local dir="$1"
-  FOLDER_VMWARE="/CHIARETTO/vm/$1"
-  VMMASTER0=$(govc ls "${FOLDER_VMWARE}" | grep "master-0")
-  VMMASTER0STATE=$(govc vm.info -json "$VMMASTER0" | jq -r '.virtualMachines[0].runtime.powerState')
+  folder_vmware="/CHIARETTO/vm/$1"
   vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  if [ "$VMMASTER0STATE" = "poweredOn" ]; then
-    printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
+
+  if check_vcenter; then
+    vmmaster0=$(govc ls "${folder_vmware}" | grep "master-0")
+    vmmaster0state=$(govc vm.info -json "$VMMASTER0" | jq -r '.virtualMachines[0].runtime.powerState')
+    if [ "$vmmaster0state" = "poweredOn" ]; then
+      printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
+    else
+      printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
+    fi
   else
     printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
   fi
+
 }
 
 selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
@@ -28,10 +38,10 @@ if [ -z "$selection_list" ]; then
   exit 0
 fi
 
-selected_entry=$(echo "$selection_list" | fzf-tmux --wrap --header=$'Cluster Name to stop          OCP Version          Description\n' --layout=reverse -p "100%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk '{print $1}')
+selected_entry=$(echo "$selection_list" | fzf-tmux --wrap --header=$'Cluster Name to start          OCP Version          Description\n' --layout=reverse -p "100%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk '{print $1}')
 
 if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
-tmux new-window -n "stop: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh;bash"
+tmux new-window -n "start: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh;bash"
