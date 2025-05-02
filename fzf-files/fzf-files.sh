@@ -23,14 +23,11 @@ selected_file=$(
 if [ -n "$selected_file" ]; then
     if [ -f "$selected_file" ]; then
         if [ -w "$selected_file" ]; then
-            tmux send-keys -t "$(tmux display-message -p '#{pane_id}')" "history -s \"vim $selected_file\"" C-m
             tmux send-keys "vim $selected_file" C-m
         else
-            tmux send-keys -t "$(tmux display-message -p '#{pane_id}')" "history -s \"sudo -E vim $selected_file\"" C-m
             tmux send-keys "sudo -E vim $selected_file" C-m
         fi
     else
-        tmux send-keys -t "$(tmux display-message -p '#{pane_id}')" "history -s \"cd $selected_file\"" C-m
         tmux send-keys "cd $selected_file" C-m
     fi
 fi
