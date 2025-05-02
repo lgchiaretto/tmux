@@ -12,7 +12,7 @@ clusters() {
 
   if check_vcenter; then
     vmmaster0=$(govc ls "${folder_vmware}" | grep "master-0")
-    vmmaster0state=$(govc vm.info -json "$VMMASTER0" | jq -r '.virtualMachines[0].runtime.powerState')
+    vmmaster0state=$(govc vm.info -json "$vmmaster0" | jq -r '.virtualMachines[0].runtime.powerState')
     if [ "$vmmaster0state" = "poweredOn" ]; then
       printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
     else
