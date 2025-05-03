@@ -1,6 +1,6 @@
 #!/bin/bash
 
-channels=("4.16" "4.17" "4.18")
+channels=("4.14" "4.16" "4.17" "4.18")
 CACHE_FILE="/vms/clusters/.ocp_versions_cache"
 
 #clean cache
