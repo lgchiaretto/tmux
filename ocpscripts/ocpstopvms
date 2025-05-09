@@ -38,10 +38,10 @@ if [ -z "$selection_list" ]; then
   exit 0
 fi
 
-selected_entry=$(echo "$selection_list" | fzf-tmux --wrap --header=$'Cluster Name to start          OCP Version          Description\n' --layout=reverse -p "100%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk '{print $1}')
+selected_entry=$(echo "$selection_list" | fzf-tmux --wrap --header=$'Cluster Name to stop          OCP Version          Description\n' --layout=reverse -p "100%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk '{print $1}')
 
 if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
-tmux new-window -n "start: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh;bash"
+tmux new-window -n "stop: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh;bash"
