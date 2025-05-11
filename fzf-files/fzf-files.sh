@@ -19,7 +19,7 @@ selected_file=$(
         --bind 'tab:accept' \
         --bind 'ctrl-c:execute-silent([[ -f {} ]] && xclip -selection clipboard -i < {} && tmux display-message -d 1000 "Copied")+abort' \
         --bind 'ctrl-p:execute-silent(tmux send-keys -l {})+abort' \
-        --bind 'tab:execute-silent(tmux send-keys "code " {} C-m)+abort' \
+        --bind 'tab:execute-silent(tmux send-keys "code -n " {} C-m)+abort' \
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
