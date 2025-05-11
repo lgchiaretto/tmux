@@ -11,14 +11,16 @@ selected_file=$(
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        -p "100%,70%" \
+        -p "100%,100%" \
         --exact \
+        --border=none \
+        --padding=12,0,12,0 \
         --wrap \
         --bind 'tab:accept' \
         --bind 'ctrl-c:execute-silent([[ -f {} ]] && xclip -selection clipboard -i < {} && tmux display-message -d 1000 "Copied")+abort' \
         --bind 'ctrl-p:execute-silent(tmux send-keys -l {})+abort' \
-        --bind 'tab:execute-silent(tmux send-keys "code {}" C-m)+abort' \
-        --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f {}" C-m)+abort' \
+        --bind 'tab:execute-silent(tmux send-keys "code " {} C-m)+abort' \
+        --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
         --query ""
