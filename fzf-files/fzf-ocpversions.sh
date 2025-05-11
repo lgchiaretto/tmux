@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CACHE_FILE="/vms/clusters/.ocp_versions_cache"
+CACHE_FILE="/data/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
     selected_version=$(cat "$CACHE_FILE" | fzf-tmux \

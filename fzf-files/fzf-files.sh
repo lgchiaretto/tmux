@@ -6,7 +6,8 @@ selected_file=$(
 [Enter]     Open file or directory
 [Ctrl-c]    Copy the content of the file to clipboard
 [Ctrl-a]    Execute oc apply -f on the file
-[Tab]       Print the file or directory in the terminal
+[Ctrl-p]    Print the file or directory in the terminal
+[Tab]       Open using Visual Studio Code
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \
         --layout=reverse \
@@ -15,7 +16,8 @@ selected_file=$(
         --wrap \
         --bind 'tab:accept' \
         --bind 'ctrl-c:execute-silent([[ -f {} ]] && xclip -selection clipboard -i < {} && tmux display-message -d 1000 "Copied")+abort' \
-        --bind 'tab:execute-silent(tmux send-keys -l {})+abort' \
+        --bind 'ctrl-p:execute-silent(tmux send-keys -l {})+abort' \
+        --bind 'tab:execute-silent(tmux send-keys "code {}" C-m)+abort' \
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f {}" C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
