@@ -44,4 +44,4 @@ if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
-tmux new-window -n "start: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./startvms.sh;bash"
+tmux new-window -n "start: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./startvms.sh && touch started; bash"

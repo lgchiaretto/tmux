@@ -44,4 +44,4 @@ if [ -z "$selected_entry" ]; then
   exit 0
 fi
 
-tmux new-window -n "stop: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh;bash"
+tmux new-window -n "stop: $selected_entry" "cd /vms/clusters/$selected_entry/ && ./stopvms.sh && rm -f started; bash"
