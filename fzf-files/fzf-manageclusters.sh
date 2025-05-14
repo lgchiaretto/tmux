@@ -23,20 +23,27 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
     clusters "$dir"
   done)
 
+if [ -z "$selection_list" ]; then
+    selection_list="No clusters found"
+fi
+
 selected_action=$(
     echo -e "$selection_list" | fzf-tmux \
-        --header=$'----------------------------- Help -----------------------------
+        --header=$'----------------------------- Help -----------------------------\n
 [1]     Create cluster
 [2]     Destroy cluster
 [3]     Start cluster
 [4]     Stop cluster
 [5]     Export kubeconfig
-[6]     Login with kubeadmin user
-[7]     Edit install configs
-[8]     List OpenShift releases available on quay.chiaret.to
-[Esc]       Exit
-----------------------------------------------------------------\n
-Cluster Name                   OCP Version          Description\n\n' \
+[6]     Edit install configs
+[7]     List OpenShift releases available on quay.chiaret.to
+[8]     Open tmuxp create session
+[Enter] Login with kubeadmin user
+[Esc]   Exit
+
+---------------------- Available Clusters ----------------------                                       
+
+Cluster Name                   OCP Version          Description' \
         --layout=reverse \
         -h 40 \
         -p "100%,52%" \
@@ -48,11 +55,18 @@ Cluster Name                   OCP Version          Description\n\n' \
         --bind '3:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started" C-m)+abort' \
         --bind '4:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh && rm -f started" C-m)+abort' \
         --bind '5:execute-silent(tmux new-window  -n "export: {1}" "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
-        --bind '6:execute-silent(tmux send-keys "oc login https://api.{1}.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/{1}/auth/kubeadmin-password) --insecure-skip-tls-verify;bash")+abort' \
-        --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
-        --bind '8:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
+        --bind '6:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
+        --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
+        --bind '8:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
         --expect=enter
 )
+
+
+if [ -n "$selected_action" ]; then
+  clustername=$(echo $selected_action | awk '{print $2}')
+  echo "$clustername" > /tmp/selected_cluster
+  tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+fi
 
 if [ $? -ne 0 ]; then
     exit 0
