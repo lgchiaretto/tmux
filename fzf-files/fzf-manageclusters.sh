@@ -68,20 +68,11 @@ if [ "$action" ]; then
         "8 - List OpenShift releases available on quay.chiaret.to")
             /usr/local/bin/ocpreleasesonquay
             ;;
-        "Available Clusters:")
-            echo "You selected the clusters section."
-            ;;
-        Cluster:*)
-            cluster_name=$(echo "$action" | awk '{print $2}')
+        *)
+            cluster_name=$(echo "$action" | awk '{print $1}')
             echo "You selected the cluster: $cluster_name"
             # Here you can add specific actions for a selected cluster
             ;;
-        *)
-            # If the selection does not match an action or the clusters header,
-            # we can consider it a cluster name directly.
-            # However, the formatting of the 'clusters()' output includes "Cluster:",
-            # so the case above should cover the selection of a cluster.
-            echo "Unknown option: $action"
             ;;
     esac
 fi
