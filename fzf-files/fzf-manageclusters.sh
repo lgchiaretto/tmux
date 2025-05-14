@@ -22,10 +22,9 @@ selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*'
   -exec basename {} \; | while read -r dir; do
     clusters "$dir"
   done)
-all_options="$selection_list"
 
 selected_action=$(
-    echo -e "$all_options" | fzf-tmux \
+    echo -e "$selection_list" | fzf-tmux \
         --header=$'----------------------------- Help -----------------------------
 [1]     Create cluster
 [2]     Destroy cluster
