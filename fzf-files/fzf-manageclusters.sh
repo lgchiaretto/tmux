@@ -64,7 +64,6 @@ Cluster Name                   OCP Version          Description' \
 
 if [ -n "$selected_action" ]; then
   clustername=$(echo $selected_action | awk '{print $2}')
-  echo "$clustername" > /tmp/selected_cluster
   tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
 fi
 
