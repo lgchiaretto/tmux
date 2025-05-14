@@ -1,51 +1,8 @@
 #!/bin/bash
 
-check_vcenter() {
-    timeout 0.3 govc about >/dev/null 2>&1
-}
-
-clusters() {
-  local dir="$1"
-  folder_vmware="/CHIARETTO/vm/$1"
-  vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-
-  if check_vcenter; then
-    vmmaster0=$(govc ls "${folder_vmware}" | grep "master-0")
-    vmmaster0state=$(govc vm.info -json "$vmmaster0" | jq -r '.virtualMachines[0].runtime.powerState')
-    if [ "$vmmaster0state" = "poweredOn" ]; then
-      printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
-    else
-      printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
-    fi
-  else
-    printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
-  fi
-
-}
-
-selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
-  ! -name 'backup-20230903' \
-  ! -name '*-files' \
-  ! -name 'quay-*' \
-  -exec basename {} \; | while read -r dir; do
-    clusters "$dir"
-  done)
-
-if [ -z "$selection_list" ]; then
-  tmux display-message -d 5000 "No clusters found"
-  exit 0
-fi
-
-selected_entry=$(echo "$selection_list" | fzf-tmux --header=$'Cluster Name to destroy        OCP Version          Description\n'  --layout=reverse -p "100%,50%" --delimiter=' / ' --with-nth=1,2,3 | awk  '{print $1}')
-
-if [ -z "$selected_entry" ]; then
-  exit 0
-fi
-
 temp_file=$(mktemp)
 
-tmux new-window -n "destroy: $selected_entry" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$selected_entry\\\"? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
+tmux new-window -n "destroy: $1" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$1\\\"? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
 
 while [ ! -s "$temp_file" ]; do
   sleep 1
@@ -58,5 +15,5 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   exit 0
 fi
 
-tmux send-keys "/usr/local/bin/destroycluster.py -i /vms/clusters/$selected_entry/$selected_entry.json -n $selected_entry" C-m
+tmux send-keys "/usr/local/bin/destroycluster.py -i /vms/clusters/$1/$1.json -n $1" C-m
 

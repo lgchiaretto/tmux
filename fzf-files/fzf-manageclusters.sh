@@ -15,67 +15,44 @@ clusters() {
   fi
 }
 
-selection_list=$(echo '----------------------------------------------------------'; echo; echo 'Cluster Name                   OCP Version          Description' ; echo; find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
+selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
   ! -name 'backup-20230903' \
   ! -name '*-files' \
   ! -name 'quay-*' \
   -exec basename {} \; | while read -r dir; do
     clusters "$dir"
   done)
-a="----------------------------------------------------------"
-all_options="$actions\n\n$selection_list\n\n----------------------------------------------------------"
+all_options="$selection_list"
 
 selected_action=$(
     echo -e "$all_options" | fzf-tmux \
-        --header=$'-------------------------- Help --------------------------
-[Enter]     Select the action
+        --header=$'----------------------------- Help -----------------------------
+[1]     Create cluster
+[2]     Destroy cluster
+[3]     Start cluster
+[4]     Stop cluster
+[5]     Export kubeconfig
+[6]     Login with kubeadmin user
+[7]     Edit install configs
+[8]     List OpenShift releases available on quay.chiaret.to
 [Esc]       Exit
-----------------------------------------------------------\n\n' \
+----------------------------------------------------------------\n
+Cluster Name                   OCP Version          Description\n\n' \
         --layout=reverse \
         -h 40 \
         -p "100%,52%" \
         --ansi \
         --sort \
         --exact \
+        --bind '1:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
+        --bind '2:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
+        --bind '3:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started" C-m)+abort' \
+        --bind '4:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh && rm -f started" C-m)+abort' \
+        --bind '5:execute-silent(tmux new-window  -n "export: {1}" "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
+        --bind '6:execute-silent(tmux send-keys "oc login https://api.{1}.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/{1}/auth/kubeadmin-password) --insecure-skip-tls-verify;bash")+abort' \
+        --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
         --expect=enter
 )
-
-action=$(echo "$selected_action" | tail -n1)
-
-if [ "$action" ]; then
-    case "$action" in
-        "7 - Stop cluster")
-            /usr/local/bin/ocpstopvms
-            ;;
-        "6 - Start cluster")
-            /usr/local/bin/ocpstartvms
-            ;;
-        "4 - Export 'kube:admin' kubeconfig")
-            /usr/local/bin/ocpexportkubeconfig
-            ;;
-        "1 - Create cluster")
-            /usr/local/bin/ocpcreatecluster
-            ;;
-        "2 - Destroy cluster")
-            /usr/local/bin/ocpdestroycluster
-            ;;
-        "5 - Login with 'kubeadmin' user")
-            /usr/local/bin/ocplogin
-            ;;
-        "3 - Edit install configs")
-            /usr/local/bin/ocpvariablesfiles
-            ;;
-        "8 - List OpenShift releases available on quay.chiaret.to")
-            /usr/local/bin/ocpreleasesonquay
-            ;;
-        *)
-            cluster_name=$(echo "$action" | awk '{print $1}')
-            echo "You selected the cluster: $cluster_name"
-            # Here you can add specific actions for a selected cluster
-            ;;
-            ;;
-    esac
-fi
 
 if [ $? -ne 0 ]; then
     exit 0
