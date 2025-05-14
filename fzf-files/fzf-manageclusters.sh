@@ -22,8 +22,8 @@ selection_list=$(echo '---------------------------------------------------------
   -exec basename {} \; | while read -r dir; do
     clusters "$dir"
   done)
-
-all_options="$actions\n\n$selection_list"
+a="----------------------------------------------------------"
+all_options="$actions\n\n$selection_list\n\n----------------------------------------------------------"
 
 selected_action=$(
     echo -e "$all_options" | fzf-tmux \
@@ -33,7 +33,7 @@ selected_action=$(
 ----------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "100%,50%" \
+        -p "100%,52%" \
         --ansi \
         --sort \
         --exact \
