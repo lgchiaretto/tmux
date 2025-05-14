@@ -51,7 +51,7 @@ Cluster Name                   OCP Version          Description\n\n' \
         --bind '5:execute-silent(tmux new-window  -n "export: {1}" "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
         --bind '6:execute-silent(tmux send-keys "oc login https://api.{1}.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/{1}/auth/kubeadmin-password) --insecure-skip-tls-verify;bash")+abort' \
         --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
-        --bind '8:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)' \
+        --bind '8:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
         --expect=enter
 )
 
