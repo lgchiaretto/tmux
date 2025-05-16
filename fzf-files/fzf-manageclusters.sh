@@ -54,7 +54,7 @@ Cluster Name                   OCP Version          Description' \
         --bind '2:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
         --bind '3:execute-silent(tmux new-window  -n "start: {1}" "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
         --bind '4:execute-silent(tmux send-keys "cd /vms/clusters/"{1}"/ && ./stopvms.sh && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
-        --bind '5:execute-silent(tmux new-window  -n "export: {1}" "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
+        --bind '5:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
         --bind '6:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
         --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
         --bind '8:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
