@@ -38,6 +38,7 @@ selected_action=$(
 [6]     Edit install configs
 [7]     List OpenShift releases available on quay.chiaret.to
 [8]     Open tmuxp create session
+[9]     Copy kubeadmin password to clipboard
 [Enter] Login with kubeadmin user
 [Esc]   Exit
 
@@ -58,6 +59,7 @@ Cluster Name                   OCP Version          Description' \
         --bind '6:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
         --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
         --bind '8:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
+        --bind '9:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
         --expect=enter
 )
 
