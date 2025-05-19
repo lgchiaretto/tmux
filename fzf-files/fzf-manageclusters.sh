@@ -6,12 +6,14 @@ clusters() {
   local dir="$1"
   vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  clustertype=$(jq -r '.clustertype' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  sno=$(jq -r '.sno' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   started_file="/vms/clusters/$dir/started"
 
   if [ -f "$started_file" ]; then
-    printf "%-30s %-20s %-50s\n" "$dir *" "$ocpversion" "$vmwarenotes"
+    printf "%-19s %-12s %-12s %-12s %s\n" "$dir *" "$ocpversion" "$clustertype" "$sno" "$vmwarenotes"
   else
-    printf "%-30s %-20s %-50s\n" "$dir" "$ocpversion" "$vmwarenotes"
+    printf "%-19s %-12s %-12s %-12s %s\n" "$dir" "$ocpversion" "$clustertype" "$sno" "$vmwarenotes"
   fi
 }
 
@@ -29,37 +31,37 @@ fi
 
 selected_action=$(
     echo -e "$selection_list" | fzf-tmux \
-        --header=$'----------------------------- Help -----------------------------\n
-[1]     Create cluster
-[2]     Destroy cluster
-[3]     Start cluster
-[4]     Stop cluster
-[5]     Export kubeconfig
-[6]     Edit install configs
-[7]     List OpenShift releases available on quay.chiaret.to
-[8]     Open tmuxp create session
-[9]     Copy kubeadmin password to clipboard
-[Enter] Login with kubeadmin user
-[Esc]   Exit
+        --header=$'--------------------------------- Help -------------------------------------\n
+[1 or c]     Create cluster
+[2 or d]     Destroy cluster
+[3 or s]     Start cluster
+[4]          Stop cluster
+[5 or k]     Export kubeconfig
+[6 or e]     Edit install configs
+[7 or l]     List OpenShift releases available on quay.chiaret.to
+[8]          Open tmuxp create session
+[9 or p]     Copy kubeadmin password to clipboard
+[Enter]      Login with kubeadmin user
+[Esc]        Exit
 
----------------------- Available Clusters ----------------------                                       
+------------------------------ Available Clusters ------------------------------                                       
 
-Cluster Name                   OCP Version          Description' \
+Cluster Name        Version      Type         SNO?         Description' \
         --layout=reverse \
         -h 40 \
         -p "100%,52%" \
         --ansi \
         --sort \
         --exact \
-        --bind '1:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
-        --bind '2:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
-        --bind '3:execute-silent(tmux new-window  -n "start: {1}" "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
+        --bind '1,c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
+        --bind '2,d:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
+        --bind '3,s:execute-silent(tmux new-window  -n "start: "{1} "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"; bash")+abort' \
         --bind '4:execute-silent(tmux send-keys "cd /vms/clusters/"{1}"/ && ./stopvms.sh && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
-        --bind '5:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
-        --bind '6:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
-        --bind '7:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
+        --bind '5,k:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
+        --bind '6,e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
+        --bind '7,l:execute-silent(tmux send-keys /usr/local/bin/ocpreleasesonquay C-m)+abort' \
         --bind '8:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
-        --bind '9:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
+        --bind '9,p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
         --expect=enter
 )
 
