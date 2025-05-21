@@ -18,7 +18,7 @@ CHANNELS = [
 def fzf_select(options, header):
     try:
         result = subprocess.run(
-            ["fzf-tmux", "--header", header, "--layout=reverse", "-h", "40%", "-p", "38%,50%", "--exact"],
+            ["fzf-tmux", "--header", header, "--layout=reverse", "-h", "40%", "-p", "38%,30%", "--exact"],
             input="\n".join(options).encode(),
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL
@@ -29,11 +29,11 @@ def fzf_select(options, header):
         sys.exit(1)
 
 def fzf_output_display(text, header="Upgrade Path Available"):
+    tempfile = "/tmp/upgrade_path_output.txt"
+    with open(tempfile, "w") as f:
+        f.write(f"{text}")
     subprocess.run(
-        ["fzf-tmux", "--layout=reverse", "-h", "40%", "-p", "34%,8%", "--no-input"],
-        input=text.encode(),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        ["tmux", "popup", "-E", "-w", "34%", "-h", "10%", f"cat {tempfile}; echo -e '\\n'; read -n 1 -s -r -p 'Press any key to close...'"]
     )
 
 def fetch_upgrade_graph(channel):
