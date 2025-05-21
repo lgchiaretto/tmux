@@ -6,7 +6,7 @@ selected_file=$(
 [Enter]     Open file or directory
 [Ctrl-c]    Copy the content of the file to clipboard
 [Ctrl-a]    Execute oc apply -f on the file
-[Ctrl-p]    Print the file or directory in the terminal
+[Ctrl-p]    Print the file or directory name in the terminal
 [Tab]       Open using Visual Studio Code
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \

@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+
+import requests
+import subprocess
+import json
+from collections import deque
+import sys
+
+GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
+CHANNELS = [
+    "eus-4.14",
+    "stable-4.15",
+    "eus-4.16",
+    "stable-4.17",
+    "eus-4.18"
+]
+
+def fzf_select(options, header):
+    try:
+        result = subprocess.run(
+            ["fzf-tmux", "--header", header, "--layout=reverse", "-h", "40%", "-p", "38%,50%", "--exact"],
+            input="\n".join(options).encode(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL
+        )
+        return result.stdout.decode().strip()
+    except FileNotFoundError:
+        print("Error: fzf-tmux not found.")
+        sys.exit(1)
+
+def fzf_output_display(text, header="Upgrade Path Available"):
+    subprocess.run(
+        ["fzf-tmux", "--layout=reverse", "-h", "40%", "-p", "34%,8%", "--no-input"],
+        input=text.encode(),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+def fetch_upgrade_graph(channel):
+    params = {"channel": channel, "arch": "amd64"}
+    try:
+        response = requests.get(GRAPH_URL, params=params)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error fetching graph: {e}")
+        sys.exit(2)
+
+def build_graph(data):
+    nodes = [node["version"] for node in data["nodes"]]
+    edges = data.get("edges", [])
+    conditional_edges = data.get("conditionalEdges", [])
+
+    graph = {}
+
+    for e in edges:
+        from_v = nodes[e[0]]
+        to_v = nodes[e[1]]
+        graph.setdefault(from_v, []).append(to_v)
+
+    for edge_group in conditional_edges:
+        for edge in edge_group.get("edges", []):
+            from_v = edge["from"]
+            to_v = edge["to"]
+            graph.setdefault(from_v, []).append(to_v)
+
+    return graph, nodes
+
+def bfs_path(graph, from_v, to_v):
+    visited = set()
+    prev = {}
+    queue = deque([from_v])
+    visited.add(from_v)
+
+    while queue:
+        current = queue.popleft()
+        if current == to_v:
+            break
+        for neighbor in sorted(graph.get(current, []), reverse=True, key=lambda v: list(map(int, v.split('.')))):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                prev[neighbor] = current
+                queue.append(neighbor)
+
+    if to_v not in prev and from_v != to_v:
+        return None
+
+    path = []
+    v = to_v
+    while v != from_v:
+        path.append(v)
+        v = prev.get(v)
+        if v is None:
+            return None
+    path.append(from_v)
+    path.reverse()
+    return path
+
+def main():
+    channel = fzf_select(CHANNELS, "Select OpenShift Channel")
+    if not channel:
+        sys.exit(0)
+
+    data = fetch_upgrade_graph(channel)
+    graph, versions = build_graph(data)
+    with open("/tmp/graph_and_versions.json", "w") as f:
+        json.dump({"graph": graph, "versions": versions}, f, indent=4)
+
+    from_version = fzf_select(versions, "Select FROM Version")
+    if not from_version:
+        sys.exit(0)
+
+    to_version = fzf_select(versions, "Select TO Version")
+    if not to_version:
+        sys.exit(0)
+
+    path = bfs_path(graph, from_version, to_version)
+    if path:
+        fzf_output_display(" -> ".join(path))
+    else:
+        fzf_output_display(f"No upgrade path found from {from_version} to {to_version} on channel {channel}")
+
+if __name__ == "__main__":
+    main()
