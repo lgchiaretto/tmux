@@ -9,8 +9,9 @@ Version             Release Date
 -----------------------------------------------\n' \
                        --layout=reverse \
                        -h 40 \
-                       -p "40%,62%" \
+                       -p "25%,53%" \
                        --with-nth=1,2,3,4,5,6,7,8 \
+                       --no-input \
                        --bind enter:accept | \
                        awk '{print $1}')
     [ -n "$selected_version" ] && tmux send-keys "$selected_version" || exit 0

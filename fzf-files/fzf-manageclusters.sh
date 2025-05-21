@@ -34,21 +34,22 @@ selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
     --header=$'------------------------------- Cluster actions -----------------------------------
                                                                                  
-   [s]........Start cluster                                                      
-   [S]........Stop cluster                                                       
-   [d]........Destroy cluster                                                    
-   [k]........Export kubeconfig                                                  
-   [t]........Open tmuxp create session                                          
-   [ctrl-c]...Copy kubeadmin password to clipboard                               
-   [Enter]....Login with kubeadmin user                                          
+   [s]........Start cluster
+   [S]........Stop cluster
+   [d]........Destroy cluster
+   [k]........Export kubeconfig
+   [t]........Open tmuxp create session
+   [p]........Copy kubeadmin password to clipboard
+   [Enter]....Login with kubeadmin user
                                                                                  
 ------------------------------- Global actions ------------------------------------
                                                                                  
-   [c]........Create cluster                                                     
-   [e]........Edit cluster install configuration files                           
-   [u]........Show OpenShift update path                                         
+   [c]........Create cluster
+   [e]........Edit cluster install configuration files
+   [C]........Check latest OCP Versions available
+   [u]........Show OpenShift update path
                                                                                  
-   [Esc]......Exit                                                               
+   [Esc]......Exit
                                                                                  
 -----------------------------------------------------------------------------------
 Cluster Name        Version      Type         SNO?         Workers      Description
@@ -58,7 +59,9 @@ Cluster Name        Version      Type         SNO?         Workers      Descript
     -p "43%,57%" \
     --sort \
     --no-input \
+    --multi \
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
+    --bind 'C:execute-silent(tmux send-keys ./fzf-files/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
     --bind 's:execute-silent(tmux new-window  -n "start: "{1} "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"; bash")+abort' \
     --bind 'S:execute-silent(tmux new-window  -n "stop: "{1} "cd /vms/clusters/"{1}"  && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"; bash")+abort' \
@@ -66,7 +69,7 @@ Cluster Name        Version      Type         SNO?         Workers      Descript
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
-    --bind 'ctrl-c:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
+    --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter
 )
 

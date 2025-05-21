@@ -11,10 +11,8 @@ selected_file=$(
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        -p "100%,100%" \
+        -p "100%,50%" \
         --exact \
-        --border=none \
-        --padding=12,0,12,0 \
         --wrap \
         --bind 'tab:accept' \
         --bind 'ctrl-c:execute-silent([[ -f {} ]] && xclip -selection clipboard -i < {} && tmux display-message -d 1000 "Copied")+abort' \
