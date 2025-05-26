@@ -8,13 +8,14 @@ clusters() {
   ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   clustertype=$(jq -r '.clustertype' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   sno=$(jq -r '.sno' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  platform=$(jq -r '.platform' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   n_worker=$(jq -r '.n_worker' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   started_file="/vms/clusters/$dir/started"
 
   if [ -f "$started_file" ]; then
-    printf "%-19s %-12s %-12s %-12s %-12s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$n_worker" "$vmwarenotes"
+    printf "%-19s %-12s %-6s %-10s %-14s %-12s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwarenotes"
   else
-    printf "%-19s %-12s %-12s %-12s %-12s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$n_worker" "$vmwarenotes"
+    printf "%-19s %-12s %-6s %-10s %-14s %-12s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwarenotes"
   fi
 }
 
@@ -32,7 +33,7 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'------------------------------- Cluster actions -----------------------------------
+    --header=$'------------------------------------------- Cluster actions -------------------------------------------------
                                                                                  
    [s]........Start cluster
    [S]........Stop cluster
@@ -42,7 +43,7 @@ selected_action=$(
    [p]........Copy kubeadmin password to clipboard
    [Enter]....Login with kubeadmin user
                                                                                  
-------------------------------- Global actions ------------------------------------
+-------------------------------------------- Global actions --------------------------------------------------
                                                                                  
    [c]........Create cluster
    [e]........Edit cluster install configuration files
@@ -51,17 +52,17 @@ selected_action=$(
                                                                                  
    [Esc]......Exit
                                                                                  
------------------------------------------------------------------------------------
-Cluster Name        Version      Type         SNO?         Workers      Description
-------------        -------      ----         ----         -------      -----------' \
+--------------------------------------------------------------------------------------------------------------
+Cluster Name        Version     Type    SNO?       Platform       Workers      Description
+------------        -------     ----    ----       --------       -------      -----------' \
     --layout=reverse \
     -h 40 \
-    -p "43%,57%" \
+    -p "55%,57%" \
     --sort \
     --no-input \
     --multi \
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
-    --bind 'C:execute-silent(tmux send-keys ./fzf-files/fzf-ocpversions.sh C-m)+abort' \
+    --bind 'C:execute-silent(tmux send-keys ~/.tmux/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
     --bind 's:execute-silent(tmux new-window  -n "start: "{1} "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"; bash")+abort' \
     --bind 'S:execute-silent(tmux new-window  -n "stop: "{1} "cd /vms/clusters/"{1}"  && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"; bash")+abort' \

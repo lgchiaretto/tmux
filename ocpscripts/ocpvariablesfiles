@@ -3,7 +3,17 @@
 #files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
 
-actions="1 - IPI 3-node cluster\n2 - IPI Single node cluster\n3 - UPI 3-node cluster with platform 'none'\n4 - UPI 3-node cluster with platform 'vsphere'\n5 - UPI 3-node cluster with 'ODF' and platform 'none'\n6 - UPI Single node cluster with platform 'none'\n7 - UPI Single node cluster with platform 'vsphere'\n8 - UPI Single node cluster with 'OCP Virt' and platform 'none'\n9 - UPI Single node cluster with 'ODF' and platform 'none'"
+actions="- Baremetal IPI 3-node cluster
+- Baremetal IPI 3-node cluster
+- None UPI 3-node cluster
+- None UPI 3-node cluster with 'ODF'
+- None UPI Single node cluster
+- None UPI Single node cluster with 'OCP Virt'
+- None UPI Single node cluster with 'ODF'
+- vSphere IPI 3-node cluster
+- vSphere UPI 3-node cluster
+- vSphere UPI Single node cluster
+- IPI Single node cluster"
 
 
 selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "100%,50%" --no-input)
@@ -13,40 +23,59 @@ variablesfile=$(echo "$selected_file" | tail -n1)
 
 if [ -n "$selected_file" ]; then
     case "$variablesfile" in
-        "1 - IPI 3-node cluster")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-ipi-3node.json" "vim /vms/clusters/variables-files/ansible-vars-ipi-3node.json; tmux wait-for -S vim-done"
+        "- Baremetal IPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-3node-baremetal.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "2 - IPI Single node cluster")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-ipi-sno.json" "vim /vms/clusters/variables-files/ansible-vars-ipi-sno.json; tmux wait-for -S vim-done"
+        "- Baremetal IPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-sno-baremetal.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "3 - UPI 3-node cluster with platform 'none'")
-            tmux new-window -n "vim /vms/clusters/variables-files/nsible-vars-upi-3node-none.json" "vim /vms/clusters/variables-files/ansible-vars-upi-3node-none.json; tmux wait-for -S vim-done"
+        "- None UPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "4 - UPI 3-node cluster with platform 'vsphere'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-3node-vsphere.json" "vim /vms/clusters/variables-files/ansible-vars-upi-3node-vsphere.json; tmux wait-for -S vim-done"
+        "- None UPI 3-node cluster with 'ODF'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-odf-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "5 - UPI 3-node cluster with 'ODF' and platform 'none'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-3node-odf-none.json" "vim /vms/clusters/variables-files/ansible-vars-upi-3node-odf-none.json; tmux wait-for -S vim-done"
+        "- None UPI Single node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "6 - UPI Single node cluster with platform 'none'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-sno-none.json" "vim /vms/clusters/variables-files/ansible-vars-upi-sno-none.json; tmux wait-for -S vim-done"
+        "- None UPI Single node cluster with 'OCP Virt'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-ocpvirt-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "7 - UPI Single node cluster with platform 'vsphere'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-sno-vsphere.json" "vim /vms/clusters/variables-files/ansible-vars-upi-sno-vsphere.json; tmux wait-for -S vim-done"
+        "- None UPI Single node cluster with 'ODF'")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-odf-none.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "8 - UPI Single node cluster with 'OCP Virt' and platform 'none'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-sno-ocpvirt-none.json" "vim /vms/clusters/variables-files/ansible-vars-upi-sno-ocpvirt-none.json; tmux wait-for -S vim-done"
+        "- vSphere IPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-3node-vsphere.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "9 - UPI Single node cluster with 'ODF' and platform 'none'")
-            tmux new-window -n "vim /vms/clusters/variables-files/ansible-vars-upi-sno-odf-none.json" "vim /vms/clusters/variables-files/ansible-vars-upi-sno-odf-none.json; tmux wait-for -S vim-done"
+        "- vSphere UPI 3-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-upi-3node-vsphere.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "- vSphere UPI Single node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-upi-sno-vsphere.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "- IPI Single node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-sno.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
     esac
