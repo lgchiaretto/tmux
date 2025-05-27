@@ -19,7 +19,7 @@ selected_operator=$(
 ------------------------------------------------------------\n\n' \
         --layout=reverse \
         -h 40 \
-        -p "25%,45" \
+        -p "32%,45" \
         --exact \
         --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(

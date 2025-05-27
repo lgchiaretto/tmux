@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 
 function error_exit {
-    echo "ERROR: $1" >&2
+    echo -e "ERROR: $1" >&2
     exit 1
 }
 
 clustername=$1
 
-#echo "Checking OpenShift cluster $clustername status..."
+UPGRADABLE_STATUS=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Upgradeable")].status}')
+if [ "$UPGRADABLE_STATUS" == "False" ]; then
+    REASON=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Upgradeable")].reason}')
+    MESSAGE=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Upgradeable")].message}')
+    echo "Cluster is not upgradable"
+    echo "Reason: $REASON"
+    error_exit "Message: $MESSAGE"
+fi
+
 oc whoami &> /dev/null
 if [ $? -ne 0 ]; then
     error_exit "You are not connected to any OpenShift cluster or the 'oc' command is not available."
@@ -18,8 +26,8 @@ oc get clusterversion version --output=jsonpath='{.status.desired.version}' &> /
 CURRENT_VERSION=$(oc get clusterversions version --output=jsonpath='{.status.desired.version}')
 CURRENT_CHANNEL=$(oc get clusterversions version --output=jsonpath='{.spec.channel}')
 CLUSTER_NAME=$(oc whoami --show-server | awk -F'.' '{print $2}')
-# echo "Current cluster version: $CURRENT_VERSION"
-# echo "Current cluster channel: $CURRENT_CHANNEL"
+#echo "Current cluster version: $CURRENT_VERSION"
+#echo "Current cluster channel: $CURRENT_CHANNEL"
 
 if [ "$CLUSTER_NAME" != "$clustername" ]; then
     error_exit "The connected cluster '$CLUSTER_NAME' does not match the selected cluster '$clustername'"
@@ -42,18 +50,21 @@ if [ -z "$SELECTED_CHANNEL" ]; then
     exit 0
 fi
 
-oc adm upgrade channel "$SELECTED_CHANNEL"
+oc adm upgrade channel $SELECTED_CHANNEL
+sleep 3 # Wait for the channel to be set
 
 AVAILABLE_VERSIONS=$(oc get clusterversion version -o json | jq -e -r '.status.availableUpdates[].version' 2>/dev/null | sort -V || echo "")
 
 if [ -z "$AVAILABLE_VERSIONS" ]; then
+    oc adm upgrade channel "$CURRENT_CHANNEL"
     error_exit "No valid versions found for channel '$SELECTED_CHANNEL'. Try another channel."
 fi
 
 SELECTED_VERSION=$(echo "$AVAILABLE_VERSIONS" | fzf-tmux --header="Available versions for channel '$SELECTED_CHANNEL'" --layout=reverse -h 40 -p "40%,40%")
 
 if [ -z "$SELECTED_VERSION" ]; then
-    error_exit "Version selection cancelled. Exiting."
+    oc adm upgrade channel "$CURRENT_CHANNEL"
+    echo "Version selection cancelled. Exiting."
     exit 0
 fi
 
@@ -64,12 +75,14 @@ read -p "Do you really want to start the update to version $SELECTED_VERSION on 
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Update cancelled. Exiting."
+    oc adm upgrade channel "$CURRENT_CHANNEL"
     exit 0
 fi
 
 echo "Starting OpenShift cluster update to version $SELECTED_VERSION on channel $SELECTED_CHANNEL..."
 oc adm upgrade --to="$SELECTED_VERSION"
 if [ $? -ne 0 ]; then
+    oc adm upgrade channel "$CURRENT_CHANNEL"
     error_exit "Failed to initiate the update. Check the error messages above."
 fi
 
