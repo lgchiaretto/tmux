@@ -2,10 +2,13 @@
 
 URL="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 
-selected_os=$(echo -e "rhel9\nrhel8" | fzf-tmux --prompt="Choose the operating system: " \
-  --layout=reverse -p "40%,40%" \
+selected_os=$(echo -e "rhel9\nrhel8" | fzf-tmux \
+  --layout=reverse -p "31%,40%" \
   --no-input \
-  --header="Select RHEL version" \
+  --header=$'-------------------------- Help --------------------------
+[Enter]     Select RHEL version
+[Esc]       Exit
+----------------------------------------------------------\n\n' \
   --height=40% --border)
 
 if [ -z "$selected_os" ]; then
@@ -19,9 +22,9 @@ fzf-tmux --prompt="Choose a client version: " \
 [Ctrl-c]     Copy OCP Client URL to copyboard
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
-  --layout=reverse -p "40%,40%" \
+  --layout=reverse -p "31%,40%" \
   --height=40% \
-  --bind 'ctrl-c:execute-silent(echo -n '$URL/{}'/openshift-client-linux-amd64-'$selected_os'-'$selected_version'.tar.gz | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
+  --bind "ctrl-c:execute-silent(echo -n '$URL/{}'/openshift-client-linux-amd64-$selected_os.tar.gz | wl-copy && tmux set-buffer {} && tmux display 'Copied')+abort" \
   --border)
 
 if [ -n "$selected_version" ]; then
