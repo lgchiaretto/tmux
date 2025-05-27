@@ -15,6 +15,9 @@ CLUSTER_NAME=$(oc whoami --show-server | awk -F'.' '{print $2}')
 
 [ "$CLUSTER_NAME" != "$clustername" ] && error_exit "The connected cluster '$CLUSTER_NAME' does not match the selected cluster '$clustername'"
 
+UPGRADE_STATUS=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Progressing")].status}')
+[ "$UPGRADE_STATUS" == "True" ] && error_exit "An update is already in progress. Please wait until it completes or has failed."
+
 UPGRADABLE_STATUS=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Upgradeable")].status}')
 if [ "$UPGRADABLE_STATUS" == "False" ]; then
     REASON=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Upgradeable")].reason}')
@@ -23,9 +26,6 @@ if [ "$UPGRADABLE_STATUS" == "False" ]; then
     echo "Reason: $REASON"
     error_exit "Message: $MESSAGE"
 fi
-
-UPGRADE_STATUS=$(oc get clusterversion version -o jsonpath='{.status.conditions[?(@.type=="Progressing")].status}')
-[ "$UPGRADE_STATUS" == "True" ] && error_exit "An update is already in progress. Please wait until it completes or has failed."
 
 CHANNELS=$(oc get clusterversion version -o json | jq -r '.status.desired.channels[]')
 [ -z "$CHANNELS" ] && error_exit "Could not retrieve update channels."
