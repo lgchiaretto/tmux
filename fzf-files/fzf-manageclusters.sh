@@ -50,6 +50,7 @@ selected_action=$(
    [e]........Edit cluster install configuration files
    [C]........Check latest OCP Versions available
    [u]........Show OpenShift update path
+   [D]........Copy or download and install OpenShift client
                                                                                  
    [Esc]......Exit
                                                                                  
@@ -58,7 +59,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
 ------------        -------     ----    ----       --------       -------      -----------' \
     --layout=reverse \
     -h 40 \
-    -p "55%,57%" \
+    -p "55%,59%" \
     --sort \
     --no-input \
     --multi \
@@ -71,6 +72,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
+    --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+URL="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
+
+selected_os=$(echo -e "rhel9\nrhel8" | fzf-tmux --prompt="Choose the operating system: " \
+  --layout=reverse -p "40%,40%" \
+  --no-input \
+  --header="Select RHEL version" \
+  --height=40% --border)
+
+if [ -z "$selected_os" ]; then
+  exit 0
+fi
+
+selected_version=$(curl -s "$URL/" | grep -oP '<a href="\K[^/]+(?=/")' | \
+fzf-tmux --prompt="Choose a client version: " \
+    --header=$'-------------------------- Help --------------------------
+[Enter]     Download OCP Client
+[Ctrl-c]     Copy OCP Client URL to copyboard
+[Esc]       Exit
+----------------------------------------------------------\n\n' \
+  --layout=reverse -p "40%,40%" \
+  --height=40% \
+  --bind 'ctrl-c:execute-silent(echo -n '$URL/{}'/openshift-client-linux-amd64-'$selected_os'-'$selected_version'.tar.gz | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
+  --border)
+
+if [ -n "$selected_version" ]; then
+    url="$URL/$selected_version/openshift-client-linux-amd64-$selected_os-$selected_version.tar.gz"
+    echo "The following URL was selected: $url"
+    read -p "Do you want to proceed with the download and install? (y/n): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        cache_dir="/vms/clusters/.cache/ocpclients"
+        mkdir -p "$cache_dir"
+        file_path="$cache_dir/openshift-client-linux-amd64-$selected_os-$selected_version.tar.gz"
+
+        if [ ! -f "$file_path" ]; then
+            echo "File not found in cache. Downloading from: $url"
+            wget -P "$cache_dir" "$url" > /dev/null 2>&1
+        else
+            echo "File found in cache. Using cached file."
+        fi
+
+        tar -xzf "$file_path" -C "$cache_dir" > /dev/null 2>&1
+        sudo mv "$cache_dir/oc" /usr/local/bin/ > /dev/null 2>&1
+        sudo mv "$cache_dir/kubectl" /usr/local/bin/ > /dev/null 2>&1
+        echo "OpenShift client $selected_version installed"
+    else
+        echo "Download and install canceled."
+    fi
+else
+   exit 0
+fi
