@@ -3,7 +3,7 @@
 #files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
 actions="- Baremetal IPI 3-node cluster
-- Baremetal SNO cluster
+- Baremetal UPI Single node OpenShift
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
 - None UPI Single node cluster
@@ -26,7 +26,7 @@ if [ -n "$selected_file" ]; then
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "- Baremetal SNO cluster")
+        "- Baremetal UPI Single node OpenShift")
             file="/vms/clusters/variables-files/ansible-vars-sno-baremetal.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done

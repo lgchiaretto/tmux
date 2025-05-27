@@ -4,7 +4,7 @@
 
 
 actions="- Baremetal IPI 3-node cluster
-- Baremetal IPI 3-node cluster
+- Baremetal UPI Single node OpenShift
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
 - None UPI Single node cluster
@@ -13,7 +13,7 @@ actions="- Baremetal IPI 3-node cluster
 - vSphere IPI 3-node cluster
 - vSphere UPI 3-node cluster
 - vSphere UPI Single node cluster
-- IPI Single node cluster"
+- vSphere IPI Single node cluster"
 
 
 selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "100%,50%" --no-input)
@@ -28,7 +28,7 @@ if [ -n "$selected_file" ]; then
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "- Baremetal IPI 3-node cluster")
+        "- Baremetal UPI Single node OpenShift")
             file="/vms/clusters/variables-files/ansible-vars-sno-baremetal.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
@@ -73,7 +73,7 @@ if [ -n "$selected_file" ]; then
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "- IPI Single node cluster")
+        "- vSphere IPI Single node cluster")
             file="/vms/clusters/variables-files/ansible-vars-ipi-sno.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done

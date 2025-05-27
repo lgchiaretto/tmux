@@ -64,8 +64,8 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
     --bind 'C:execute-silent(tmux send-keys ~/.tmux/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
-    --bind 's:execute-silent(tmux new-window  -n "start: "{1} "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"; bash")+abort' \
-    --bind 'S:execute-silent(tmux new-window  -n "stop: "{1} "cd /vms/clusters/"{1}"  && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"; bash")+abort' \
+    --bind 's:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
+    --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
     --bind 'k:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
