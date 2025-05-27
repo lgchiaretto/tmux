@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 oc whoami > /tmp/dummy-file-tmux
 

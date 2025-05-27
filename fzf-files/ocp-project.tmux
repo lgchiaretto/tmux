@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env bash -x
 
 oc project -q 2>&1
 OPENSHIFT_CONNECTED=$?

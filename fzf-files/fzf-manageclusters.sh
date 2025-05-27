@@ -38,6 +38,7 @@ selected_action=$(
    [s]........Start cluster
    [S]........Stop cluster
    [d]........Destroy cluster
+   [U]........Upgrade cluster
    [k]........Export kubeconfig
    [t]........Open tmuxp create session
    [p]........Copy kubeadmin password to clipboard
@@ -68,6 +69,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
     --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
     --bind 'k:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
+    --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 pod="$1"
 project_name=$(oc project -q)
 containers=$(oc get pod "$pod" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)

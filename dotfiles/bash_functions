@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env bash -x
 #ssh() {
 #    if [ "$(ps -p $(ps -p $$ -o ppid=) -o comm=)" = "tmux" ]; then
 #        #tmux rename-window "$(echo $* | cut -d . -f 1)"

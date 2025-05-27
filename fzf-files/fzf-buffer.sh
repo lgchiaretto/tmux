@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 buffer=$(tmux list-buffers -F "#{buffer_name}: #{buffer_sample}" | fzf-tmux --wrap --reverse | awk -F': ' '{print $2}')
 
 
