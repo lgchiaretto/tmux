@@ -43,6 +43,7 @@ selected_action=$(
   [D]........Copy or download and install OpenShift   |    [k]........Export kubeconfig
              client                                   |    [t]........Open tmuxp create session
                                                       |    [p]........Copy kubeadmin password to clipboard
+                                                      |    [f]........Enter cluster files directory
   [Esc]......Exit                                     |    
                                                       |    [Enter]....Login with kubeadmin user
                                                       | 
@@ -51,7 +52,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
 ------------        -------     ----    ----       --------       -------      -------------------------------' \
     --layout=reverse \
     -h 40 \
-    -p "55%,44%" \
+    -p "55%,46%" \
     --sort \
     --no-input \
     --multi \
@@ -65,6 +66,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers      D
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
+    --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter
