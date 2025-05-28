@@ -53,13 +53,11 @@ def build_graph(data):
 
     graph = {}
 
-    # Adicionar arestas regulares
     for e in edges:
         from_v = nodes[e[0]]
         to_v = nodes[e[1]]
         graph.setdefault(from_v, []).append((to_v, False, "No Risk", "No Message", "No URL"))  # False indica aresta regular
 
-    # Adicionar arestas condicionais com riscos
     for edge_group in conditional_edges:
         for edge in edge_group.get("edges", []):
             from_v = edge.get("from")
