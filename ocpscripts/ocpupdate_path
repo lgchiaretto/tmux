@@ -1,165 +1,77 @@
-#!/usr/bin/env python3
+#!/bin/bash
 
-import requests
-import subprocess
-import json
-from collections import deque
-import sys
-import os  # Import the os module
-
-GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
-CHANNELS = [
-    "eus-4.14",
-    "stable-4.15",
-    "eus-4.16",
-    "stable-4.17",
+GRAPH_URL="https://api.openshift.com/api/upgrades_info/graph"
+CHANNELS=(
+    "eus-4.14"
+    "stable-4.15"
+    "eus-4.16"
+    "stable-4.17"
     "eus-4.18"
-]
+)
 
-HEADER = """
+HEADER="
 ----------------------------------------- Update path tool ---------------------------------------------------
 |                                                                                                            |
 |  [Enter]....Select the channel                                                                             |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n
-"""
+"
 
-def fzf_select(options, header, search):
-    try:
-        full_header = HEADER.replace("Select the channel", header)
-        result = subprocess.run(
-            ["fzf-tmux", "--header", full_header, "--layout=reverse", "-h", "40%", "-p", "55%,46%", "--exact" , search],
-            input="\n".join(options).encode(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL
-        )
-        return result.stdout.decode().strip()
-    except FileNotFoundError:
-        print("Error: fzf-tmux not found.")
-        sys.exit(1)
+fzf_select() {
+    local options="$1"
+    local header_text="$2"
+    local search_args="$3"
 
-def fetch_upgrade_graph(channel):
-    params = {"channel": channel, "arch": "amd64"}
-    try:
-        response = requests.get(GRAPH_URL, params=params)
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        print(f"Error fetching graph: {e}")
-        sys.exit(2)
+    full_header="${HEADER/Select the channel/$header_text}"
 
-def build_graph(data):
-    nodes = [node["version"] for node in data["nodes"]]
-    edges = data.get("edges", [])
-    conditional_edges = data.get("conditionalEdges", [])
+    local options_file=$(mktemp)
+    result=$(echo -e "$options" | sort | fzf-tmux --header "$full_header" --layout=reverse -h "40%" -p "55%,46%" --exact)
+    echo "$result"
+}
 
-    graph = {}
+fetch_upgrade_graph() {
+    local channel="$1"
+    local url="${GRAPH_URL}?channel=${channel}&arch=amd64"
 
-    for e in edges:
-        from_v = nodes[e[0]]
-        to_v = nodes[e[1]]
-        graph.setdefault(from_v, []).append((to_v, False, "No Risk", "No Message", "No URL"))
+    response=$(curl -s "$url")
+    if [ $? -ne 0 ]; then
+        echo "Error fetching graph." >&2
+        exit 2
+    fi
 
-    for edge_group in conditional_edges:
-        for edge in edge_group.get("edges", []):
-            from_v = edge.get("from")
-            to_v = edge.get("to")
-            risk_name = edge_group.get("risks", [{}])[0].get("name")
-            risk_message = edge_group.get("risks", [{}])[0].get("message")
-            risk_url = edge_group.get("risks", [{}])[0].get("url")
-            graph.setdefault(from_v, []).append((to_v, True, risk_name, risk_message, risk_url))
+    echo "$response"
+}
 
-    return graph, nodes
+get_versions() {
+    local data="$1"
+    echo "$data" | jq -r '.nodes[].version'
+}
 
-def bfs_path(graph, from_v, to_v):
-    visited = set()
-    prev = {}
-    edge_type = {}
-    risks = {}
-    messages = {}
-    urls = {}
-    queue = deque([from_v])
-    visited.add(from_v)
+channel=$(fzf_select "$(printf "%s\n" "${CHANNELS[@]}")" "Select OCP Channel" "--no-input")
+if [ -z "$channel" ]; then
+    exit 0
+fi
 
-    while queue:
-        current = queue.popleft()
-        if current == to_v:
-            break
-        for neighbor, is_conditional, risk_name, risk_message, risk_url in sorted(graph.get(current, []), reverse=True, key=lambda v: list(map(int, v[0].split('.')))):
-            if neighbor not in visited:
-                visited.add(neighbor)
-                prev[neighbor] = current
-                edge_type[neighbor] = is_conditional
-                risks[neighbor] = risk_name
-                messages[neighbor] = risk_message
-                urls[neighbor] = risk_url
-                queue.append(neighbor)
+data=$(fetch_upgrade_graph "$channel")
+versions=$(get_versions "$data")
 
-    if to_v not in prev and from_v != to_v:
-        return None
+from_version=$(fzf_select "$versions" "Select from Version" "--exact")
+if [ -z "$from_version" ]; then
+    exit 0
+fi
 
-    path = []
-    v = to_v
-    while v != from_v:
-        path.append((v, edge_type.get(v, False), risks.get(v, "No Risk"), messages.get(v, "No Message"), urls.get(v, "No URL")))
-        v = prev.get(v)
-        if v is None:
-            return None
-    path.append((from_v, False, "No Risk", "No Message", "No URL"))
-    path.reverse()
-    return path
-
-def calculate_and_show_path(graph, from_version, to_version, channel):
-    path = bfs_path(graph, from_version, to_version)
-    if path:
-        formatted_path = " -> ".join(f"{v}" for v, _, _, _, _ in path)
-        detailed_info = "\n".join(
-            f"Version: {v}\n  - Risk: {risk}\n  - Message: {message}\n  - URL: {url}"
-            for v, is_conditional, risk, message, url in path if is_conditional
-        )
-        return f"Available path: {formatted_path}\n\n{detailed_info}" if detailed_info else f"Path: {formatted_path}"
-    else:
-        return f"No upgrade path found from {from_version} to {to_version} on channel {channel}"
-
-def generate_preview(versions, from_version, channel):
-    preview_lines = []
-    data = fetch_upgrade_graph(channel)
-    graph, _ = build_graph(data)
-    for to_version in versions:
-        preview_lines.append(calculate_and_show_path(graph, from_version, to_version, channel))
-    return "\n---\n".join(preview_lines)
-
-def main():
-    channel = fzf_select(CHANNELS, "Select OCP Channel", "--no-input")
-    if not channel:
-        sys.exit(0)
-
-    data = fetch_upgrade_graph(channel)
-    graph, versions = build_graph(data)
-
-    from_version = fzf_select(versions, "Select from Version", "--exact")
-    if not from_version:
-        sys.exit(0)
-
-    # Get the directory of the current script
-    script_dir = "/usr/local/bin/ocpupdate_lib.py"
-    command = [
-        "fzf-tmux",
-        "--header", "Select 'to' Version",
-        "--layout=reverse",
-        "-h", "40%",
-        "-p", "55%,46%",
-        "--preview", f"""python3 {script_dir} --from-version {from_version} --channel {channel} --to-version {{}}""",
-        "--bind", "enter:ignore",
-        "--preview-window", "right:80%",
-        "--delimiter", "---",
-    ]
-
-    result = subprocess.run(command, input="\n".join(versions).encode(), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-
-    sys.exit(0)
+script_dir="/usr/local/bin/ocpupdate_lib.py"
     
-
-if __name__ == "__main__":
-    main()
+echo -e "$versions" | sort | fzf-tmux \
+    --header "Select 'to' Version" \
+    --layout=reverse \
+    -h "40%" \
+    -p "55%,46%" \
+    --exact \
+    --preview "python3 ${script_dir} --from-version ${from_version} --channel ${channel} --to-version {}" \
+    --bind "enter:ignore" \
+    --preview-window "right:80%" \
+    --delimiter "---"
+    
+exit 0
