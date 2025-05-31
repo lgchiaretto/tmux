@@ -26,7 +26,7 @@ fzf_select() {
     full_header="${HEADER/Select the channel/$header_text}"
 
     local options_file=$(mktemp)
-    result=$(echo -e "$options" | sort | fzf-tmux --header "$full_header" --layout=reverse -h "40%" -p "55%,46%" --exact)
+    result=$(echo -e "$options" | sort -V | fzf-tmux --header "$full_header" --layout=reverse -h "40%" -p "55%,46%" --exact)
     echo "$result"
 }
 
@@ -63,8 +63,8 @@ fi
 
 script_dir="/usr/local/bin/ocpupdate_lib.py"
     
-echo -e "$versions" | sort | fzf-tmux \
-    --header "Select 'to' Version" \
+echo -e "$versions" | sort -V | fzf-tmux \
+    --header $"Select 'to' Version\n" \
     --layout=reverse \
     -h "40%" \
     -p "55%,46%" \
