@@ -81,18 +81,16 @@ def main():
 
     if path:
         formatted_path = " -> ".join(v for v, _, _, _, _ in path)
-        print(f"Available path: {formatted_path}")
+        print(f"Available path: {formatted_path}\n")
 
         detailed_info_lines = []
         for v, is_conditional, risk, message, url in path[1:]:
             if is_conditional:
                 wrapped_message = '\n    '.join(textwrap.wrap(message, width=70))
-                detailed_info_lines.append(f"Version: {v}\n  - Risk: {risk}\n  - Message: {wrapped_message}\n  - URL: {url}")
+                detailed_info_lines.append(f"Version: {v}\n\n  - Risk: {risk}\n  - Message: {wrapped_message}\n  - URL: {url}\n")
         
         if detailed_info_lines:
-            print("\n---")
-            print("Detailed Information on Conditional Upgrades:")
-            print("\n---\n".join(detailed_info_lines))
+            print("\n".join(detailed_info_lines))
     else:
         print(f"No upgrade path found from {args.from_version} to {args.to_version} on channel {args.channel}")
 
