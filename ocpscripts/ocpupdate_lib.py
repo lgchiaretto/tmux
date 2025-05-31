@@ -1,43 +1,11 @@
 #!/usr/bin/env python3
 
 import requests
-import subprocess
-import json
 from collections import deque
 import sys
-import os  # Import the os module
+import argparse
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
-CHANNELS = [
-    "eus-4.14",
-    "stable-4.15",
-    "eus-4.16",
-    "stable-4.17",
-    "eus-4.18"
-]
-
-HEADER = """
------------------------------------------ Update path tool ---------------------------------------------------
-|                                                                                                            |
-|  [Enter]....Select the channel                                                                             |
-|  [Esc]......Exit                                                                                           |
-|                                                                                                            |
---------------------------------------------------------------------------------------------------------------\n\n
-"""
-
-def fzf_select(options, header, search):
-    try:
-        full_header = HEADER.replace("Select the channel", header)
-        result = subprocess.run(
-            ["fzf-tmux", "--header", full_header, "--layout=reverse", "-h", "40%", "-p", "55%,46%", "--exact" , search],
-            input="\n".join(options).encode(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL
-        )
-        return result.stdout.decode().strip()
-    except FileNotFoundError:
-        print("Error: fzf-tmux not found.")
-        sys.exit(1)
 
 def fetch_upgrade_graph(channel):
     params = {"channel": channel, "arch": "amd64"}
@@ -114,8 +82,9 @@ def calculate_and_show_path(graph, from_version, to_version, channel):
     path = bfs_path(graph, from_version, to_version)
     if path:
         formatted_path = " -> ".join(f"{v}" for v, _, _, _, _ in path)
-        detailed_info = "\n".join(
-            f"Version: {v}\n  - Risk: {risk}\n  - Message: {message}\n  - URL: {url}"
+        import textwrap
+        detailed_info = "\n\n".join(
+            f"Version: {v}\n\n  - Risk: {risk}\n  - Message: {'\n    '.join(textwrap.wrap(message, width=70))}\n  - URL: {url}"
             for v, is_conditional, risk, message, url in path if is_conditional
         )
         return f"Available path: {formatted_path}\n\n{detailed_info}" if detailed_info else f"Path: {formatted_path}"
@@ -124,42 +93,26 @@ def calculate_and_show_path(graph, from_version, to_version, channel):
 
 def generate_preview(versions, from_version, channel):
     preview_lines = []
-    data = fetch_upgrade_graph(channel)
-    graph, _ = build_graph(data)
+    # data = fetch_upgrade_graph(channel)
+    # graph, _ = build_graph(data)
     for to_version in versions:
-        preview_lines.append(calculate_and_show_path(graph, from_version, to_version, channel))
+        # preview_lines.append(calculate_and_show_path(graph, from_version, to_version, channel))
+        preview_lines.append(f"Path from {from_version} to {to_version} will be displayed here")
     return "\n---\n".join(preview_lines)
 
 def main():
-    channel = fzf_select(CHANNELS, "Select OCP Channel", "--no-input")
-    if not channel:
-        sys.exit(0)
+    parser = argparse.ArgumentParser(description="Find upgrade paths between OpenShift versions.")
+    parser.add_argument("--from-version", required=True, help="Starting OpenShift version.")
+    parser.add_argument("--to-version", required=True, help="Target OpenShift version.")
+    parser.add_argument("--channel", required=True, help="The OpenShift update channel (e.g., stable-4.14).")
 
-    data = fetch_upgrade_graph(channel)
-    graph, versions = build_graph(data)
+    args = parser.parse_args()
 
-    from_version = fzf_select(versions, "Select from Version", "--exact")
-    if not from_version:
-        sys.exit(0)
-
-    # Get the directory of the current script
-    script_dir = "/usr/local/bin/ocpupdate_lib.py"
-    command = [
-        "fzf-tmux",
-        "--header", "Select 'to' Version",
-        "--layout=reverse",
-        "-h", "40%",
-        "-p", "55%,46%",
-        "--preview", f"""python3 {script_dir} --from-version {from_version} --channel {channel} --to-version {{}}""",
-        "--bind", "enter:ignore",
-        "--preview-window", "right:80%",
-        "--delimiter", "---",
-    ]
-
-    result = subprocess.run(command, input="\n".join(versions).encode(), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-
-    sys.exit(0)
+    data = fetch_upgrade_graph(args.channel)
+    graph, _ = build_graph(data)
     
+    result = calculate_and_show_path(graph, args.from_version, args.to_version, args.channel)
+    print(result)
 
 if __name__ == "__main__":
     main()

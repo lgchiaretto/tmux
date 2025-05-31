@@ -30,7 +30,20 @@ fi
 CHANNELS=$(oc get clusterversion version -o json | jq -r '.status.desired.channels[]')
 [ -z "$CHANNELS" ] && error_exit "Could not retrieve update channels."
 
-SELECTED_CHANNEL=$(echo "$CHANNELS" | fzf-tmux --prompt="Channel > " -p "40%,40%" --layout=reverse )
+SELECTED_CHANNEL=$(echo -e "$CHANNELS" | sort | fzf-tmux \
+    --header=$'
+----------------------------------------- Update path tool ---------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Select the channel                                                                             |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+    --layout=reverse \
+    -h 40 -p "55%,46%" \
+    --no-input \
+    --no-sort
+    )
+
 [ -z "$SELECTED_CHANNEL" ] && error_exit "Channel selection cancelled. Exiting."
 
 oc adm upgrade channel $SELECTED_CHANNEL

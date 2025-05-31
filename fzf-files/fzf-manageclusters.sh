@@ -35,21 +35,21 @@ selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
     --header=$'
 ------------------- Global actions -------------------|------------------- Cluster actions -------------------
-                                                      |                        
-  [c]........Create cluster                           |    [s]........Start cluster 
-  [e]........Edit cluster install config files        |    [S]........Stop cluster
-  [C]........Check latest OCP Versions available      |    [d]........Destroy cluster
-  [u]........Show OpenShift update path               |    [U]........Upgrade cluster
-  [D]........Copy or download and install OpenShift   |    [k]........Export kubeconfig
-             client                                   |    [t]........Open tmuxp create session
-                                                      |    [p]........Copy kubeadmin password to clipboard
-                                                      |    [f]........Enter cluster files directory
-  [Esc]......Exit                                     |    
-                                                      |    [Enter]....Login with kubeadmin user
-                                                      | 
+|                                                     |                                                      |
+|  [c]........Create cluster                          |    [s]........Start cluster                          |
+|  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
+|  [C]........Check latest OCP Versions available     |    [d]........Destroy cluster                        |
+|  [u]........Show OpenShift update path              |    [U]........Upgrade cluster                        |
+|  [D]........Copy or download and install OpenShift  |    [k]........Export kubeconfig                      |
+|             client                                  |    [t]........Open tmuxp create session              |
+|                                                     |    [p]........Copy kubeadmin password to clipboard   |
+|                                                     |    [f]........Enter cluster files directory          |
+|  [Esc]......Exit                                    |                                                      |
+|                                                     |    [Enter]....Login with kubeadmin user              |
+|                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
-Cluster Name        Version     Type    SNO?       Platform       Workers      Description
-------------        -------     ----    ----       --------       -------      -------------------------------' \
+Cluster Name        Version     Type    SNO?       Platform       Workers              Description
+--------------------------------------------------------------------------------------------------------------' \
     --layout=reverse \
     -h 40 \
     -p "55%,46%" \

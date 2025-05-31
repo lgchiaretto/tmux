@@ -4,6 +4,8 @@
 
 
 actions="- Baremetal IPI 3-node cluster
+- Baremetal IPI 4-node cluster
+- Baremetal IPI 5-node cluster
 - Baremetal UPI Single node OpenShift
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
@@ -16,7 +18,19 @@ actions="- Baremetal IPI 3-node cluster
 - vSphere IPI Single node cluster"
 
 
-selected_file=$(echo -e "$actions" | sort | fzf-tmux --header=$'Select the cluster configuration:\n\n' --layout=reverse  -h 40 -p "100%,50%" --no-input)
+selected_file=$(echo -e "$actions" | sort | fzf-tmux \
+    --header=$'
+----------------------------------------- Create cluster -----------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Edit the cluster configuration                                                                 |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+    --layout=reverse \
+    -h 40 -p "55%,46%" \
+    --no-input \
+    --no-sort
+    )
 
 
 variablesfile=$(echo "$selected_file" | tail -n1)
@@ -25,6 +39,16 @@ if [ -n "$selected_file" ]; then
     case "$variablesfile" in
         "- Baremetal IPI 3-node cluster")
             file="/vms/clusters/variables-files/ansible-vars-ipi-3node-baremetal.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "- Baremetal IPI 4-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-4node-baremetal.json"
+            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+            ;;
+        "- Baremetal IPI 5-node cluster")
+            file="/vms/clusters/variables-files/ansible-vars-ipi-5node-baremetal.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
