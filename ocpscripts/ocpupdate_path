@@ -85,6 +85,6 @@ Select to version\n\n' \
     --preview "python3 ${script_dir} --from-version ${from_version} --channel ${channel} --to-version {}" \
     --bind "enter:ignore" \
     --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {})" \
-    --preview-window "right:70%"
+    --preview-window "right:76%"
     
 exit 0
