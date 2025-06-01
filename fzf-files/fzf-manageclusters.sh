@@ -34,17 +34,21 @@ fi
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
     --header=$'
-------------------- Global actions -------------------|------------------- Cluster actions -------------------
+------------------- Cluster creation------------------|------------------- Cluster actions -------------------
 |                                                     |                                                      |
 |  [c]........Create cluster                          |    [s]........Start cluster                          |
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
-|  [C]........Check latest OCP Versions available     |    [d]........Destroy cluster                        |
-|  [u]........Show OpenShift update path              |    [U]........Upgrade cluster                        |
-|  [D]........Copy or download and install OpenShift  |    [t]........Open tmuxp create session              |
-|             client                                  |    [p]........Copy kubeadmin password to clipboard   |
-|                                                     |    [k]........kubeconfig for cluster                 |
-|                                                     |    [f]........Enter cluster files directory          |
-|  [Enter]....Login with kubeadmin user               |                                                      |
+|                                                     |    [d]........Destroy cluster                        |
+|                                                     |    [U]........Upgrade cluster                        |
+|------------------ OpenShift Tools ------------------|    [t]........Open tmuxp create session              |
+|                                                     |    [p]........Copy kubeadmin password to clipboard   |
+|  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
+|  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
+|  [D]........Copy or download and install OpenShift  |    [Enter]....Login with kubeadmin user              |
+|             client                                  |                                                      |
+|                                                     |                                                      |
+|                                                     |                                                      |
+|                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
 |                                                     |                                                      |
@@ -55,7 +59,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers       
     --border-label=" chiaret.to " \
     --border-label-pos=center \
     -h 40 \
-    -p "55%,46%" \
+    -p "55%,55%" \
     --sort \
     --no-input \
     --multi \
