@@ -63,15 +63,20 @@ fi
 
 script_dir="/usr/local/bin/ocpgenerate-graph.py"
     
-echo -e "$versions" | sort -V | fzf-tmux \
-    --header $'Select 'to' Version' \
+echo -e "$versions" | sort -rV |fzf-tmux \
+     --header=$'------------------------
+
+[r]     Release notes
+[Esc]   Exit
+------------------------
+Select to version\n\n' \
     --layout=reverse \
     -h "40%" \
     -p "55%,46%" \
     --exact \
     --preview "python3 ${script_dir} --from-version ${from_version} --channel ${channel} --to-version {}" \
     --bind "enter:ignore" \
-    --preview-window "right:70%" \
-    --delimiter "---"
+    --bind "r:execute-silent(firefox \"https://docs.redhat.com/en/documentation/openshift_container_platform/$(cut -d'.' -f1-2 <<< {})/html-single/release_notes/index#ocp-$(echo \"{}\" | sed 's/\./-/g')_release-notes\")" \
+    --preview-window "right:70%"
     
 exit 0

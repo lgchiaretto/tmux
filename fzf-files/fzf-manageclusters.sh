@@ -40,12 +40,13 @@ selected_action=$(
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
 |  [C]........Check latest OCP Versions available     |    [d]........Destroy cluster                        |
 |  [u]........Show OpenShift update path              |    [U]........Upgrade cluster                        |
-|  [D]........Copy or download and install OpenShift  |    [k]........Export kubeconfig                      |
-|             client                                  |    [t]........Open tmuxp create session              |
-|                                                     |    [p]........Copy kubeadmin password to clipboard   |
+|  [D]........Copy or download and install OpenShift  |    [t]........Open tmuxp create session              |
+|             client                                  |    [p]........Copy kubeadmin password to clipboard   |
+|                                                     |    [k]........kubeconfig for cluster                 |
 |                                                     |    [f]........Enter cluster files directory          |
+|  [Enter]....Login with kubeadmin user               |                                                      |
 |  [Esc]......Exit                                    |                                                      |
-|                                                     |    [Enter]....Login with kubeadmin user              |
+|                                                     |                                                      |
 |                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
 Cluster Name        Version     Type    SNO?       Platform       Workers              Description
