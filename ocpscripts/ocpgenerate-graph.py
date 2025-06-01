@@ -88,7 +88,7 @@ def calculate_and_show_path(graph, from_version, to_version, channel):
                 if is_conditional:
                     wrapped_msg = '\n    '.join(textwrap.wrap(msg, width=65))
                     details.append(
-                        f"Version: {v}\n\n"
+                        f"Upgrade to Version: {v}\n\n"
                         f"  - Risk: {risk}\n"
                         f"  - Message: {wrapped_msg}\n"
                         f"  - URL: {url}\n"
@@ -99,9 +99,9 @@ def calculate_and_show_path(graph, from_version, to_version, channel):
 
 def main():
     parser = argparse.ArgumentParser(description="Find upgrade paths between OpenShift versions.")
-    parser.add_argument("--from-version", required=True, help="Starting OpenShift version.")
-    parser.add_argument("--to-version", required=True, help="Target OpenShift version.")
-    parser.add_argument("--channel", required=True, help="The OpenShift update channel (e.g., stable-4.14).")
+    parser.add_argument("--from-version", required=True, help="Starting OpenShift version (e.g., 4.16.1).")
+    parser.add_argument("--to-version", required=True, help="Target OpenShift version (e.g., 4.18.14).")
+    parser.add_argument("--channel", required=True, help="The OpenShift update channel (e.g., eus-4.18).")
 
     args = parser.parse_args()
 
