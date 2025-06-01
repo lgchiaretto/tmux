@@ -97,13 +97,6 @@ def calculate_and_show_path(graph, from_version, to_version, channel):
     else:
         return f"No upgrade path found from {from_version} to {to_version} on channel {channel}"
 
-
-def generate_preview(versions, from_version, channel):
-    preview_lines = []
-    for to_version in versions:
-        preview_lines.append(f"Path from {from_version} to {to_version} will be displayed here")
-    return "\n---\n".join(preview_lines)
-
 def main():
     parser = argparse.ArgumentParser(description="Find upgrade paths between OpenShift versions.")
     parser.add_argument("--from-version", required=True, help="Starting OpenShift version.")
