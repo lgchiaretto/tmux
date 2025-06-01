@@ -33,20 +33,19 @@ def build_graph(data):
         for edge in edge_group.get("edges", []):
             from_v = edge.get("from")
             to_v = edge.get("to")
-            risk_name = edge_group.get("risks", [{}])[0].get("name")
-            risk_message = edge_group.get("risks", [{}])[0].get("message")
-            risk_url = edge_group.get("risks", [{}])[0].get("url")
-            graph.setdefault(from_v, []).append((to_v, True, risk_name, risk_message, risk_url))
+            for risk in edge_group.get("risks", [{}]):
+                risk_name = risk.get("name", "Unknown")
+                risk_message = risk.get("message", "No message")
+                risk_url = risk.get("url", "No URL")
+                graph.setdefault(from_v, []).append((to_v, True, risk_name, risk_message, risk_url))
 
     return graph, nodes
 
 def bfs_path(graph, from_v, to_v):
     visited = set()
     prev = {}
-    edge_type = {}
-    risks = {}
-    messages = {}
-    urls = {}
+    edges_info = {}
+
     queue = deque([from_v])
     visited.add(from_v)
 
@@ -58,11 +57,10 @@ def bfs_path(graph, from_v, to_v):
             if neighbor not in visited:
                 visited.add(neighbor)
                 prev[neighbor] = current
-                edge_type[neighbor] = is_conditional
-                risks[neighbor] = risk_name
-                messages[neighbor] = risk_message
-                urls[neighbor] = risk_url
+                edges_info.setdefault(neighbor, []).append((is_conditional, risk_name, risk_message, risk_url))
                 queue.append(neighbor)
+            elif prev.get(neighbor) == current:
+                edges_info[neighbor].append((is_conditional, risk_name, risk_message, risk_url))
 
     if to_v not in prev and from_v != to_v:
         return None
@@ -70,33 +68,39 @@ def bfs_path(graph, from_v, to_v):
     path = []
     v = to_v
     while v != from_v:
-        path.append((v, edge_type.get(v, False), risks.get(v, "No Risk"), messages.get(v, "No Message"), urls.get(v, "No URL")))
+        path.append((v, edges_info.get(v, [])))
         v = prev.get(v)
         if v is None:
             return None
-    path.append((from_v, False, "No Risk", "No Message", "No URL"))
+    path.append((from_v, []))
     path.reverse()
     return path
 
+
 def calculate_and_show_path(graph, from_version, to_version, channel):
+    import textwrap
     path = bfs_path(graph, from_version, to_version)
     if path:
-        formatted_path = " -> ".join(f"{v}" for v, _, _, _, _ in path)
-        import textwrap
-        detailed_info = "\n".join(
-            f"Version: {v}\n\n  - Risk: {risk}\n  - Message: {'\n    '.join(textwrap.wrap(message, width=75))}\n  - URL: {url}\n"
-            for v, is_conditional, risk, message, url in path if is_conditional
-        )
-        return f"Available path: {formatted_path}\n\n{detailed_info}" if detailed_info else f"Path: {formatted_path}"
+        formatted_path = " -> ".join(v for v, _ in path)
+        details = []
+        for v, edges in path:
+            for is_conditional, risk, msg, url in edges:
+                if is_conditional:
+                    wrapped_msg = '\n    '.join(textwrap.wrap(msg, width=65))
+                    details.append(
+                        f"Version: {v}\n\n"
+                        f"  - Risk: {risk}\n"
+                        f"  - Message: {wrapped_msg}\n"
+                        f"  - URL: {url}\n"
+                    )
+        return f"Available path: {formatted_path}\n\n" + "\n".join(details) if details else f"Path: {formatted_path}"
     else:
         return f"No upgrade path found from {from_version} to {to_version} on channel {channel}"
 
+
 def generate_preview(versions, from_version, channel):
     preview_lines = []
-    # data = fetch_upgrade_graph(channel)
-    # graph, _ = build_graph(data)
     for to_version in versions:
-        # preview_lines.append(calculate_and_show_path(graph, from_version, to_version, channel))
         preview_lines.append(f"Path from {from_version} to {to_version} will be displayed here")
     return "\n---\n".join(preview_lines)
 
