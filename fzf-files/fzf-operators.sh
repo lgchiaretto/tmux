@@ -18,6 +18,8 @@ selected_operator=$(
 [Esc]       Exit
 ------------------------------------------------------------\n\n' \
         --layout=reverse \
+        --border-label=" chiaret.to " \
+        --border-label-pos=center \
         -h 40 \
         -p "32%,45" \
         --exact \

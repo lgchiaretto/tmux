@@ -10,6 +10,13 @@ elif [ -z "$project_name" ] && [ $? -eq 1 ]; then
   exit 0
 fi
 
-action=$(oc api-resources --cached=true | tail -n +2 | fzf-tmux --exact --layout=reverse -h 40 -p "100%,50%" --bind 'tab:accept' | awk '{print $1}')
+action=$(oc api-resources --cached=true | tail -n +2 | 
+    fzf-tmux \
+    --exact \
+    --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
+    -h 40 -p "100%,50%" \
+    --bind 'tab:accept' | awk '{print $1}')
 
 tmux send-keys "$action"

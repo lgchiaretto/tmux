@@ -5,16 +5,22 @@ CACHE_FILE="/data/.ocp_versions_cache"
 if [ -f "$CACHE_FILE" ]; then
     selected_version=$(cat "$CACHE_FILE" | fzf-tmux \
                        --header=$'-----------------------------------------------
+
+[r]       Release notes
+[Enter]   Print release name
+[Esc]     Exit
+
 Version             Release Date
 -----------------------------------------------\n' \
                        --layout=reverse \
+                       --border-label=" chiaret.to " \
+                       --border-label-pos=center \
                        -h 40 \
-                       -p "25%,53%" \
+                       -p "25%,62%" \
                        --with-nth=1,2,3,4,5,6,7,8 \
                        --no-input \
-                       --bind enter:accept \
-                       awk '{print $1}')
-    [ -n "$selected_version" ] && tmux send-keys "$selected_version" || exit 0
+                       --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {1})" \
+                       --bind "enter:ignore")
 else
     exit 0
 fi

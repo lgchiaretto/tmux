@@ -39,6 +39,8 @@ SELECTED_CHANNEL=$(echo -e "$CHANNELS" | sort | fzf-tmux \
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \
     --no-sort
@@ -80,5 +82,8 @@ if [ $? -ne 0 ]; then
     oc adm upgrade channel "$CURRENT_CHANNEL"
     error_exit "Failed to initiate the update. Check the error messages above."
 fi
+
+CURRENT_VERSION=$(oc get clusterversion -o jsonpath='{.items[0].status.desired.version}')
+sed -i "s/\"ocpversion": \"$CURRENT_VERSION\"/\"ocpversion": \"$SELECTED_VERSION\"/" /vms/clusters/$clustername/$clustername.json
 
 yes | tmuxp load /vms/clusters/$clustername/upgrade-tmuxp.yaml

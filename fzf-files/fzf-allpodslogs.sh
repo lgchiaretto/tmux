@@ -21,6 +21,8 @@ mapfile -t selected_pods_and_namespaces < <(
 -----------------------------------------------------------------------------------------------------------------\n\n' \
         --multi \
         --layout=reverse \
+        --border-label=" chiaret.to " \
+        --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \
         --exact \

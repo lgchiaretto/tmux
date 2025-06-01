@@ -52,6 +52,8 @@ selected_action=$(
 Cluster Name        Version     Type    SNO?       Platform       Workers              Description
 --------------------------------------------------------------------------------------------------------------' \
     --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
     -h 40 \
     -p "55%,46%" \
     --sort \
