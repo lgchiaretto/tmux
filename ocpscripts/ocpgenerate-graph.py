@@ -11,7 +11,7 @@ import heapq
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
 CACHE_DIR = "./graph_cache"
-CACHE_TTL_SECONDS = 6 * 3600
+CACHE_TTL_SECONDS = 12 * 3600
 
 CHANNELS = [
     "stable-4.12", "stable-4.13", "stable-4.14",
