@@ -51,11 +51,7 @@ def process_channel(channel):
     return channel_output
 
 if __name__ == "__main__":
-    header = [
-        "-----------------------------------------------",
-        f"{'Version':<10} {'Created Date':<30}",
-        "-----------------------------------------------"
-    ]
+    header = []
 
     all_outputs = header[:]
 

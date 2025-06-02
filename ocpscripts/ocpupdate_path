@@ -54,13 +54,7 @@ get_versions() {
     echo "$data" | jq -r '.nodes[].version'
 }
 
-channel=$(fzf_select "$(printf "%s\n" "${CHANNELS[@]}")" "Select OCP Channel" "--no-input")
-if [ -z "$channel" ]; then
-    exit 0
-fi
-
-data=$(fetch_upgrade_graph "$channel")
-versions=$(get_versions "$data")
+versions=`/usr/local/bin/ocpgetreleases.py`
 
 from_version=$(fzf_select "$versions" "Select from Version" "--exact")
 if [ -z "$from_version" ]; then
@@ -82,7 +76,7 @@ Select to version\n\n' \
     -h "40%" \
     -p "55%,46%" \
     --exact \
-    --preview "python3 ${script_dir} --from-version ${from_version} --channel ${channel} --to-version {}" \
+    --preview "python3 ${script_dir} --from-version ${from_version} --to-version {}" \
     --bind "enter:ignore" \
     --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {})" \
     --preview-window "right:76%"

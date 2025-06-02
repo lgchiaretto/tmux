@@ -10,8 +10,8 @@ from time import time
 import heapq
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
-CACHE_DIR = "./graph_cache"
-CACHE_TTL_SECONDS = 12 * 3600
+CACHE_DIR = "/vms/clusters/.cache/ocpgraph"
+CACHE_TTL_SECONDS = 24 * 3600
 
 CHANNELS = [
     "stable-4.12", "stable-4.13", "stable-4.14",
@@ -174,7 +174,7 @@ def format_path(path):
                 if actual_risks:
                     detail.append(f"Upgrade from {prev_version_only} to {current_version_only} (via {current_node_with_channel}):\n")
                     for risk, msg, url in actual_risks:
-                        wrapped_msg = "\n    ".join(textwrap.wrap(msg, width=65))
+                        wrapped_msg = "\n    ".join(textwrap.wrap(msg, width=55))
                         detail.append(
                             f"  - Risk: {risk}\n"
                             f"    Message: {wrapped_msg}\n"
@@ -188,7 +188,8 @@ def format_path(path):
                             wrapped_msg = "\n    ".join(textwrap.wrap(link_msg, width=65))
                             detail.append(f"  - {link_name}: {wrapped_msg}")
 
-    return f"Path: {steps}\n\n" + ("\n".join(detail) if detail else "No specific conditional risks found for this path.")
+    wrapped_steps = "\n".join(textwrap.wrap(steps, width=75))
+    return f"Path:\n{wrapped_steps}\n\n" + ("\n".join(detail) if detail else "No specific conditional risks found for this path.")
 
 def main():
     parser = argparse.ArgumentParser(description="Find OpenShift upgrade path")
@@ -196,6 +197,8 @@ def main():
     parser.add_argument("--to-version", required=True)
     parser.add_argument("--refresh-cache", action="store_true")
     args = parser.parse_args()
+
+    os.makedirs(CACHE_DIR, exist_ok=True)
 
     graph, version_to_nodes = build_supergraph(CHANNELS, refresh=args.refresh_cache)
     start_nodes = resolve_start_nodes(args.from_version, version_to_nodes)
