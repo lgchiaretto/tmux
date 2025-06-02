@@ -1,9 +1,9 @@
 [Unit]
-Description=Timer for updating OCP cache every 6 hours
+Description=Timer for updating OCP cache every 4 hours
 
 [Timer]
 OnBootSec=10min
-OnUnitActiveSec=6h
+OnUnitActiveSec=4h
 Unit=update-ocp-cache.service
 
 [Install]

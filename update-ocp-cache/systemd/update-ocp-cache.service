@@ -3,7 +3,7 @@ Description=Update OCP Versions Cache
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/update_ocp_cache.sh
+ExecStart=/usr/local/bin/update_ocp_cache.py
 User=root
 Environment=HOME=/root
 
