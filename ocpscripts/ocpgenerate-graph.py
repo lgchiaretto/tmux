@@ -1,115 +1,211 @@
 #!/usr/bin/env python3
 
+import os
+import json
 import requests
-from collections import deque
-import sys
 import argparse
+import textwrap
+from collections import defaultdict
+from time import time
+import heapq
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
+CACHE_DIR = "./graph_cache"
+CACHE_TTL_SECONDS = 6 * 3600
 
-def fetch_upgrade_graph(channel):
-    params = {"channel": channel, "arch": "amd64"}
-    try:
-        response = requests.get(GRAPH_URL, params=params)
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        print(f"Error fetching graph: {e}")
-        sys.exit(2)
+CHANNELS = [
+    "stable-4.12", "stable-4.13", "stable-4.14",
+    "stable-4.15", "stable-4.16", "stable-4.17", "stable-4.18"
+]
 
-def build_graph(data):
-    nodes = [node["version"] for node in data["nodes"]]
-    edges = data.get("edges", [])
-    conditional_edges = data.get("conditionalEdges", [])
+def fetch_graph(channel, refresh=False):
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cache_file = os.path.join(CACHE_DIR, f"{channel}.json")
+    if not refresh and os.path.exists(cache_file):
+        if time() - os.path.getmtime(cache_file) < CACHE_TTL_SECONDS:
+            with open(cache_file) as f:
+                return json.load(f)
+    print(f"Fetching graph for {channel}...")
+    resp = requests.get(GRAPH_URL, params={"channel": channel, "arch": "amd64"}, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
+    with open(cache_file, "w") as f:
+        json.dump(data, f)
+    return data
 
-    graph = {}
+def parse_version(version):
+    return tuple(map(int, version.split(".")))
 
-    for e in edges:
-        from_v = nodes[e[0]]
-        to_v = nodes[e[1]]
-        graph.setdefault(from_v, []).append((to_v, False, "No Risk", "No Message", "No URL"))
+def build_supergraph(channels, refresh=False):
+    temp_edges_info = defaultdict(lambda: {'is_conditional': False, 'risks': []})
+    version_to_nodes = defaultdict(list)
 
-    for edge_group in conditional_edges:
-        for edge in edge_group.get("edges", []):
-            from_v = edge.get("from")
-            to_v = edge.get("to")
-            for risk in edge_group.get("risks", [{}]):
-                risk_name = risk.get("name", "Unknown")
-                risk_message = risk.get("message", "No message")
-                risk_url = risk.get("url", "No URL")
-                graph.setdefault(from_v, []).append((to_v, True, risk_name, risk_message, risk_url))
+    for channel in CHANNELS:
+        data = fetch_graph(channel, refresh)
+        nodes = data["nodes"]
+        index_to_version = {i: node["version"] for i, node in enumerate(nodes)}
 
-    return graph, nodes
+        for i, version_str in index_to_version.items():
+            channel_node = f"{channel}:{version_str}"
+            if channel_node not in version_to_nodes[version_str]:
+                version_to_nodes[version_str].append(channel_node)
 
-def bfs_path(graph, from_v, to_v):
+        for e in data.get("edges", []):
+            f_version = index_to_version[e[0]]
+            t_version = index_to_version[e[1]]
+            from_node = f"{channel}:{f_version}"
+            to_node = f"{channel}:{t_version}"
+            if (from_node, to_node) not in temp_edges_info:
+                temp_edges_info[(from_node, to_node)] = {'is_conditional': False, 'risks': []}
+
+        for group in data.get("conditionalEdges", []):
+            group_risks_raw = group.get("risks", [])
+            processed_risks = []
+            for risk_dict in group_risks_raw:
+                name = risk_dict.get("name", "Unknown")
+                msg = risk_dict.get("message", "No message")
+                url = risk_dict.get("url", "No URL")
+                processed_risks.append((name, msg, url))
+
+            for e in group.get("edges", []):
+                f_version = e["from"]
+                t_version = e["to"]
+                from_node = f"{channel}:{f_version}"
+                to_node = f"{channel}:{t_version}"
+                temp_edges_info[(from_node, to_node)]['is_conditional'] = True
+                temp_edges_info[(from_node, to_node)]['risks'].extend(processed_risks)
+                
+    final_graph = defaultdict(list)
+    for (from_node, to_node), info in temp_edges_info.items():
+        unique_risks = []
+        seen_risks = set()
+        for risk_tuple in info['risks']:
+            if risk_tuple not in seen_risks:
+                unique_risks.append(risk_tuple)
+                seen_risks.add(risk_tuple)
+        if not info['is_conditional'] and not unique_risks:
+            unique_risks.append(("No Risk", "No message", "No URL"))
+        final_graph[from_node].append((to_node, info['is_conditional'], unique_risks))
+
+    for version_str, nodes_list in version_to_nodes.items():
+        unique_nodes_for_version = list(set(nodes_list))
+        for i in range(len(unique_nodes_for_version)):
+            for j in range(i + 1, len(unique_nodes_for_version)):
+                node1 = unique_nodes_for_version[i]
+                node2 = unique_nodes_for_version[j]
+                if (node1, node2) not in temp_edges_info and (node2, node1) not in temp_edges_info:
+                    final_graph[node1].append((node2, False, [("Channel Link", "Upgrade between equivalent versions in different channels.", "")]))
+                    final_graph[node2].append((node1, False, [("Channel Link", "Upgrade between equivalent versions in different channels.", "")]))
+
+    return final_graph, version_to_nodes
+
+
+def best_path(graph, start_nodes, target_versions, version_to_nodes):
     visited = set()
     prev = {}
-    edges_info = {}
+    edge_info = defaultdict(list)
+    heap = []
 
-    queue = deque([from_v])
-    visited.add(from_v)
+    for node in start_nodes:
+        version_tuple = parse_version(node.split(":")[1])
+        heapq.heappush(heap, (tuple(-x for x in version_tuple), node))
+        prev[node] = None
 
-    while queue:
-        current = queue.popleft()
-        if current == to_v:
-            break
-        for neighbor, is_conditional, risk_name, risk_message, risk_url in sorted(graph.get(current, []), reverse=True, key=lambda v: list(map(int, v[0].split('.')))):
+    target_nodes = set()
+    for v in target_versions:
+        target_nodes.update(version_to_nodes.get(v, []))
+
+    while heap:
+        _, current = heapq.heappop(heap)
+        if current in visited:
+            continue
+        visited.add(current)
+
+        if current in target_nodes:
+            path = []
+            temp_current = current
+            while temp_current:
+                path.append((temp_current, edge_info.get(temp_current, [])))
+                temp_current = prev.get(temp_current)
+            return path[::-1]
+
+        for neighbor, is_cond, risks_list in graph.get(current, []):
             if neighbor not in visited:
-                visited.add(neighbor)
                 prev[neighbor] = current
-                edges_info.setdefault(neighbor, []).append((is_conditional, risk_name, risk_message, risk_url))
-                queue.append(neighbor)
-            elif prev.get(neighbor) == current:
-                edges_info[neighbor].append((is_conditional, risk_name, risk_message, risk_url))
+                version_tuple = parse_version(neighbor.split(":")[1])
+                heapq.heappush(heap, (tuple(-x for x in version_tuple), neighbor))
+                edge_info[neighbor].extend([(is_cond, r[0], r[1], r[2]) for r in risks_list])
+    return None
 
-    if to_v not in prev and from_v != to_v:
-        return None
+def resolve_start_nodes(version, version_to_nodes):
+    return version_to_nodes.get(version, [])
 
-    path = []
-    v = to_v
-    while v != from_v:
-        path.append((v, edges_info.get(v, [])))
-        v = prev.get(v)
-        if v is None:
-            return None
-    path.append((from_v, []))
-    path.reverse()
-    return path
+def format_path(path):
+    if not path:
+        return "No upgrade path found."
 
+    cleaned_path_nodes = []
+    seen_versions_in_path = set()
+    for node, _ in path:
+        version_only = node.split(":")[1]
+        if version_only not in seen_versions_in_path:
+            cleaned_path_nodes.append(version_only)
+            seen_versions_in_path.add(version_only)
+    
+    steps = " -> ".join(cleaned_path_nodes)
+    
+    detail = []
+    for i in range(len(path)):
+        current_node_with_channel, incoming_edge_infos = path[i]
+        current_version_only = current_node_with_channel.split(":")[1]
 
-def calculate_and_show_path(graph, from_version, to_version, channel):
-    import textwrap
-    path = bfs_path(graph, from_version, to_version)
-    if path:
-        formatted_path = " -> ".join(v for v, _ in path)
-        details = []
-        for v, edges in path:
-            for is_conditional, risk, msg, url in edges:
-                if is_conditional:
-                    wrapped_msg = '\n    '.join(textwrap.wrap(msg, width=65))
-                    details.append(
-                        f"Upgrade to Version: {v}\n\n"
-                        f"  - Risk: {risk}\n"
-                        f"  - Message: {wrapped_msg}\n"
-                        f"  - URL: {url}\n"
-                    )
-        return f"Available path: {formatted_path}\n\n" + "\n".join(details) if details else f"Path: {formatted_path}"
-    else:
-        return f"No upgrade path found from {from_version} to {to_version} on channel {channel}"
+        if i > 0:
+            prev_node_with_channel = path[i-1][0]
+            prev_version_only = prev_node_with_channel.split(":")[1]
+
+            actual_risks = [
+                (risk, msg, url) for is_cond, risk, msg, url in incoming_edge_infos
+                if is_cond and risk not in ("No Risk", "Channel Link")
+            ]
+            
+            is_channel_link_only = all(r[0] == "Channel Link" for is_cond, r, msg, url in incoming_edge_infos) and len(incoming_edge_infos) > 0
+
+            if prev_version_only != current_version_only:
+                if actual_risks:
+                    detail.append(f"Upgrade from {prev_version_only} to {current_version_only} (via {current_node_with_channel}):\n")
+                    for risk, msg, url in actual_risks:
+                        wrapped_msg = "\n    ".join(textwrap.wrap(msg, width=65))
+                        detail.append(
+                            f"  - Risk: {risk}\n"
+                            f"    Message: {wrapped_msg}\n"
+                            f"    URL: {url}\n"
+                        )
+            elif is_channel_link_only and prev_version_only == current_version_only:
+                if prev_node_with_channel.split(":")[0] != current_node_with_channel.split(":")[0]:
+                    detail.append(f"Channel hop from {prev_node_with_channel.split(':')[0]} to {current_node_with_channel.split(':')[0]} (version {current_version_only}):")
+                    for is_cond, link_name, link_msg, link_url in incoming_edge_infos:
+                        if link_name == "Channel Link":
+                            wrapped_msg = "\n    ".join(textwrap.wrap(link_msg, width=65))
+                            detail.append(f"  - {link_name}: {wrapped_msg}")
+
+    return f"Path: {steps}\n\n" + ("\n".join(detail) if detail else "No specific conditional risks found for this path.")
 
 def main():
-    parser = argparse.ArgumentParser(description="Find upgrade paths between OpenShift versions.")
-    parser.add_argument("--from-version", required=True, help="Starting OpenShift version (e.g., 4.16.1).")
-    parser.add_argument("--to-version", required=True, help="Target OpenShift version (e.g., 4.18.14).")
-    parser.add_argument("--channel", required=True, help="The OpenShift update channel (e.g., eus-4.18).")
-
+    parser = argparse.ArgumentParser(description="Find OpenShift upgrade path")
+    parser.add_argument("--from-version", required=True)
+    parser.add_argument("--to-version", required=True)
+    parser.add_argument("--refresh-cache", action="store_true")
     args = parser.parse_args()
 
-    data = fetch_upgrade_graph(args.channel)
-    graph, _ = build_graph(data)
-    
-    result = calculate_and_show_path(graph, args.from_version, args.to_version, args.channel)
-    print(result)
+    graph, version_to_nodes = build_supergraph(CHANNELS, refresh=args.refresh_cache)
+    start_nodes = resolve_start_nodes(args.from_version, version_to_nodes)
+
+    if not start_nodes:
+        print(f"Starting version {args.from_version} not found in any channel.")
+        return
+
+    path = best_path(graph, start_nodes, [args.to_version], version_to_nodes)
+    print(format_path(path))
 
 if __name__ == "__main__":
     main()
