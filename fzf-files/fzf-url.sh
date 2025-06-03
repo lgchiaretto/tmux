@@ -28,6 +28,8 @@ chosen=$(echo "$content" | fzf-tmux \
   --bind 'ctrl-o:execute-silent(firefox {})+abort' \
   --bind 'tab:accept' \
   --expect=enter \
+  --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+  --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
 )
 if [ -n "$chosen" ]; then
     tmux send-keys "$(echo "$chosen" | tail -n1)"

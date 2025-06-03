@@ -9,7 +9,10 @@ selected_os=$(echo -e "rhel9\nrhel8" | fzf-tmux \
 [Enter]     Select RHEL version
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
-  --height=40% --border)
+  --height=40% --border \
+  --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+  --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+  )
 
 if [ -z "$selected_os" ]; then
   exit 0
@@ -27,7 +30,10 @@ fzf-tmux --prompt="Choose a client version: " \
   --layout=reverse -p "31%,40%" \
   --height=40% \
   --bind "ctrl-c:execute-silent(echo -n '$URL/{}'/openshift-client-linux-amd64-$selected_os.tar.gz | wl-copy && tmux set-buffer {} && tmux display 'Copied')+abort" \
-  --border)
+  --border\
+  --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+  --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+  )
 
 if [ -n "$selected_version" ]; then
     url="$URL/$selected_version/openshift-client-linux-amd64-$selected_os-$selected_version.tar.gz"

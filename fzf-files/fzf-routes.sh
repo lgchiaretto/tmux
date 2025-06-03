@@ -34,6 +34,8 @@ chosen=$(echo "$content" | fzf-tmux \
          echo {3} | xargs firefox
     )+abort' \
     --expect=enter \
+    --color=fg:#d4be98,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
   tmux send-keys $(echo "$chosen" | tail -n1 | awk '{print $2}')

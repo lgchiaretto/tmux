@@ -12,7 +12,7 @@ CHANNELS=(
 HEADER="
 ----------------------------------------- Update path tool ---------------------------------------------------
 |                                                                                                            |
-|  [Enter]....Select the channel                                                                             |
+|  [Enter]....Select the channel                                                                            |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n
@@ -32,7 +32,10 @@ fzf_select() {
         --border-label=" chiaret.to " \
         --border-label-pos=center \
         -h "40%" -p "55%,46%" \
-        --exact)
+        --exact \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+    )
     echo "$result"
 }
 
@@ -79,6 +82,8 @@ Select to version\n\n' \
     --preview "python3 ${script_dir} --from-version ${from_version} --to-version {}" \
     --bind "enter:ignore" \
     --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {})" \
-    --preview-window "right:76%"
+    --preview-window "right:76%" \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     
 exit 0

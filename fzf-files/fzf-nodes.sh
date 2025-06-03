@@ -81,7 +81,9 @@ selected_nodes=$(
         --bind 'ctrl-e:execute-silent('"$0"' --action-wrapper edit {+1})+abort' \
         --bind 'ctrl-s:execute-silent('"$0"' --action-wrapper ossh {+1})+abort' \
         --bind 'ctrl-a:toggle-all' \
-        --expect=enter
+        --expect=enter \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
 )
 
 if [ -n "$selected_nodes" ]; then

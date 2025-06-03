@@ -19,6 +19,8 @@ mapfile -t selected_pods_and_namespaces < <(
 [Tab]       Select pod to show log
 [Esc]       Exit
 -----------------------------------------------------------------------------------------------------------------\n\n' \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
         --multi \
         --layout=reverse \
         --border-label=" chiaret.to " \
@@ -68,7 +70,13 @@ for line in "${selected_pods_and_namespaces[@]}"; do
         if [[ $container_count -eq 1 ]]; then
             first_container="${containers[0]}"
         else
-            first_container=$(echo "$final_containers" | fzf-tmux --header="Select the container for pod $pod in namespace $namespace:" --layout=reverse -h 40 -p "100%,50%")
+            first_container=$(echo "$final_containers" | fzf-tmux \
+                --header="Select the container for pod $pod in namespace $namespace:" \
+                --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+                --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \                
+                --color=marker:#a9b665,spinner:#a9b665,header:#7c6f64 \
+                --layout=reverse \
+                -h 40 -p "100%,50%")
             [[ -z "$first_container" ]] && continue
         fi
 

@@ -56,7 +56,10 @@ selected_cluster_project=$(fzf-tmux \
     -h 40 -p "50%,50%" \
     --query="$FILTER" \
     --bind 'tab:accept' \
-    --exact < /tmp/clusters_projects.$$)
+    --exact < /tmp/clusters_projects.$$ \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+    )
 
 rm -f /tmp/clusters_projects.$$
 

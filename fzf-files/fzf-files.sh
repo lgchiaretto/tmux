@@ -23,7 +23,9 @@ selected_file=$(
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
-        --query ""
+        --query "" \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
 )
 
 if [ -n "$selected_file" ]; then

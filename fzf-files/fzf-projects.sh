@@ -23,6 +23,8 @@ selected_project=$(echo "$projects" | fzf-tmux \
     --bind 'tab:accept' \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \
     --expect=enter \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 
 if [ -n "$selected_project" ]; then

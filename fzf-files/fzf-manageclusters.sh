@@ -34,7 +34,7 @@ fi
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
     --header=$'
-|----------------- Cluster creation ------------------|------------------- Cluster actions ------------------|
+------------------ Cluster creation -------------------------------------- Cluster actions -------------------
 |                                                     |                                                      |
 |  [c]........Create cluster                          |    [s]........Start cluster                          |
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
@@ -52,12 +52,15 @@ selected_action=$(
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
 |                                                     |                                                      |
-|------------------------------------------------------------------------------------------------------------|
-Cluster Name        Version     Type    SNO?       Platform       Workers              Description
+--------------------------------------------------------------------------------------------------------------
+Cluster Name        Version      Type   SNO?       Platform       Workers              Description
 --------------------------------------------------------------------------------------------------------------' \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
     --border-label=" chiaret.to " \
     --border-label-pos=center \
+    --border=rounded \
     -h 40 \
     -p "55%,55%" \
     --sort \
@@ -76,7 +79,7 @@ Cluster Name        Version     Type    SNO?       Platform       Workers       
     --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
-    --expect=enter
+    --expect=enter 
 )
 
 if [ -n "$selected_action" ]; then

@@ -16,7 +16,7 @@ selected_operator=$(
 [Ctrl-d]    Run "oc describe <cluster operator>"
 [Ctrl-e]    Run "oc edit <cluster operator>"
 [Esc]       Exit
-------------------------------------------------------------\n\n' \
+------------------------------------------------------------\n\n' \       
         --layout=reverse \
         --border-label=" chiaret.to " \
         --border-label-pos=center \
@@ -29,7 +29,9 @@ selected_operator=$(
         )+abort' \
         --bind 'ctrl-e:execute-silent(
             tmux send-keys "oc edit co {1}" C-m;
-        )+abort' | awk '{print $1}'
+        )+abort' | awk '{print $1}' \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \ 
 )
 
 if [ -n "$selected_operator" ]; then

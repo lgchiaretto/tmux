@@ -29,7 +29,9 @@ selected_file=$(echo -e "$actions" | sort | fzf-tmux \
     --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \
-    --no-sort
+    --no-sort \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     )
 
 variablesfile=$(echo "$selected_file" | tail -n1)

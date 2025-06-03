@@ -12,11 +12,14 @@ fi
 
 action=$(oc api-resources --cached=true | tail -n +2 | 
     fzf-tmux \
-    --exact \
+    --exact \   
     --layout=reverse \
     --border-label=" chiaret.to " \
     --border-label-pos=center \
     -h 40 -p "100%,50%" \
-    --bind 'tab:accept' | awk '{print $1}')
+    --bind 'tab:accept' | awk '{print $1}'\ 
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+)
 
 tmux send-keys "$action"
