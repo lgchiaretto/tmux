@@ -60,7 +60,7 @@ selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
         --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
 [Enter]     Print node name
-[Tab]       Print node name
+[Tab]       Select node
 [Ctrl-a]    Select all nodes
 [Ctrl-d]    Run "oc describe <node>" in new tmux window
 [Ctrl-e]    Run "oc edit <node>" in new tmux window
@@ -83,7 +83,7 @@ selected_nodes=$(
         --bind 'ctrl-a:toggle-all' \
         --expect=enter \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 
 if [ -n "$selected_nodes" ]; then

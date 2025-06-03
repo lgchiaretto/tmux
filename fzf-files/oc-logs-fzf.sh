@@ -16,7 +16,7 @@ else
         --exact \
         --bind 'tab:accept' \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \ 
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 
         )
     if [ -n "$container" ]; then
         formatted_pod="${pod:0:15}..${container: -15}"

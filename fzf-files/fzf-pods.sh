@@ -62,7 +62,7 @@ selected_pod=$(
 [Ctrl-e]    Run "oc edit <pod>" in new tmux window
 [Ctrl-l]    Run "oc logs <pod>" in new tmux window
 [Esc]       Exit
-----------------------------------------------------------------------------------------------------------------------------------------\n\n' \     
+----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
         --border-label=" chiaret.to " \
         --border-label-pos=center \
@@ -79,7 +79,7 @@ selected_pod=$(
         --bind 'ctrl-a:toggle-all' \
         --expect=enter \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \   
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 
 if [ -n "$selected_pod" ]; then

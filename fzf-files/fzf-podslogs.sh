@@ -35,7 +35,7 @@ mapfile -t selected_pods < <(
             -p "100%,50%" \
             --exact \
             --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-            --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+            --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 
 [[ ${#selected_pods[@]} -eq 0 ]] && exit

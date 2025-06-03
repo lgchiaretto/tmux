@@ -25,7 +25,7 @@ selected_file=$(
         --preview-window=right:60%:wrap \
         --query "" \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 
 if [ -n "$selected_file" ]; then

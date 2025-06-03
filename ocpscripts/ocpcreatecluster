@@ -31,7 +31,7 @@ selected_file=$(echo -e "$actions" | sort | fzf-tmux \
     --no-input \
     --no-sort \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
     )
 
 variablesfile=$(echo "$selected_file" | tail -n1)

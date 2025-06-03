@@ -193,12 +193,19 @@ def format_path(path):
 
 def main():
     parser = argparse.ArgumentParser(description="Find OpenShift upgrade path")
-    parser.add_argument("--from-version", required=True)
-    parser.add_argument("--to-version", required=True)
+    parser.add_argument("--from-version")
+    parser.add_argument("--to-version")
     parser.add_argument("--refresh-cache", action="store_true")
     args = parser.parse_args()
 
     os.makedirs(CACHE_DIR, exist_ok=True)
+
+    if args.refresh_cache and (not args.from_version or not args.to_version):
+        print("Refreshing cache...")
+        for channel in CHANNELS:
+           fetch_graph(channel, refresh=True)
+        print("Cache has been recreated...")
+        exit(0)
 
     graph, version_to_nodes = build_supergraph(CHANNELS, refresh=args.refresh_cache)
     start_nodes = resolve_start_nodes(args.from_version, version_to_nodes)
