@@ -15,7 +15,9 @@ if [ -z "$selected_os" ]; then
   exit 0
 fi
 
-selected_version=$(curl -s "$URL/" | grep -oP '<a href="\K[^/]+(?=/")' | \
+versions=`/usr/local/bin/ocpgetreleases.py`
+
+selected_version=$(IFS=' '; echo $versions | sort -rV | \
 fzf-tmux --prompt="Choose a client version: " \
     --header=$'-------------------------- Help --------------------------
 [Enter]     Download OCP Client

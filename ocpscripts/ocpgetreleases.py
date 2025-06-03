@@ -20,7 +20,11 @@ def list_versions():
             except Exception:
                 continue
 
-    for version in sorted(seen, key=lambda v: tuple(map(int, v.split(".")))):
+    filtered_versions = [
+        v for v in seen if not v.startswith("4.11.")
+    ]
+
+    for version in sorted(filtered_versions, key=lambda v: tuple(map(int, v.split(".")))):
         print(version)
 
 if __name__ == "__main__":
