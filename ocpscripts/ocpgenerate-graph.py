@@ -10,7 +10,7 @@ from time import time
 import heapq
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
-CACHE_DIR = "/vms/clusters/.cache/ocpgraph"
+CACHE_DIR = "~/.cache/ocpgraph"
 CACHE_TTL_SECONDS = 24 * 3600
 
 CHANNELS = [
