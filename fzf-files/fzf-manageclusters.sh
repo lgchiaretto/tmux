@@ -46,11 +46,9 @@ selected_action=$(
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
 |  [D]........Copy or download and install OpenShift  |    [Enter]....Login with kubeadmin user              |
 |             client                                  |                                                      |
-|                                                     |                                                      |
-|                                                     |                                                      |
+|  [K]........Unset current-context on client         |                                                      |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
-|                                                     |                                                      |
 |                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
 Cluster Name        Version      Type   SNO?       Platform       Workers              Description
@@ -77,6 +75,7 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
     --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
+    --bind 'K:execute-silent(tmux send-keys "oc config unset current-context" C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter 
