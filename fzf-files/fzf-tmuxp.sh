@@ -27,12 +27,12 @@ fi
 
 case "$tmuxpfile" in
   "/vms/clusters/$clustername/create-tmuxp.yaml")
-    yes | tmuxp load /vms/clusters/$clustername/create-tmuxp.yaml
+    tmuxp load /vms/clusters/$clustername/create-tmuxp.yaml -y
     ;;
   "/vms/clusters/$clustername/upgrade-tmuxp.yaml")
     connected_cluster=$(oc whoami --show-server | awk -F'.' '{print $2}')
     [ "$connected_cluster" != "$clustername" ] && error_exit "The connected cluster '$connected_cluster' does not match the selected cluster '$clustername'"
 
-    yes | tmuxp load /vms/clusters/$clustername/upgrade-tmuxp.yaml
+    tmuxp load /vms/clusters/$clustername/upgrade-tmuxp.yaml -y
     ;;
 esac

@@ -82,7 +82,11 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
 
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
-  tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+  if [[ -z "$KUBECONFIG" ]]; then
+    tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+  else
+    tmux display -d 5000 "KUBECONFIG is set, not logging in with kubeadmin user"
+  fi
 fi
 
 if [ $? -ne 0 ]; then
