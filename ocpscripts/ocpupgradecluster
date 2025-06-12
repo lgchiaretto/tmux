@@ -36,7 +36,7 @@ SELECTED_CHANNEL=$(echo -e "$CHANNELS" | sort | fzf-tmux \
     --no-input \
     --no-sort \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
     )
 
 [ -z "$SELECTED_CHANNEL" ] && error_exit "Channel selection cancelled. Exiting."

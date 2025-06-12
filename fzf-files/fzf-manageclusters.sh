@@ -33,14 +33,13 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'
------------------- Cluster creation -------------------------------------- Cluster actions -------------------
+    --header=$'------------------ Cluster creation -------------------------------------- Cluster actions -------------------
 |                                                     |                                                      |
 |  [c]........Create cluster                          |    [s]........Start cluster                          |
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
 |                                                     |    [d]........Destroy cluster                        |
 |                                                     |    [U]........Upgrade cluster                        |
-|------------------ OpenShift Tools ------------------|    [t]........Open tmuxp create session              |
+|------------------ OpenShift Tools ------------------|    [t]........Tmuxp sessions                         |
 |                                                     |    [p]........Copy kubeadmin password to clipboard   |
 |  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
@@ -60,7 +59,7 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
     --border-label-pos=center \
     --border=rounded \
     -h 40 \
-    -p "55%,55%" \
+    -p "55%,50%" \
     --sort \
     --no-input \
     --multi \
@@ -69,14 +68,14 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
     --bind 's:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
     --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
-    --bind 'k:execute-silent(tmux new-window  -n "export: "{1} "export KUBECONFIG=/vms/clusters/{1}/auth/kubeconfig; bash")+abort' \
+    --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="/vms/clusters/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; bash)+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
     --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
     --bind 'K:execute-silent(tmux send-keys "oc config unset current-context" C-m)+abort' \
-    --bind 't:execute-silent(tmux send-keys "yes | tmuxp load /vms/clusters/"{1}"/create-tmuxp.yaml" C-m)+abort' \
+    --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter 
 )
