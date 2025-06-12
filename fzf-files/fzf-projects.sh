@@ -9,9 +9,8 @@ fi
 
 selected_project=$(echo "$projects" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
-[Enter]           Print project name
+[Enter]           Change to project
 [Tab]             Print project name
-[Ctrl-p] - Esc    Run "oc project <project>"
 [Esc]             Exit
 ----------------------------------------------------------\n\n' \
     --layout=reverse \
@@ -20,7 +19,7 @@ selected_project=$(echo "$projects" | fzf-tmux \
     -h 40 \
     -p "100%,50%" \
     --exact \
-    --bind 'tab:accept' \
+    --bind "tab:execute-silent(tmux send-keys '{}')+abort" \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \
     --expect=enter \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
@@ -28,5 +27,6 @@ selected_project=$(echo "$projects" | fzf-tmux \
 )
 
 if [ -n "$selected_project" ]; then
-    tmux send-keys $(echo "$selected_project" | tail -n1 | awk '{print $1}')
+    project=$(echo "$selected_project" | tail -n1 | awk '{print $1}')
+    oc project $project > /dev/null 2>&1
 fi

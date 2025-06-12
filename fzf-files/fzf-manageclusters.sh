@@ -68,7 +68,7 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
     --bind 's:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
     --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
-    --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="/vms/clusters/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; bash)+abort' \
+    --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="/vms/clusters/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; tmux send-keys "cd /vms/clusters/"{1} C-m; bash)+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
