@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if [[ $1 == *----* ]]; then
+    exit 0
+fi
+
+firefox "https://docs.redhat.com/en/documentation/openshift_container_platform/$(cut -d'.' -f1-2 <<< $1)"

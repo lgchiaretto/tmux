@@ -7,6 +7,7 @@ if [ -f "$CACHE_FILE" ]; then
                        --header=$'-----------------------------------------------
 
 [r]       Release notes
+[d]       Documentation
 [Enter]   Print release name
 [Esc]     Exit
 
@@ -20,6 +21,7 @@ Version             Release Date
                        --with-nth=1,2,3,4,5,6,7,8 \
                        --no-input \
                        --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {1})" \
+                       --bind "d:execute-silent(/usr/local/bin/ocpdocumentation {1})" \
                        --bind "enter:ignore" \
                        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
                        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665

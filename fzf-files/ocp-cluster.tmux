@@ -6,7 +6,14 @@ KUBECONFIG_PATH="/vms/clusters/${CLUSTER}/auth/kubeconfig"
 if [[ -f "$KUBECONFIG_PATH" ]]; then
     OPENSHIFT_VERSION=$(KUBECONFIG=$KUBECONFIG_PATH oc version | grep Server | awk -F' ' '{print $3}')
     OPENSHIFT_PROJECT=$(KUBECONFIG=$KUBECONFIG_PATH oc project -q)
-    echo "#[fg=green](k)#[fg=orange]${OPENSHIFT_VERSION}#[fg=white]:#[fg=colour30]${OPENSHIFT_PROJECT}#[fg=white)"
+    if [[ -z "$OPENSHIFT_PROJECT" ]]; then
+        OPENSHIFT_PROJECT="#[fg=red]<no-project>"
+    fi  
+    if [[ -z "$OPENSHIFT_VERSION" ]]; then
+        echo -e "#[fg=red]N/A"
+    else
+        echo "#[fg=orange]${OPENSHIFT_VERSION}#[fg=white]:#[fg=green](k)#[fg=white]:#[fg=colour30]${OPENSHIFT_PROJECT}#[fg=white)"
+    fi
 else
     oc whoami > /tmp/dummy-file-tmux
 

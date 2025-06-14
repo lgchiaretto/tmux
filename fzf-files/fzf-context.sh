@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-KUBECONFIG=~/.kube/config
+if [[ -z "$KUBECONFIG" ]]; then
+   KUBECONFIG=~/.kube/config
+fi
 
 if [[ ! -f "$KUBECONFIG" ]]; then
     tmux display -d 5000 "Error: File $KUBECONFIG does not exist."
