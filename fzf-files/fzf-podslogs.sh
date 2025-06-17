@@ -58,7 +58,12 @@ for pod in "${selected_pods[@]}"; do
           [[ -z "$first_container" ]] && continue
       fi
     fi
-    formatted_pod="${pod:0:15}..${pod: -15}"
+
+    if [[ ${#pod} -gt 30 ]]; then
+        formatted_pod="${pod:0:15}..${pod: -15}"
+    else
+        formatted_pod="$pod"
+    fi
 
     if tmux list-windows -t "$session_name" | grep -q "$formatted_pod"; then
         continue

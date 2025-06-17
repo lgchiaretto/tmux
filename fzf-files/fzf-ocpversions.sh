@@ -17,7 +17,7 @@ Version             Release Date
                        --border-label=" chiaret.to " \
                        --border-label-pos=center \
                        -h 40 \
-                       -p "25%,68%" \
+                       -p "25%,73%" \
                        --with-nth=1,2,3,4,5,6,7,8 \
                        --no-input \
                        --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {1})" \

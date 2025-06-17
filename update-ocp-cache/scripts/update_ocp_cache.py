@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import re
 
-channels = ["4.14", "4.16", "4.17", "4.18"]
+channels = ["4.14", "4.16", "4.17", "4.18", "4.19"]
 
 def get_release_info(version):
     release_url = f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{version}/release.txt"

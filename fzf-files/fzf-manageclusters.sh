@@ -8,14 +8,16 @@ clusters() {
   ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   clustertype=$(jq -r '.clustertype' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   sno=$(jq -r '.sno' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwaredatastore=$(jq -r '.vmwaredatastore' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   platform=$(jq -r '.platform' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   n_worker=$(jq -r '.n_worker' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  created_at=$(stat -c %y /vms/clusters/$dir/$dir.json | cut -d' ' -f1)
   started_file="/vms/clusters/$dir/started"
 
   if [ -f "$started_file" ]; then
-    printf "%-19s %-12s %-6s %-10s %-14s %-12s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwarenotes"
+    printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
   else
-    printf "%-19s %-12s %-6s %-10s %-14s %-12s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwarenotes"
+    printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
   fi
 }
 
@@ -45,12 +47,11 @@ selected_action=$(
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
 |  [D]........Copy or download and install OpenShift  |    [Enter]....Login with kubeadmin user              |
 |             client                                  |                                                      |
-|  [K]........Unset current-context on client         |                                                      |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
-Cluster Name        Version      Type   SNO?       Platform       Workers              Description
+Cluster Name      Version  Type   SNO?   Platform    Workers   Datastore  Created        Description
 --------------------------------------------------------------------------------------------------------------' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
@@ -74,7 +75,6 @@ Cluster Name        Version      Type   SNO?       Platform       Workers       
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
     --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
-    --bind 'K:execute-silent(tmux send-keys "oc config unset current-context" C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --expect=enter 

@@ -9,8 +9,8 @@ fi
 
 chosen=$(echo "$content" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
-[Enter]     Print route name
-[Tab]       Print route name
+[Enter]     Open route on Firefox
+[Tab]       Print route hostname
 [Ctrl-e]    Run "oc edit <route>"
 [Ctrl-d]    Run "oc describe <route>"
 [Ctrl-o]    open the route on firefox
@@ -23,7 +23,9 @@ chosen=$(echo "$content" | fzf-tmux \
     -p "100%,50%" \
     --exact \
     --with-nth=1,2,3 \
-    --bind 'tab:accept' \
+    --bind 'tab:execute-silent(
+        tmux send-keys {3};
+    )+abort' \
     --bind 'ctrl-e:execute-silent(
         tmux send-keys "oc edit -n {1} {2}" C-m;
     )+abort' \
@@ -38,5 +40,5 @@ chosen=$(echo "$content" | fzf-tmux \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
-  tmux send-keys $(echo "$chosen" | tail -n1 | awk '{print $2}')
+  firefox $(echo "$chosen" | tail -n1 | awk '{print $3}')
 fi

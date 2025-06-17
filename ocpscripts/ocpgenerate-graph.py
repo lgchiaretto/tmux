@@ -15,7 +15,8 @@ CACHE_TTL_SECONDS = 24 * 3600
 
 CHANNELS = [
     "stable-4.12", "stable-4.13", "stable-4.14",
-    "stable-4.15", "stable-4.16", "stable-4.17", "stable-4.18"
+    "stable-4.15", "stable-4.16", "stable-4.17",
+    "stable-4.18", "stable-4.19" 
 ]
 
 def fetch_graph(channel, refresh=False):
@@ -172,7 +173,7 @@ def format_path(path):
 
             if prev_version_only != current_version_only:
                 if actual_risks:
-                    detail.append(f"Upgrade from {prev_version_only} to {current_version_only} (via {current_node_with_channel}):\n")
+                    detail.append(f"Upgrade from {prev_version_only} to {current_version_only}:\n")
                     for risk, msg, url in actual_risks:
                         wrapped_msg = "\n    ".join(textwrap.wrap(msg, width=55))
                         detail.append(
