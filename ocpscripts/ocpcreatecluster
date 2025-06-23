@@ -12,9 +12,7 @@ actions="- Baremetal IPI 3-node cluster
 - None UPI Single node cluster with 'OCP Virt'
 - None UPI Single node cluster with 'ODF'
 - vSphere IPI 3-node cluster
-- vSphere UPI 3-node cluster
-- vSphere UPI Single node cluster
-- vSphere IPI Single node cluster"
+- vSphere UPI 3-node cluster"
 
 selected_file=$(echo -e "$actions" | sort | fzf-tmux \
     --header=$'
@@ -58,11 +56,6 @@ if [ -n "$selected_file" ]; then
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;
-        "- vSphere IPI Single node cluster")
-            file="/vms/clusters/variables-files/ansible-vars-ipi-sno.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
         "- None UPI 3-node cluster")
             file="/vms/clusters/variables-files/ansible-vars-upi-3node-none.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
@@ -90,11 +83,6 @@ if [ -n "$selected_file" ]; then
             ;;
         "- vSphere UPI 3-node cluster")
             file="/vms/clusters/variables-files/ansible-vars-upi-3node-vsphere.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- vSphere UPI Single node cluster")
-            file="/vms/clusters/variables-files/ansible-vars-upi-sno-vsphere.json"
             tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
             ;;

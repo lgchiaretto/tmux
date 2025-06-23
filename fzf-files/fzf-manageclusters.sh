@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 
-actions="1 - Create cluster\n2 - Destroy cluster\n3 - Edit install configs\n4 - Export 'kube:admin' kubeconfig\n5 - Login with 'kubeadmin' user\n6 - Start cluster\n7 - Stop cluster\n8 - List OpenShift releases available on quay.chiaret.to"
+actions=$(
+  cat <<EOF
+1 - Create cluster
+2 - Destroy cluster
+3 - Edit install configs
+4 - Export 'kube:admin' kubeconfig
+5 - Login with 'kubeadmin' user
+6 - Start cluster
+7 - Stop cluster
+8 - List OpenShift releases available on quay.chiaret.to
+EOF
+)
 
 clusters() {
   local dir="$1"
@@ -47,11 +58,12 @@ selected_action=$(
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
 |  [D]........Copy or download and install OpenShift  |    [Enter]....Login with kubeadmin user              |
 |             client                                  |                                                      |
+|  [l]........OpenShift/Operators Lifecycle           |                                                      |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
-Cluster Name      Version  Type   SNO?   Platform    Workers   Datastore  Created        Description
+Cluster Name      Version  Type   SNO?   Platform    Workers   Datastore  Created At     Description
 --------------------------------------------------------------------------------------------------------------' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
@@ -77,6 +89,7 @@ Cluster Name      Version  Type   SNO?   Platform    Workers   Datastore  Create
     --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
+    --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
     --expect=enter 
 )
 

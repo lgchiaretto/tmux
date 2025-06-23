@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import re
 
-channels = ["4.14", "4.16", "4.17", "4.18", "4.19"]
+channels = ["4.14", "4.15", "4.16", "4.17", "4.18", "4.19"]
 
 def get_release_info(version):
     release_url = f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{version}/release.txt"
@@ -24,10 +24,10 @@ def get_release_info(version):
                         created_date = datetime.strptime(created_date_str.replace(" UTC", ""), "%a %b %d %H:%M:%S %Y")
                 return f"{version:<10} {created_date.strftime('%c'):<30}"
     except requests.exceptions.RequestException as e:
-        return f"Erro ao buscar {version}: {e}"
+        return f"Error fetching {version}: {e}"
     except ValueError:
-        return f"Erro ao analisar data para {version}"
-    return f"{version:<10} Data de criação não encontrada"
+        return f"Error parsing date for {version}"
+    return f"{version:<10} Creation date not found"
 
 def process_channel(channel):
     channel_output = []
@@ -45,9 +45,9 @@ def process_channel(channel):
             channel_output.extend(results)
 
     except requests.exceptions.RequestException as e:
-        channel_output.append(f"Erro ao buscar versões para o canal {channel}: {e}")
+        channel_output.append(f"Error fetching versions for channel {channel}: {e}")
 
-    channel_output.append("-----------------------------------------------")
+    channel_output.append("---------------------------------------")
     return channel_output
 
 if __name__ == "__main__":
@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
     with open("/data/.ocp_versions_cache", "w", encoding="utf-8") as f:
         for line in all_outputs:
-            f.write(line + "\n")
+            f.write(line.replace("    ", "        ") + "\n")
