@@ -24,12 +24,12 @@ if [[ ${#CONTEXTS[@]} -eq 0 ]]; then
 fi
 
 FILTER=${1:-}
-current_context=$(timeout 0.2 oc config current-context)
+current_context=$(timeout 0.5 oc config current-context)
 
 list_projects() {
     local cluster="$1"
     local context="$2"
-    namespaces=$(timeout 0.2 oc --context="$context" get namespaces --no-headers -o custom-columns=":metadata.name" 2>/dev/null)
+    namespaces=$(timeout 0.5 oc --context="$context" get namespaces --no-headers -o custom-columns=":metadata.name" 2>/dev/null)
     if [[ -n "$namespaces" ]]; then
         while IFS= read -r ns; do
             echo "$cluster/$ns"

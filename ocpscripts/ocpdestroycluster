@@ -15,5 +15,10 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   exit 0
 fi
 
-tmux send-keys "/usr/local/bin/destroycluster.py -i /vms/clusters/$1/$1.json -n $1" C-m
+infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
 
+if [[ "$infra" == "vsphere" ]]; then
+  tmux send-keys "/usr/local/bin/destroycluster.py -i /vms/clusters/$1/$1.json -n $1" C-m
+elif [[ "$infra" == "kvm" ]]; then
+  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml" C-m
+fi

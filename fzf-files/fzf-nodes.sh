@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-nodes=$(timeout 2s oc get nodes -o json | jq -r '.items[] | "\(.metadata.name) \(.status.conditions[] | select(.reason == "KubeletReady").type)"')
+nodes=$(timeout 2s oc get nodes -o "custom-columns=NOME:.metadata.name,STATUS:.status.conditions[?(@.type=='Ready')].status" --no-headers)
 
 if [ -z "$nodes" -a $? -eq 0 ]; then
     tmux display -d 5000 'No node found'
@@ -49,10 +49,10 @@ if [[ "$1" == "--action-wrapper" ]]; then
 fi
 
 colored_nodes=$(echo "$nodes" | awk '{
-    if ($2 != "Ready") {
-        printf "\033[31m%s\t%s\033[0m\n", $1, $2  # Red for error or non-Running statuses
+    if ($2 != "True") {
+        printf "\033[31m%s\tNotReady\033[0m\n", $1  # Red for error or non-Running statuses
     } else {
-        printf "%s\t%s\n", $1, $2
+        printf "%s\tReady\n", $1
     }
 }' | column -t) 
 

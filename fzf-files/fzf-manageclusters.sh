@@ -20,15 +20,24 @@ clusters() {
   clustertype=$(jq -r '.clustertype' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   sno=$(jq -r '.sno' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   vmwaredatastore=$(jq -r '.vmwaredatastore' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwaredatastoreworkers=$(jq -r '.vmwaredatastoreworkers' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   platform=$(jq -r '.platform' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   n_worker=$(jq -r '.n_worker' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   created_at=$(stat -c %y /vms/clusters/$dir/$dir.json | cut -d' ' -f1)
   started_file="/vms/clusters/$dir/started"
 
   if [ -f "$started_file" ]; then
-    printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
+    if [ "$vmwaredatastore" == "$vmwaredatastoreworkers" ]; then
+        printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
+    else
+        printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s, %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" $platform "$n_worker" "$vmwaredatastore,$vmwaredatastoreworkers" "$created_at" "$vmwarenotes"
+    fi
   else
-    printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
+    if [ "$vmwaredatastore" == "$vmwaredatastoreworkers" ]; then
+        printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenotes"
+    else
+        printf "%-17s %-8s %-6s %-6s %-11s %-9s %-10s %-14s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreworkers" "$created_at" "$vmwarenotes"
+    fi
   fi
 }
 
