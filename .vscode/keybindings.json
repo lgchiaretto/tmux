@@ -1,0 +1,17 @@
+[
+    {
+        "key": "ctrl+shift+g ctrl+c",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Git: Smart Commit"
+    },
+    {
+        "key": "ctrl+shift+g ctrl+a",
+        "command": "workbench.action.tasks.runTask", 
+        "args": "Git: Commit with AI-style message"
+    },
+    {
+        "key": "ctrl+shift+g ctrl+s",
+        "command": "workbench.action.tasks.runTask",
+        "args": "Git: Status & Diff"
+    }
+]
