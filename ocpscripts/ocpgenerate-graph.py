@@ -105,11 +105,13 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
     visited = set()
     prev = {}
     edge_info = defaultdict(list)
+    distance = {}
     heap = []
 
+    # Initialize starting nodes with distance 0
     for node in start_nodes:
-        version_tuple = parse_version(node.split(":")[1])
-        heapq.heappush(heap, (tuple(-x for x in version_tuple), node))
+        distance[node] = 0
+        heapq.heappush(heap, (0, node))
         prev[node] = None
 
     target_nodes = set()
@@ -117,7 +119,7 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
         target_nodes.update(version_to_nodes.get(v, []))
 
     while heap:
-        _, current = heapq.heappop(heap)
+        current_dist, current = heapq.heappop(heap)
         if current in visited:
             continue
         visited.add(current)
@@ -132,10 +134,16 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
 
         for neighbor, is_cond, risks_list in graph.get(current, []):
             if neighbor not in visited:
-                prev[neighbor] = current
-                version_tuple = parse_version(neighbor.split(":")[1])
-                heapq.heappush(heap, (tuple(-x for x in version_tuple), neighbor))
-                edge_info[neighbor].extend([(is_cond, r[0], r[1], r[2]) for r in risks_list])
+                # Calculate new distance (number of hops + version priority)
+                new_dist = current_dist + 1
+                
+                # If we haven't seen this neighbor or found a shorter path
+                if neighbor not in distance or new_dist < distance[neighbor]:
+                    distance[neighbor] = new_dist
+                    prev[neighbor] = current
+                    heapq.heappush(heap, (new_dist, neighbor))
+                    # Reset edge_info for this neighbor since we found a better path
+                    edge_info[neighbor] = [(is_cond, r[0], r[1], r[2]) for r in risks_list]
     return None
 
 def resolve_start_nodes(version, version_to_nodes):
@@ -146,23 +154,39 @@ def format_path(path):
         return "No upgrade path found."
 
     cleaned_path_nodes = []
+    first_channel = None
+    last_channel = None
     seen_versions_in_path = set()
     for node, _ in path:
+        channel = node.split(":")[0]
         version_only = node.split(":")[1]
         if version_only not in seen_versions_in_path:
             cleaned_path_nodes.append(version_only)
+            if first_channel is None:
+                first_channel = channel
+            last_channel = channel
             seen_versions_in_path.add(version_only)
     
     steps = " -> ".join(cleaned_path_nodes)
+    
+    # Show channel information based on whether there's a channel change
+    if first_channel == last_channel:
+        # Same channel throughout the path
+        channel_info = f"\nvia {last_channel}" if last_channel else ""
+    else:
+        # Channel change - show both origin and destination
+        channel_info = f"\nvia {first_channel} -> {last_channel}" if first_channel and last_channel else ""
     
     detail = []
     for i in range(len(path)):
         current_node_with_channel, incoming_edge_infos = path[i]
         current_version_only = current_node_with_channel.split(":")[1]
+        current_channel = current_node_with_channel.split(":")[0]
 
         if i > 0:
             prev_node_with_channel = path[i-1][0]
             prev_version_only = prev_node_with_channel.split(":")[1]
+            prev_channel = prev_node_with_channel.split(":")[0]
 
             actual_risks = [
                 (risk, msg, url) for is_cond, risk, msg, url in incoming_edge_infos
@@ -173,7 +197,7 @@ def format_path(path):
 
             if prev_version_only != current_version_only:
                 if actual_risks:
-                    detail.append(f"Upgrade from {prev_version_only} to {current_version_only}:\n")
+                    detail.append(f"Upgrade from {prev_version_only} ({prev_channel}) to {current_version_only} ({current_channel}):\n")
                     for risk, msg, url in actual_risks:
                         wrapped_msg = "\n    ".join(textwrap.wrap(msg, width=55))
                         detail.append(
@@ -182,15 +206,16 @@ def format_path(path):
                             f"    URL: {url}\n"
                         )
             elif is_channel_link_only and prev_version_only == current_version_only:
-                if prev_node_with_channel.split(":")[0] != current_node_with_channel.split(":")[0]:
-                    detail.append(f"Channel hop from {prev_node_with_channel.split(':')[0]} to {current_node_with_channel.split(':')[0]} (version {current_version_only}):")
+                if prev_channel != current_channel:
+                    detail.append(f"Channel hop from {prev_channel} to {current_channel} (version {current_version_only}):")
                     for is_cond, link_name, link_msg, link_url in incoming_edge_infos:
                         if link_name == "Channel Link":
                             wrapped_msg = "\n    ".join(textwrap.wrap(link_msg, width=65))
                             detail.append(f"  - {link_name}: {wrapped_msg}")
 
     wrapped_steps = "\n".join(textwrap.wrap(steps, width=75))
-    return f"Path:\n{wrapped_steps}\n\n" + ("\n".join(detail) if detail else "No specific conditional risks found for this path.")
+    path_with_channel = f"Path:\n{wrapped_steps}{channel_info}\n"
+    return path_with_channel + ("\n" + "\n".join(detail) if detail else "\nNo specific conditional risks found for this path.")
 
 def main():
     parser = argparse.ArgumentParser(description="Find OpenShift upgrade path")
