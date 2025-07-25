@@ -99,21 +99,6 @@ function createVphereCluster() {
     fi
 
     if [ -n "$selected_file" ]; then
-        temp_file=$(mktemp)
-
-        tmux new-window -n "create cluster" "bash -c 'read -p \"Are you sure you want to create the cluster? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
-
-        while [ ! -s "$temp_file" ]; do
-        sleep 1
-        done
-
-        confirm=$(cat "$temp_file")
-        rm -f "$temp_file"
-
-        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-        exit 0
-        fi
-
         tmux send-keys "/usr/local/bin/createcluster.py -i $file" C-m
     else
     #    tmux display -d 3000 "No file selected"
@@ -160,23 +145,6 @@ function createKVMCluster(){
     fi
 
     if [ -n "$selected_file" ]; then
-        temp_file=$(mktemp)
-
-        tmux new-window -n "create cluster" "bash -c 'read -p \"Are you sure you want to create the cluster? (y/N): \" confirm; echo \$confirm > $temp_file; bash'"
-
-        while [ ! -s "$temp_file" ]; do
-        sleep 1
-        done
-
-        confirm=$(cat "$temp_file")
-        rm -f "$temp_file"
-
-        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-            exit 0
-        fi
-
-        clustername=$(/usr/local/bin/generateclustername.py)
-
         tmux send-keys "ansible-playbook -i localhost -e \"clustername=$clustername\" -e \"@$file\" /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/create-cluster-upi-kvm-modular.yaml" C-m       
     else
     #    tmux display -d 3000 "No file selected"
