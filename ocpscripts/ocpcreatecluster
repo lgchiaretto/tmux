@@ -114,7 +114,7 @@ function createVphereCluster() {
         if [ "$(hostname)" = "bastion.aap.chiaret.to" ]; then
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
         else
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster-remote.py -i $file" C-m
+            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\"" C-m
         fi
     else
     #    tmux display -d 3000 "No file selected"
