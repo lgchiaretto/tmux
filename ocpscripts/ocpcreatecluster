@@ -7,7 +7,9 @@ function createVphereCluster() {
 - Baremetal IPI 4-node cluster
 - Baremetal IPI 5-node cluster
 - Baremetal UPI Single node OpenShift
+- Baremetal UPI Single node OpenShift with worker nodes
 - Baremetal UPI Single node OpenShift with ODF nodes
+- Baremetal UPI Single node OpenShift with Virt nodes
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
 - vSphere IPI 3-node cluster
@@ -15,12 +17,12 @@ function createVphereCluster() {
 
     selected_file=$(echo -e "$actions" | sort | fzf-tmux \
         --header=$'
-    ----------------------------------------- Create cluster -----------------------------------------------------
-    |                                                                                                            |
-    |  [Enter]....Create the cluster                                                                             |
-    |  [Esc]......Exit                                                                                           |
-    |                                                                                                            |
-    --------------------------------------------------------------------------------------------------------------\n\n' \
+----------------------------------------- Create cluster -----------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Create the cluster                                                                             |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
         --border-label=" chiaret.to " \
         --border-label-pos=center \
@@ -55,8 +57,18 @@ function createVphereCluster() {
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
                 ;;
+            "- Baremetal UPI Single node OpenShift with worker nodes")
+                file="/vms/clusters/variables-files/ansible-vars-sno-worker-baremetal.json"
+                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+                tmux wait-for vim-done
+                ;;
             "- Baremetal UPI Single node OpenShift with ODF nodes")
                 file="/vms/clusters/variables-files/ansible-vars-sno-odf-baremetal.json"
+                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+                tmux wait-for vim-done
+                ;;
+            "- Baremetal UPI Single node OpenShift with Virt nodes")
+                file="/vms/clusters/variables-files/ansible-vars-sno-virt-baremetal.json"
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
                 ;;
