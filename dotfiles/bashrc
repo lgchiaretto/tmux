@@ -60,7 +60,7 @@ tmux_smart_attach() {
     tmux new
   fi
 }
-alias tmux='tmux_smart_attach'
+alias t='tmux_smart_attach'
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --color=bg+:#000000,spinner:#fe8019,hl:#928374,fg:#ffffff,header:#928374,info:#fabd2f,pointer:#fe8019,marker:#fe8019,fg+:#458588,prompt:#fe8019,hl+:#fe8019 --height 40% --border"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
