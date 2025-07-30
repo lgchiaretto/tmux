@@ -73,7 +73,7 @@ selected_action=$(
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
 --------------------------------------------------------------------------------------------------------------
-Cluster Name    Version  Type   SNO?   Platform    Workers  Datastore  Created At   vlan     Description
+Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Description
 --------------------------------------------------------------------------------------------------------------' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
