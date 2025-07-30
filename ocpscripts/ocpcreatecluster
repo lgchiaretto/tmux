@@ -118,7 +118,7 @@ function createVphereCluster() {
             jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
             jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
         fi
-        if [ "$(hostname)" = "bastion.aap.chiaret.to" ]; then
+        if [ "$(hostname)" = "bastion.chiaret.to" ]; then
           if [[ "$customname" == "Yes" ]]; then
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n "
           else
