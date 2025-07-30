@@ -189,6 +189,10 @@ selected_infra=$(echo -e "$infra" | fzf-tmux \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
     )
 
+if [ -z "$selected_infra" ]; then
+    exit 0
+fi
+
 createcerts=$(echo -e "Yes\nNo" | fzf-tmux \
     --header=$'
 ----------------------------------------- Remove Certs -------------------------------------------------------
