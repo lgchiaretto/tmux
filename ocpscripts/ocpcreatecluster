@@ -195,9 +195,9 @@ fi
 
 createcerts=$(echo -e "Yes\nNo" | fzf-tmux \
     --header=$'
------------------------------------------ Remove Certs -------------------------------------------------------
+----------------------------------------- Create Certs -------------------------------------------------------
 |                                                                                                            |
-|  [Enter]....Remove certs                                                                                   |
+|  [Enter]....Create certs                                                                                   |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
@@ -210,6 +210,10 @@ createcerts=$(echo -e "Yes\nNo" | fzf-tmux \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
     )
+
+if [ -z "$createcerts" ]; then
+    exit 0
+fi
 
 if [ -n "$selected_infra" ]; then
     if [[ "$createcerts" == "Yes" ]]; then
