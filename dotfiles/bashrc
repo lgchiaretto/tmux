@@ -16,7 +16,7 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.dropbox-dist/:~/.local/bin/
 export LIBVIRT_DEFAULT_URI=qemu:///system
 export GO111MODULE=off
 export GOVC_USERNAME='administrator@chiaretto.local'
-export GOVC_PASSWORD='VMware1!VMware1!'
+export GOVC_PASSWORD='VMware1!VMware1!' #dummy-password
 export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
 
 # -------------------- Shell Options --------------------
