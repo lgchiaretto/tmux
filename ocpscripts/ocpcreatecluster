@@ -189,7 +189,32 @@ selected_infra=$(echo -e "$infra" | fzf-tmux \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
     )
 
+createcerts=$(echo -e "Yes\nNo" | fzf-tmux \
+    --header=$'
+----------------------------------------- Remove Certs -------------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Remove certs                                                                                   |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+    --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
+    -h 40 -p "55%,46%" \
+    --no-input \
+    --no-sort \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+    )
+
 if [ -n "$selected_infra" ]; then
+    if [[ "$createcerts" == "Yes" ]]; then
+        jq '.deleteiffailed = "true"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
+        jq '.createcertfiles = "true"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
+    else
+        jq '.deleteiffailed = "false"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
+        jq '.createcertfiles = "false"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
+    fi
     case "$selected_infra" in
         "KVM")
             createKVMCluster
