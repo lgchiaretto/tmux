@@ -111,10 +111,25 @@ function createVphereCluster() {
     fi
 
     if [ -n "$selected_file" ]; then
-        if [ "$(hostname)" = "bastion.aap.chiaret.to" ]; then
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+        if [[ "$createcerts" == "Yes" ]]; then
+            jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
+            jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
         else
+            jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
+            jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
+        fi
+        if [ "$(hostname)" = "bastion.aap.chiaret.to" ]; then
+          if [[ "$customname" == "Yes" ]]; then
+            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n "
+          else
+            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+          fi
+        else
+          if [[ "$customname" == "Yes" ]]; then
+            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\" -n "
+          else
             tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\"" C-m
+          fi
         fi
     else
     #    tmux display -d 3000 "No file selected"
@@ -215,14 +230,29 @@ if [ -z "$createcerts" ]; then
     exit 0
 fi
 
+customname=$(echo -e "Yes\nNo" | fzf-tmux \
+    --header=$'
+----------------------------------------- Create Certs -------------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Create Cluster with custom name (must exist certificates)                                      |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+    --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
+    -h 40 -p "55%,46%" \
+    --no-input \
+    --no-sort \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+    )
+
+if [ -z "$customname" ]; then
+    exit 0
+fi
+
 if [ -n "$selected_infra" ]; then
-    if [[ "$createcerts" == "Yes" ]]; then
-        jq '.deleteiffailed = "true"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
-        jq '.createcertfiles = "true"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
-    else
-        jq '.deleteiffailed = "false"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
-        jq '.createcertfiles = "false"' $selected_file > $selected_file.tmp && mv $selected_file.tmp $selected_file
-    fi
     case "$selected_infra" in
         "KVM")
             createKVMCluster
