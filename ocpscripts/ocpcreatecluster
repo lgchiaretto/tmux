@@ -230,7 +230,7 @@ if [ -z "$createcerts" ]; then
     exit 0
 fi
 
-customname=$(echo -e "Yes\nNo" | fzf-tmux \
+customname=$(echo -e "No\nYes" | fzf-tmux \
     --header=$'
 ----------------------------------------- Create Certs -------------------------------------------------------
 |                                                                                                            |
