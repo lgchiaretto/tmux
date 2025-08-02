@@ -25,12 +25,12 @@ fi
 infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
 
 if [[ "$infra" == "vsphere" ]]; then
-  if [ "$(hostname)" = "bastion.aap.chiaret.to" ]; then
-      tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py -i /vms/clusters/$1/$1.json -n $1" C-m
+  if [ "$(hostname)" = "bastion.chiaret.to" ]; then
+      tmux send-keys "nohup /home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $1 &" C-m
   else
-      tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py-i /vms/clusters/$1/$1.json -n $1\"" C-m
+      tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"nohup /home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $1 & \"" C-m
   fi
 
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml" C-m
+  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml &" C-m
 fi

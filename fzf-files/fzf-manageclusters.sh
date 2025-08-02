@@ -66,8 +66,8 @@ selected_action=$(
 |                                                     |    [p]........Copy kubeadmin password to clipboard   |
 |  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
-|  [D]........Copy or download and install OpenShift  |    [Enter]....Login with kubeadmin user              |
-|             client                                  |                                                      |
+|  [D]........Copy or download and install OpenShift  |    [R]........Recreate cluster                       |
+|             client                                  |    [Enter]....Login with kubeadmin user              |
 |  [l]........OpenShift/Operators Lifecycle           |                                                      |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
@@ -100,6 +100,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
+    --bind 'R:execute-silent(tmux new-session -d -s recreate-{1}; tmux send-keys -t recreate "/home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py {1}" C-m; tmux switch-client -t recreate-{1})+abort' \
     --expect=enter 
 )
 

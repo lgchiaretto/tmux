@@ -111,24 +111,25 @@ function createVphereCluster() {
     fi
 
     if [ -n "$selected_file" ]; then
-        if [[ "$createcerts" == "Yes" ]]; then
-            jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
-            jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
-        else
-            jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
-            jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
-        fi
         if [ "$(hostname)" = "bastion.chiaret.to" ]; then
           if [[ "$customname" == "Yes" ]]; then
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n "
+            jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
+            jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
+            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
           else
+            jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
+            jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
           fi
         else
           if [[ "$customname" == "Yes" ]]; then
-            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\" -n "
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file"
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file"
+            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\" -n $cluster_name_custom" C-m
           else
-            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\"" C-m
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file"
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file"
+            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom\"" C-m
           fi
         fi
     else
@@ -208,28 +209,6 @@ if [ -z "$selected_infra" ]; then
     exit 0
 fi
 
-createcerts=$(echo -e "Yes\nNo" | fzf-tmux \
-    --header=$'
------------------------------------------ Create Certs -------------------------------------------------------
-|                                                                                                            |
-|  [Enter]....Create certs                                                                                   |
-|  [Esc]......Exit                                                                                           |
-|                                                                                                            |
---------------------------------------------------------------------------------------------------------------\n\n' \
-    --layout=reverse \
-    --border-label=" chiaret.to " \
-    --border-label-pos=center \
-    -h 40 -p "55%,46%" \
-    --no-input \
-    --no-sort \
-    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
-    )
-
-if [ -z "$createcerts" ]; then
-    exit 0
-fi
-
 customname=$(echo -e "No\nYes" | fzf-tmux \
     --header=$'
 ----------------------------------------- Create Certs -------------------------------------------------------
@@ -249,6 +228,28 @@ customname=$(echo -e "No\nYes" | fzf-tmux \
     )
 
 if [ -z "$customname" ]; then
+    exit 0
+fi
+
+cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
+    --header=$'
+----------------------------------------- Create Certs -------------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Select the available cluster name custom                                                       |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+    --layout=reverse \
+    --border-label=" chiaret.to " \
+    --border-label-pos=center \
+    -h 40 -p "55%,70%" \
+    --no-input \
+    --no-sort \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
+)
+
+if [ -z "$cluster_name_custom" ]; then
     exit 0
 fi
 
