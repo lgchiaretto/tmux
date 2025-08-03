@@ -100,14 +100,39 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
-    --bind 'R:execute-silent(tmux new-session -d -s recreate-{1}; tmux send-keys -t recreate "/home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py {1}" C-m; tmux switch-client -t recreate-{1})+abort' \
+    --bind 'R:execute-silent(tmux send-keys "nohup /home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py {1} > /tmp/nohup-recreate.out 2>&1 &" C-m; tmux switch-client -t recreate-{1})+abort' \
     --expect=enter 
 )
 
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
   if [[ -z "$KUBECONFIG" ]]; then
-    tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+      selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
+        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
+[Enter]     Select user to connect to cluster
+[Esc]       Exit
+----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
+        --layout=reverse \
+        --border-label=" chiaret.to " \
+        --border-label-pos=center \
+        -h 40 \
+        -p "100%,50%" \
+        --exact \
+        --with-nth=1,2 \
+        --ansi \
+        --wrap \
+        --expect=enter \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+      )
+      selected_user=$(echo "$selected_user_raw" | tail -1)
+    if [ -z "$selected_user" ]; then
+        exit 0
+    elif [ "$selected_user" == "kubeadmin" ]; then
+        tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+    elif [ "$selected_user" == "chiaretto" ]; then
+        tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
+    fi
   else
     tmux display -d 5000 "KUBECONFIG is set, not logging in with kubeadmin user"
   fi
