@@ -100,7 +100,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
-    --bind 'R:execute-silent(tmux send-keys "nohup /home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py {1} > /tmp/nohup-recreate.out 2>&1 &" C-m; tmux switch-client -t recreate-{1})+abort' \
+    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
     --expect=enter 
 )
 
