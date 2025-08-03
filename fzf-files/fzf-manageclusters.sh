@@ -43,9 +43,16 @@ clusters() {
 }
 
 selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d \
-  | grep -Ev ".cache|quay|variable|archived|backup|multicluster" \
-  | while read -r dir; do
-    clusters "$(basename "$dir")"
+  ! -name 'backup-20230903' \
+  ! -name 'backup*' \
+  ! -name '*-files' \
+  ! -name 'quay*' \
+  ! -name 'archived' \
+  ! -name 'multiclusterfiles' \
+  ! -name '.cache' \
+  ! -name 'createcerts' \
+  -exec basename {} \; | while read -r dir; do
+    clusters "$dir"
   done)
 
 if [ -z "$selection_list" ]; then
@@ -64,7 +71,7 @@ selected_action=$(
 |                                                     |    [p]........Copy kubeadmin password to clipboard   |
 |  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
-|  [D]........Copy or download and install OpenShift  |    [R]........Recreate cluster                       |
+|  [D]........Copy or download and install OpenShift  |    [r]........Recreate cluster                       |
 |             client                                  |    [Enter]....Login with kubeadmin user              |
 |  [l]........OpenShift/Operators Lifecycle           |                                                      |
 |                                                     |                                                      |
@@ -98,7 +105,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
-    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
+    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} )+abort' \
     --expect=enter 
 )
 
