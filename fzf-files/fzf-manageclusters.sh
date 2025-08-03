@@ -42,12 +42,10 @@ clusters() {
   fi
 }
 
-selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d -name '*-*' \
-  ! -name 'backup-20230903' \
-  ! -name '*-files' \
-  ! -name 'quay-*' \
-  -exec basename {} \; | while read -r dir; do
-    clusters "$dir"
+selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d \
+  | grep -Ev ".cache|quay|variable|archived|backup|multicluster" \
+  | while read -r dir; do
+    clusters "$(basename "$dir")"
   done)
 
 if [ -z "$selection_list" ]; then
