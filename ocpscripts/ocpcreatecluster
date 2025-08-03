@@ -209,7 +209,7 @@ if [ -z "$selected_infra" ]; then
     exit 0
 fi
 
-customname=$(echo -e "No\nYes" | fzf-tmux \
+customname=$(echo -e "Yes\nNo" | fzf-tmux \
     --header=$'
 ----------------------------------------- Create Certs -------------------------------------------------------
 |                                                                                                            |
