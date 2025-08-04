@@ -113,6 +113,12 @@ function createVphereCluster() {
     if [ -n "$selected_file" ]; then
         if [ "$(hostname)" = "bastion.chiaret.to" ]; then
           if [[ "$customname" == "Yes" ]]; then
+            clear
+            read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
+            if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
+                echo "Aborted."
+                exit 0
+            fi
             jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
             jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
@@ -123,12 +129,18 @@ function createVphereCluster() {
           fi
         else
           if [[ "$customname" == "Yes" ]]; then
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file"
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file"
+            clear
+            read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
+            if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
+                echo "Aborted."
+                exit 0
+            fi
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = \"true\"' $file > $file.tmp && mv $file.tmp $file"
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = \"true\"' $file > $file.tmp && mv $file.tmp $file"
             tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\" -n $cluster_name_custom" C-m
           else
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file"
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file"
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = \"false\"' $file > $file.tmp && mv $file.tmp $file"
+            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = \"false\"' $file > $file.tmp && mv $file.tmp $file"
             tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom\"" C-m
           fi
         fi

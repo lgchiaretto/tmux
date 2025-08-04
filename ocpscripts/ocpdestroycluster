@@ -15,6 +15,7 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   exit 0
 fi
 
+clear
 read -p "Do you also want to remove DNS and certs for cluster \"$1\"? (y/N): " confirm2
 if [[ "$confirm2" == "y" || "$confirm2" == "Y" ]]; then
   jq '.deleteiffailed = "true"' /vms/clusters/$1/$1.json > /vms/clusters/$1/$1.json.tmp && mv /vms/clusters/$1/$1.json.tmp /vms/clusters/$1/$1.json
