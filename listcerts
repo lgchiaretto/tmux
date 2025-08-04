@@ -38,11 +38,12 @@ def save_cache(cache_data: Dict[str, Any]):
         pass
 
 def resolve_domain(domain: str) -> str:
-    try:
-        answer = DNS_RESOLVER.resolve(domain, 'A')
-        return answer[0].to_text()
-    except Exception:
-        return "N/A"
+    while True:
+        try:
+            answer = DNS_RESOLVER.resolve(domain, 'A')
+            return answer[0].to_text()
+        except Exception:
+            continue
 
 def get_certificate_data(cert_dir: Path, cache: Dict[str, Any]) -> Tuple[str, Optional[tuple]]:
     cert_name = cert_dir.name
