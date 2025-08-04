@@ -251,7 +251,7 @@ cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------
-cluster name       | Ingress VIP     | API VIP         | SSL Expire | Good for IPI/UPI
+cluster name       | VLAN    | SSL Expire | Good for IPI/UPI
 --------------------------------------------------------------------------------------------------------------'\
     --layout=reverse \
     --border-label=" chiaret.to " \

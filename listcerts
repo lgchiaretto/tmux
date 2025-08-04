@@ -59,8 +59,14 @@ def get_certificate_data(cert_dir: Path, cache: Dict[str, Any]) -> Tuple[str, Op
                 ip_api_int = "-"
             else:
                 ip_apps, cluster, ip_api, ip_api_int, expiry_str = data
-            expiry_date = datetime.datetime.fromisoformat(expiry_str)
-            if expiry_date > NOW:
+            if expiry_str and expiry_str != '-':
+                try:
+                    expiry_date = datetime.datetime.fromisoformat(expiry_str)
+                except ValueError:
+                    expiry_date = None
+            else:
+                expiry_date = None
+            if expiry_date and expiry_date > NOW:
                 return cert_name, (ip_apps, cluster, ip_api, ip_api_int, expiry_date)
 
     cert_path = cert_dir / "fullchain.pem"
@@ -133,7 +139,7 @@ def main():
             infra_type = "UPI Baremetal"
         elif ip_api == ip_api_int and ip_api != ip_apps:
             infra_type = "IPI"
-        elif ip_api != ip_api_int and ip_api != ip_apps:
+        elif ip_api != ip_api_int:
             infra_type = "UPI None"
         else:
             infra_type = "IPI"
@@ -148,17 +154,24 @@ def main():
         existing_clusters = {d.name for d in clusters_dir.iterdir() if d.is_dir()}
 
     for ip_apps, cluster, ip_api, ip_api_int, expiry_date in sorted_results:
-        expiry_str = expiry_date.strftime('%Y-%m-%d')
+        if expiry_date:
+            expiry_str = expiry_date.strftime('%Y-%m-%d')
+        else:
+            expiry_str = '-'
         if ip_api == ip_api_int == ip_apps:
             infra_type = "UPI Baremetal"
         elif ip_api == ip_api_int and ip_api != ip_apps:
             infra_type = "IPI"
-        elif ip_api != ip_api_int and ip_api != ip_apps:
+        elif ip_api != ip_api_int:
             infra_type = "UPI None"
         else:
             infra_type = "IPI"
         cluster_display = cluster + ' *' if cluster in existing_clusters else cluster
-        print(f"{cluster_display: <18} | {ip_apps: <15} | {ip_api: <15} | {ip_api_int: <15} | {expiry_str} | {infra_type}")
+        try:
+            vlan_id = ip_api_int.split('.')[2]
+        except Exception:
+            vlan_id = '?'
+        print(f"{cluster_display: <18} | vlan{vlan_id: <3} | {expiry_str} | {infra_type}")
 
 if __name__ == "__main__":
     main()
