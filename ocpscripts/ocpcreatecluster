@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Exit if not running on bastion.chiaret.to
+if [ "$(hostname)" != "bastion.chiaret.to" ]; then
+    echo "This script must be run on bastion.chiaret.to. Exiting."
+    exit 0
+fi
+
 #files=$(find /vms/clusters/variables-files/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
 function createVphereCluster() {
@@ -111,39 +117,20 @@ function createVphereCluster() {
     fi
 
     if [ -n "$selected_file" ]; then
-        if [ "$(hostname)" = "bastion.chiaret.to" ]; then
-          if [[ "$customname" == "Yes" ]]; then
-            clear
-            read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
-            if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
-                echo "Aborted."
-                exit 0
-            fi
-            jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
-            jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
-          else
-            jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
-            jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+        if [[ "$customname" == "Yes" ]]; then
+          clear
+          read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
+          if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
+              echo "Aborted."
+              exit 0
           fi
+          jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
+          jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
+          tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
         else
-          if [[ "$customname" == "Yes" ]]; then
-            clear
-            read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
-            if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
-                echo "Aborted."
-                exit 0
-            fi
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = \"true\"' $file > $file.tmp && mv $file.tmp $file"
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = \"true\"' $file > $file.tmp && mv $file.tmp $file"
-            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file\" -n $cluster_name_custom" C-m
-          else
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.deleteiffailed = \"false\"' $file > $file.tmp && mv $file.tmp $file"
-            ssh -t lchiaret@bastion.aap.chiaret.to "jq '.createcertfiles = \"false\"' $file > $file.tmp && mv $file.tmp $file"
-            tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom\"" C-m
-          fi
-        fi
+          jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
+          jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
+          tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
     else
     #    tmux display -d 3000 "No file selected"
         exit 0
