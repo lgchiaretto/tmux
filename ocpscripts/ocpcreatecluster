@@ -211,7 +211,7 @@ fi
 
 customname=$(echo -e "Yes\nNo" | fzf-tmux \
     --header=$'
------------------------------------------ Create Certs -------------------------------------------------------
+----------------------------------------- Cluster Name -------------------------------------------------------
 |                                                                                                            |
 |  [Enter]....Create Cluster with custom name (must exist certificates)                                      |
 |  [Esc]......Exit                                                                                           |
@@ -238,12 +238,14 @@ cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
 |  [Enter]....Select the available cluster name custom                                                       |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
---------------------------------------------------------------------------------------------------------------\n\n' \
+--------------------------------------------------------------------------------------------------------------
+cluster name       | Ingress VIP     | API VIP         | SSL Expire | Good for IPI/UPI
+--------------------------------------------------------------------------------------------------------------'\
     --layout=reverse \
     --border-label=" chiaret.to " \
     --border-label-pos=center \
-    -h 40 -p "55%,70%" \
-    --no-input \
+    -h 40 -p "55%,93%" \
+    --exact \
     --no-sort \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'

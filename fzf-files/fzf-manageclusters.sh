@@ -105,7 +105,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
-    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} )+abort' \
+    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
     --expect=enter 
 )
 
