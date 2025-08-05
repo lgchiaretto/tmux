@@ -25,6 +25,7 @@ This repository contains a custom `.tmux.conf` configuration file and related sc
     - [Fuzzy Search Utilities](#fuzzy-search-utilities)
     - [OpenShift Utilities](#openshift-utilities)
   - [Additional Features](#additional-features)
+  - [OpenShift Management Scripts](#openshift-management-scripts)
   - [Predefined Sessions](#predefined-sessions)
     - [Available Sessions](#available-sessions)
   - [Plugins](#plugins)
@@ -40,8 +41,11 @@ To use this configuration, ensure the following dependencies are installed:
 - **Tmux Plugin Manager (TPM)** for plugin management
 - **Git**
 - **Python 3** and `tmuxp` for session management
-- **fzf** for fuzzy searching
+- **fzf** for fuzzy searching (automatically installed by the script)
 - **OpenShift CLI (`oc`)** for OpenShift integration
+- **bat** for enhanced file viewing (automatically installed by the script)
+- **wget** for downloading binaries
+- **tar** for extracting archives
 
 ---
 
@@ -75,28 +79,67 @@ Clone this repository and execute the `configure-local.sh` script to set up the 
    ./configure-local.sh --download-tmux
    ```
 
-4. To skip downloading both Tmux and OpenShift CLI:
+4. To skip downloading both Tmux and OpenShift CLI (configuration only):
    ```bash
    ./configure-local.sh
    ```
+
+**Note**: The script uses `dnf` package manager (suitable for RHEL/Fedora systems).
 
 Run `./configure-local.sh --help` for more details on available options.
 
 ### What the Script Does
 
-- Copies `.bashrc`, `.vimrc`, and `.tmux.conf` to your home directory.
+- Copies `.bashrc`, `.vimrc`, `.tmux.conf`, `.dircolors`, `.inputrc`, and `.bash_functions` to your home directory.
+- Installs and configures `fzf` (fuzzy finder) with key bindings and completion.
 - Copies additional Tmux configuration files from `fzf-files/` to `~/.tmux/`.
-- Installs the Tmux binary and OpenShift CLI (`oc`) in `/usr/local/bin`.
-- Installs `tmuxp` for session management.
+- Optionally installs the Tmux binary and OpenShift CLI (`oc`) in `/usr/local/bin`.
+- Installs `tmuxp` and `bat` for session management and enhanced file viewing.
+- Copies OpenShift utility scripts to `/usr/local/bin` for cluster management.
 - Copies predefined Tmux sessions to your home directory.
 
 #### Manual Setup
 
-Alternatively, you can manually copy the `.tmux.conf` file:
+Alternatively, you can manually copy the configuration files and install the dependencies:
 
-```bash
-cp dotfiles/tmux.conf ~/.tmux.conf
-```
+**Prerequisites for manual installation:**
+
+1. **Install fzf (fuzzy finder)**:
+   ```bash
+   git clone https://github.com/junegunn/fzf.git ~/.fzf
+   cd ~/.fzf
+   ./install --key-bindings --completion --update-rc
+   ```
+
+2. **Install required packages** (RHEL/Fedora systems):
+   ```bash
+   sudo dnf install -y python3-pip bat tmuxp
+   ```
+
+3. **Copy configuration files**:
+   ```bash
+   cp dotfiles/tmux.conf ~/.tmux.conf
+   cp dotfiles/bashrc ~/.bashrc
+   cp dotfiles/vimrc ~/.vimrc
+   cp dotfiles/dircolors ~/.dircolors
+   cp dotfiles/inputrc ~/.inputrc
+   cp dotfiles/bash_functions ~/.bash_functions
+   mkdir -p ~/.tmux/
+   cp fzf-files/* ~/.tmux/
+   ```
+
+4. **Install OpenShift utilities** (optional):
+   ```bash
+   sudo cp fzf-files/oc-logs-fzf.sh /usr/local/bin/
+   sudo cp ocpscripts/* /usr/local/bin/
+   sudo chmod +x /usr/local/bin/oc-logs-fzf.sh
+   sudo chmod +x /usr/local/bin/ocp*
+   ```
+
+5. **Copy tmux sessions**: (optional):
+   ```bash
+   cp -R tmux-sessions ~/
+   ```
 ---
 
 ### Global Prefix
@@ -129,6 +172,7 @@ The following keybindings are defined in the custom `.tmux.conf` file:
   - **TIP**: Use `fzf` to search for strings within the Tmux buffer. Type search terms to initiate a fuzzy search on all buffers.
 - **Kill session**: `prefix + K` (with confirmation prompt)
 - **Kill all sessions**: `prefix + D` (with confirmation prompt)
+- **Switch sessions**: `prefix +b`
 
 ### Window Management
 
@@ -239,6 +283,31 @@ This configuration includes several keybindings specifically designed to simplif
 - **Enhanced History**: Increases the scrollback buffer to 1.000.000 lines.
 - **256-Color Support**: Improves theme visualization.
 - **Custom Status Bar**: Displays session, cluster, and system information.
+- **OpenShift Utilities**: Includes a comprehensive set of OpenShift management scripts in `/usr/local/bin`.
+- **Enhanced Shell Environment**: Includes custom bash functions, improved completion, and directory colors.
+
+---
+
+## OpenShift Management Scripts
+
+The configuration automatically installs a comprehensive set of OpenShift management scripts to `/usr/local/bin`, making them available system-wide:
+
+- **ocpcreatecluster**: Script for creating OpenShift clusters
+- **ocpdestroycluster**: Script for destroying OpenShift clusters  
+- **ocpdocumentation**: Access OpenShift documentation
+- **ocpgenerate-graph.py**: Python script for generating cluster graphs
+- **ocpgetclient**: Download OpenShift client tools
+- **ocpgetreleases.py**: Python script to get OpenShift releases information
+- **ocplifecycle**: Manage OpenShift cluster lifecycle
+- **ocprecreatecluster**: Recreate OpenShift clusters
+- **ocpreleasenotes**: Access OpenShift release notes
+- **ocpreleasesonquay**: Check OpenShift releases on Quay
+- **ocpupdate_path**: Update OpenShift upgrade paths
+- **ocpupgradecluster**: Upgrade OpenShift clusters
+- **ocpvariablesfiles**: Manage OpenShift variables files
+- **oc-logs-fzf.sh**: Enhanced log viewing with fuzzy search
+
+These scripts provide a complete toolkit for OpenShift cluster management and administration.
 
 ---
 
@@ -252,8 +321,8 @@ tmuxp load <session-name-file>
 
 ### Available Sessions
 
-- **INSTALL**: For monitoring OpenShift installation.
-- **UPGRADE**: For monitoring OpenShift upgrades.
+- **INSTALL** (`create-cluster-sessions.yaml`): For monitoring OpenShift cluster installation with multiple panes showing pod status, cluster operators, pending CSRs, and nodes.
+- **UPGRADE** (`upgrade-cluster-sessions.yaml`): For monitoring OpenShift cluster upgrades with panes for pod monitoring, cluster operators, upgrade status, and node status.
 
 ---
 
