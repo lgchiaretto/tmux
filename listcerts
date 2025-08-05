@@ -38,34 +38,37 @@ def save_cache(cache_data: Dict[str, Any]):
         pass
 
 def resolve_domain(domain: str) -> str:
-    while True:
-        try:
-            answer = DNS_RESOLVER.resolve(domain, 'A')
-            return answer[0].to_text()
-        except Exception:
-            continue
+    """Resolve domain to IP address."""
+    try:
+        answer = DNS_RESOLVER.resolve(domain, 'A')
+        return answer[0].to_text()
+    except Exception:
+        return ""
 
 def get_certificate_data(cert_dir: Path, cache: Dict[str, Any]) -> Tuple[str, Optional[tuple]]:
+    """Extract certificate data from directory."""
     cert_name = cert_dir.name
     
+    # Check cache first
     if cert_name in cache:
         entry = cache[cert_name]
         cached_at = datetime.datetime.fromisoformat(entry["timestamp"])
         if NOW - cached_at < CACHE_EXPIRATION:
             data = entry["data"]
-            # Compatibilidade retroativa: 4 ou 5 valores
+            # Handle backward compatibility
             if len(data) == 4:
                 ip_apps, cluster, ip_api, expiry_str = data
                 ip_api_int = "-"
             else:
                 ip_apps, cluster, ip_api, ip_api_int, expiry_str = data
+            
+            expiry_date = None
             if expiry_str and expiry_str != '-':
                 try:
                     expiry_date = datetime.datetime.fromisoformat(expiry_str)
                 except ValueError:
-                    expiry_date = None
-            else:
-                expiry_date = None
+                    pass
+            
             if expiry_date and expiry_date > NOW:
                 return cert_name, (ip_apps, cluster, ip_api, ip_api_int, expiry_date)
 
@@ -74,10 +77,12 @@ def get_certificate_data(cert_dir: Path, cache: Dict[str, Any]) -> Tuple[str, Op
         return cert_name, None
 
     try:
+        # Load and validate certificate
         cert_data = cert_path.read_bytes()
         x509_cert = x509.load_pem_x509_certificate(cert_data, default_backend())
         expiry_date = x509_cert.not_valid_after_utc
 
+        # Remove expired certificates
         if expiry_date < NOW:
             subprocess.run(
                 ["sudo", "certbot", "delete", "--cert-name", cert_name],
@@ -85,19 +90,16 @@ def get_certificate_data(cert_dir: Path, cache: Dict[str, Any]) -> Tuple[str, Op
             )
             return cert_name, None
 
+        # Extract cluster name
         base_name = cert_name.removeprefix("*.apps.").removeprefix("apps.")
         cluster = base_name.removesuffix(".chiaret.to") if ".chiaret.to" in base_name else base_name
 
-        domain_to_resolve = f"resolve.apps.{base_name}"
-        domain_api = f"api.{base_name}"
-        domain_api_int = f"api-int.{base_name}"
+        # Resolve domains
+        ip_apps = resolve_domain(f"resolve.apps.{base_name}")
+        ip_api = resolve_domain(f"api.{base_name}")
+        ip_api_int = resolve_domain(f"api-int.{base_name}")
 
-        ip_apps = resolve_domain(domain_to_resolve)
-        ip_api = resolve_domain(domain_api)
-        ip_api_int = resolve_domain(domain_api_int)
-
-        result = (ip_apps, cluster, ip_api, ip_api_int, expiry_date)
-        return cert_name, result
+        return cert_name, (ip_apps, cluster, ip_api, ip_api_int, expiry_date)
     except Exception:
         return cert_name, None
 
@@ -132,45 +134,52 @@ def main():
     if not results:
         print("No valid certificates found.")
         return
-        
-    def infra_sort_key(item):
-        ip_apps, cluster, ip_api, ip_api_int, expiry_date = item
+
+    def get_infra_type(ip_apps, ip_api, ip_api_int):
+        """Determine infrastructure type based on IP addresses."""
         if ip_api == ip_api_int == ip_apps:
-            infra_type = "UPI Baremetal"
+            return "UPI Baremetal"
         elif ip_api == ip_api_int and ip_api != ip_apps:
-            infra_type = "IPI"
+            return "IPI"
         elif ip_api != ip_api_int:
-            infra_type = "UPI None"
+            return "UPI None"
         else:
-            infra_type = "IPI"
-        # UPI first (0), IPI last (1), depois pelo nome do cluster
-        return (0 if infra_type.startswith("UPI") else 1, cluster.lower())
+            return "IPI"
 
-    sorted_results = sorted(results, key=infra_sort_key)
+    def get_vlan_id(ip):
+        """Extract VLAN ID from IP address."""
+        try:
+            return ip.split('.')[2]
+        except (AttributeError, IndexError):
+            return '?'
 
+    def vlan_sort_key(item):
+        """Sort by VLAN ID first, then by cluster name."""
+        ip_apps, cluster, ip_api, ip_api_int, expiry_date = item
+        vlan_id = get_vlan_id(ip_api_int)
+        # Convert VLAN to int for proper numeric sorting, fallback to 999 for unknown
+        try:
+            vlan_num = int(vlan_id) if vlan_id != '?' else 999
+        except ValueError:
+            vlan_num = 999
+        return (vlan_num, cluster.lower())
+
+    # Sort results by VLAN
+    sorted_results = sorted(results, key=vlan_sort_key)
+
+    # Get existing clusters
     clusters_dir = Path("/vms/clusters")
     existing_clusters = set()
     if clusters_dir.is_dir():
         existing_clusters = {d.name for d in clusters_dir.iterdir() if d.is_dir()}
 
+    # Display results in original format, sorted by VLAN
     for ip_apps, cluster, ip_api, ip_api_int, expiry_date in sorted_results:
-        if expiry_date:
-            expiry_str = expiry_date.strftime('%Y-%m-%d')
-        else:
-            expiry_str = '-'
-        if ip_api == ip_api_int == ip_apps:
-            infra_type = "UPI Baremetal"
-        elif ip_api == ip_api_int and ip_api != ip_apps:
-            infra_type = "IPI"
-        elif ip_api != ip_api_int:
-            infra_type = "UPI None"
-        else:
-            infra_type = "IPI"
+        vlan_id = get_vlan_id(ip_api_int)
+        expiry_str = expiry_date.strftime('%Y-%m-%d') if expiry_date else '-'
+        infra_type = get_infra_type(ip_apps, ip_api, ip_api_int)
         cluster_display = cluster + ' *' if cluster in existing_clusters else cluster
-        try:
-            vlan_id = ip_api_int.split('.')[2]
-        except Exception:
-            vlan_id = '?'
+        
         print(f"{cluster_display: <18} | vlan{vlan_id: <3} | {expiry_str} | {infra_type}")
 
 if __name__ == "__main__":
