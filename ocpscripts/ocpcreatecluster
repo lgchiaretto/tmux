@@ -118,7 +118,7 @@ function createVphereCluster() {
                 file="/vms/clusters/variables-files/ansible-vars-assisted-installer.json"
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
-                assistedinstaller=true
+                assistedinstaller="true"
                 ;;
         esac
     fi
@@ -133,19 +133,20 @@ function createVphereCluster() {
           fi
           jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
-          if [[ assistedinstaller == true ]]; then
-              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom -a true" C-m
+          if [[ "$assistedinstaller" == "true" ]]; then
+              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom -a" C-m
           else
               tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
           fi
         else
           jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
-          if [[ assistedinstaller == true ]]; then
+          if [[ "$assistedinstaller" == "true" ]]; then
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -a true" C-m
           else
             tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
           fi
+        fi
     else
     #    tmux display -d 3000 "No file selected"
         exit 0
