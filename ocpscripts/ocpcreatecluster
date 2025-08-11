@@ -19,7 +19,8 @@ function createVphereCluster() {
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
 - vSphere IPI 3-node cluster
-- vSphere UPI 3-node cluster"
+- vSphere UPI 3-node cluster
+- Assisted Installer"
 
     selected_file=$(echo -e "$actions" | sort | fzf-tmux \
         --header=$'
@@ -113,6 +114,12 @@ function createVphereCluster() {
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
                 ;;
+            "- Assisted Installer")
+                file="/vms/clusters/variables-files/ansible-vars-assisted-installer.json"
+                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+                tmux wait-for vim-done
+                assistedinstaller=true
+                ;;
         esac
     fi
 
@@ -126,11 +133,19 @@ function createVphereCluster() {
           fi
           jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
-          tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
+          if [[ assistedinstaller == true ]]; then
+              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom -a true" C-m
+          else
+              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
+          fi
         else
           jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
-          tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+          if [[ assistedinstaller == true ]]; then
+            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -a true" C-m
+          else
+            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+          fi
     else
     #    tmux display -d 3000 "No file selected"
         exit 0
