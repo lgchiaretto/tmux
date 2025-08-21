@@ -200,7 +200,7 @@ function createKVMCluster(){
 }
 
 # begin
-infra="KVM\nvSphere"
+infra="vSphere\nKVM"
 
 selected_infra=$(echo -e "$infra" | fzf-tmux \
     --header=$'
@@ -254,13 +254,13 @@ cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------
-cluster name       | VLAN    | SSL Expire | Good for IPI/UPI
+cluster name       | VLAN    | SSL Expire
 --------------------------------------------------------------------------------------------------------------'\
     --layout=reverse \
     --border-label=" chiaret.to " \
     --border-label-pos=center \
     -h 40 -p "55%,93%" \
-    --exact \
+    --no-input \
     --no-sort \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
