@@ -108,10 +108,26 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
     distance = {}
     heap = []
 
-    # Initialize starting nodes with distance 0
+    def parse_version(version_str):
+        """Parse version string to tuple of integers for comparison"""
+        try:
+            # Extract version from channel:version format
+            version = version_str.split(":")[-1]
+            return tuple(map(int, version.split(".")))
+        except:
+            return (0, 0, 0)
+
+    def version_priority(version_str):
+        """Calculate version priority - newer versions get lower values (higher priority)"""
+        parts = parse_version(version_str)
+        # Convert to negative value so newer versions have lower (better) priority in min-heap
+        return -(parts[0] * 10000 + parts[1] * 100 + parts[2])
+
+    # Initialize starting nodes with distance (hops, version_priority)
     for node in start_nodes:
-        distance[node] = 0
-        heapq.heappush(heap, (0, node))
+        version_p = version_priority(node)
+        distance[node] = (0, version_p)
+        heapq.heappush(heap, (0, version_p, node))
         prev[node] = None
 
     target_nodes = set()
@@ -119,7 +135,7 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
         target_nodes.update(version_to_nodes.get(v, []))
 
     while heap:
-        current_dist, current = heapq.heappop(heap)
+        current_hops, current_version_p, current = heapq.heappop(heap)
         if current in visited:
             continue
         visited.add(current)
@@ -134,14 +150,18 @@ def best_path(graph, start_nodes, target_versions, version_to_nodes):
 
         for neighbor, is_cond, risks_list in graph.get(current, []):
             if neighbor not in visited:
-                # Calculate new distance (number of hops + version priority)
-                new_dist = current_dist + 1
+                # Calculate new distance: (hops + edge_weight, neighbor_version_priority)
+                edge_weight = 1.1 if is_cond else 1.0  # Small penalty for conditional edges
+                new_hops = current_hops + edge_weight
+                neighbor_version_p = version_priority(neighbor)
+                new_distance = (new_hops, neighbor_version_p)
                 
-                # If we haven't seen this neighbor or found a shorter path
-                if neighbor not in distance or new_dist < distance[neighbor]:
-                    distance[neighbor] = new_dist
+                # If we haven't seen this neighbor or found a better path
+                # Better = fewer hops, or same hops but newer version
+                if neighbor not in distance or new_distance < distance[neighbor]:
+                    distance[neighbor] = new_distance
                     prev[neighbor] = current
-                    heapq.heappush(heap, (new_dist, neighbor))
+                    heapq.heappush(heap, (new_hops, neighbor_version_p, neighbor))
                     # Reset edge_info for this neighbor since we found a better path
                     edge_info[neighbor] = [(is_cond, r[0], r[1], r[2]) for r in risks_list]
     return None
