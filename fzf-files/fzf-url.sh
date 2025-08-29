@@ -18,7 +18,7 @@ chosen=$(echo "$content" | fzf-tmux \
 [Esc]       Exit
 -----------------------------------------------------------------------\n\n' \
   --layout=reverse \
-  --border-label=" chiaret.to " \
+  --border-label=" chiarettolabs.com.br " \
   --border-label-pos=center \
   -h 40 \
   -p "100%,50%" \

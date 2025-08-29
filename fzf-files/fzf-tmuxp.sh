@@ -15,7 +15,7 @@ tmuxpfile=$(echo -e "/vms/clusters/$clustername/create-tmuxp.yaml\n/vms/clusters
 [Esc]       Exit
 ---------------------------------------------------------------------------------------------------------------\n\n' \
   --height=40% --border \
-  --border-label=" chiaret.to " \
+  --border-label=" chiarettolabs.com.br " \
   --border-label-pos=center \
   --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
   --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \

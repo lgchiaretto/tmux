@@ -23,7 +23,7 @@ mapfile -t selected_pods_and_namespaces < <(
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
         --multi \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \

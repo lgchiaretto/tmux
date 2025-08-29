@@ -18,7 +18,7 @@ selected_operator=$(
 [Esc]       Exit
 ------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \

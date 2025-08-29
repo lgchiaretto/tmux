@@ -31,7 +31,7 @@ function createVphereCluster() {
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         -h 40 -p "55%,46%" \
         --no-input \
@@ -165,7 +165,7 @@ function createKVMCluster(){
     |                                                                                                            |
     --------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         -h 40 -p "55%,46%" \
         --no-input \
@@ -211,7 +211,7 @@ selected_infra=$(echo -e "$infra" | fzf-tmux \
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \
@@ -233,7 +233,7 @@ customname=$(echo -e "Yes\nNo" | fzf-tmux \
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \
@@ -257,7 +257,7 @@ cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
 cluster name       | VLAN    | SSL Expire
 --------------------------------------------------------------------------------------------------------------'\
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     -h 40 -p "55%,93%" \
     --no-input \

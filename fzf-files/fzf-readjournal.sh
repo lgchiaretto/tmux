@@ -3,7 +3,7 @@
 selected_file=$(
     ls -1r "$1" | grep -e journal$ | fzf-tmux \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         -p "100%,100%" \
         --exact \

@@ -9,7 +9,7 @@ if [ "$count" -eq 1 ]; then
 else
     container=$(echo "$containers" | tr ' ' '\n' | fzf-tmux \
         --header="Select container for pod $pod" \       
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         --layout=reverse \
         -h 10 \

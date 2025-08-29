@@ -14,7 +14,7 @@ if [ -f "$CACHE_FILE" ]; then
 Version             Release Date
 ---------------------------------------\n' \
                        --layout=reverse \
-                       --border-label=" chiaret.to " \
+                       --border-label=" chiarettolabs.com.br " \
                        --border-label-pos=center \
                        -h 40 \
                        -p "23%,86%" \

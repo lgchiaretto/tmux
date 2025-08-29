@@ -53,7 +53,7 @@ fi
 selected_cluster_project=$(fzf-tmux \
     --header="Select the OCP context" \
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     -h 40 -p "50%,50%" \
     --query="$FILTER" \

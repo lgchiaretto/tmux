@@ -29,7 +29,7 @@ mapfile -t selected_pods < <(
             --multi \
             --bind "ctrl-a:toggle-all" \
             --layout=reverse \
-            --border-label=" chiaret.to " \
+            --border-label=" chiarettolabs.com.br " \
             --border-label-pos=center \
             -h 40 \
             -p "100%,50%" \

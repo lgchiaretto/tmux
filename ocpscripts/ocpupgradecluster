@@ -30,7 +30,7 @@ SELECTED_CHANNEL=$(echo -e "$CHANNELS" | sort | fzf-tmux \
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \
@@ -65,7 +65,7 @@ SELECTED_VERSION=$(echo "$AVAILABLE_VERSIONS" | fzf-tmux \
     --header="Available versions for channel '$SELECTED_CHANNEL'" \
     --layout=reverse \
     -h 40 -p "40%,40%" \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665

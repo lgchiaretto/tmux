@@ -27,6 +27,7 @@ clusters() {
   vmwarenetwork=$(jq -r '.vmwarenetwork' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
   created_at=$(stat -c %y /vms/clusters/$dir/$dir.json | cut -d' ' -f1)
   started_file="/vms/clusters/$dir/started"
+  basedomain=$(jq -r '.basedomain' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
 
   if [ -f "$started_file" ]; then
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
@@ -84,7 +85,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
-    --border-label=" chiaret.to " \
+    --border-label=" chiarettolabs.com.br " \
     --border-label-pos=center \
     --border=rounded \
     -h 40 \
@@ -119,7 +120,7 @@ if [ -n "$selected_action" ]; then
 [Esc]       Exit
 ----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiaret.to " \
+        --border-label=" chiarettolabs.com.br " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \
@@ -135,9 +136,9 @@ if [ -n "$selected_action" ]; then
     if [ -z "$selected_user" ]; then
         exit 0
     elif [ "$selected_user" == "kubeadmin" ]; then
-        tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
     elif [ "$selected_user" == "chiaretto" ]; then
-        tmux send-keys "oc login https://api.$clustername.chiaret.to:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
+        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
     fi
   else
     tmux display -d 5000 "KUBECONFIG is set, not logging in with kubeadmin user"
