@@ -113,6 +113,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
 
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
+  basedomain=$(jq -r '.basedomain' "/vms/clusters/$clustername/$clustername.json" 2>/dev/null || echo "chiarettolabs.com.br")
   if [[ -z "$KUBECONFIG" ]]; then
       selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
         --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
