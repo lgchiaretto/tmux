@@ -67,7 +67,7 @@ selected_action=$(
 |                                                     |                                                      |
 |  [c]........Create cluster                          |    [s]........Start cluster                          |
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
-|                                                     |    [d]........Destroy cluster                        |
+|  [E]........Edit cluster JSON file with vim         |    [d]........Destroy cluster                        |
 |                                                     |    [U]........Upgrade cluster                        |
 |------------------ OpenShift Tools ------------------|    [t]........Tmuxp sessions                         |
 |                                                     |    [p]........Copy kubeadmin password to clipboard   |
@@ -100,6 +100,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
     --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="/vms/clusters/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; tmux send-keys "cd /vms/clusters/"{1} C-m; bash)+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
+    --bind 'E:execute-silent(tmux send-keys "vim /vms/clusters/"{1}"/{1}.json" C-m)+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
