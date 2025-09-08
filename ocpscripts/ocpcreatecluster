@@ -16,6 +16,7 @@ function createVphereCluster() {
 - Baremetal UPI Single node OpenShift with worker nodes
 - Baremetal UPI Single node OpenShift with ODF nodes
 - Baremetal UPI Single node OpenShift with Virt nodes
+- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo
 - None UPI 3-node cluster
 - None UPI 3-node cluster with 'ODF'
 - vSphere IPI 3-node cluster
@@ -76,6 +77,11 @@ function createVphereCluster() {
                 ;;
             "- Baremetal UPI Single node OpenShift with Virt nodes")
                 file="/vms/clusters/variables-files/ansible-vars-sno-virt-baremetal.json"
+                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+                tmux wait-for vim-done
+                ;;
+            "- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo")
+                file="/vms/clusters/variables-files/ansible-vars-sno-virt-baremetal-demo.json"
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
                 ;;
