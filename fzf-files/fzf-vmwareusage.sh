@@ -66,7 +66,7 @@ process_host() {
       local ds_percentage=$(awk "BEGIN {printf \"%.2f\", ($ds_used / $ds_capacity) * 100}")
       
       local ds_color=$(get_color_by_percentage "$ds_percentage" 80 60)
-  echo -e "  ${WHITE}${ICON_DISK} Datastore $datastore:${RESET} ${ds_color}${ds_used}GB/${ds_capacity}GB${RESET}"
+  echo -e "  ${WHITE}${ICON_DISK} Datastore $datastore:${RESET} ${ds_color}${ds_used}GB/${ds_capacity}GB (${ds_percentage}%)${RESET}"
     done <<< "$datastore_ids"
   fi
   
