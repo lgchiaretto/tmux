@@ -66,7 +66,7 @@ process_host() {
       local ds_percentage=$(awk "BEGIN {printf \"%.2f\", ($ds_used / $ds_capacity) * 100}")
       
       local ds_color=$(get_color_by_percentage "$ds_percentage" 80 60)
-  echo -e "  ${WHITE}${ICON_DISK} Datastore $datastore:${RESET} ${ds_color}${ds_used}GB/${ds_capacity}GB (${ds_percentage}%)${RESET}"
+      echo -e "  ${WHITE}${ICON_DISK} Datastore $datastore:${RESET} ${ds_color}${ds_used}GB/${ds_capacity}GB (${ds_percentage}%)${RESET}"
     done <<< "$datastore_ids"
   fi
   
@@ -84,8 +84,25 @@ tempfile=$(mktemp)
   echo -e "${WHITE}CPU, Memory and Datastore Usage of VMware Hosts:${RESET}"
   echo "-------------------------------------------------------------"
   
+  # Create temporary directory for parallel processing
+  temp_dir=$(mktemp -d)
+  trap "rm -rf $temp_dir" EXIT
+  
+  # Process hosts in parallel
   for host in $hosts; do
-    process_host "$host"
+    {
+      process_host "$host"
+    } > "$temp_dir/$host.out" &
+  done
+  
+  # Wait for all background jobs to complete
+  wait
+  
+  # Output results in the correct order
+  for host in $hosts; do
+    if [ -f "$temp_dir/$host.out" ] && [ -s "$temp_dir/$host.out" ]; then
+      cat "$temp_dir/$host.out"
+    fi
   done
 } > "$tempfile"
 
