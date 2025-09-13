@@ -10,6 +10,7 @@ actions=$(
 6 - Start cluster
 7 - Stop cluster
 8 - List OpenShift releases available on quay.chiaret.to
+9 - Run OC Mirror operations
 EOF
 )
 
@@ -74,8 +75,8 @@ selected_action=$(
 |  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
 |  [D]........Copy or download and install OpenShift  |    [r]........Recreate cluster                       |
-|             client                                  |    [Enter]....Login with kubeadmin user              |
-|  [l]........OpenShift/Operators Lifecycle           |                                                      |
+|             client                                  |    [m]........Run OC Mirror operations               |
+|  [l]........OpenShift/Operators Lifecycle           |    [Enter]....Login with kubeadmin user              |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
 |                                                     |                                                      |
@@ -109,6 +110,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
     --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
+    --bind 'm:execute-silent(tmux has-session -t oc-mirror-session 2>/dev/null || tmux new-session -d -s oc-mirror-session; tmux switch-client -t oc-mirror-session; tmux send-keys "ocp-oc-mirror.sh" C-m)+abort' \
     --expect=enter 
 )
 
