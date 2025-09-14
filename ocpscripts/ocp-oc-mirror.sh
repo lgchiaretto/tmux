@@ -50,11 +50,7 @@ create_imagesets() {
         
         cat > "$BASE_DIR/$dir/imageset-config.yaml" <<EOF
 kind: ImageSetConfiguration
-apiVersion: mirror.openshift.io/v1alpha2
-storageConfig:
-  registry:
-    imageURL: quay.chiaret.to/ocp4/oc-mirror-$dir
-    skipTLS: false
+apiVersion: mirror.openshift.io/v2alpha1
 mirror:
   platform:
     architectures:
@@ -134,8 +130,7 @@ for dir in "${DIRECTORIES[@]}"; do
     tmux new-window -t $TMUX_SESSION -n "${window_name}-running" -c "$BASE_DIR/$dir"
     
     tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror for $dir'" Enter
-    tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror --config imageset-config.yaml docker://quay.chiaret.to" Enter
-    tmux send-keys -t $TMUX_SESSION:$window_index "echo 'MIRROR_EXIT_CODE:'\$?" Enter
+    tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror --v2 --config imageset-config.yaml --workspace file://\$(pwd) docker://quay.chiaret.to" Enter
     
     echo "Waiting for completion of $dir..."
     sleep 5
@@ -152,14 +147,10 @@ for dir in "${DIRECTORIES[@]}"; do
     
     sleep 3
     echo "  Checking exit code for $dir..."
-    for i in {1..10}; do
-        exit_code=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p | grep "MIRROR_EXIT_CODE:" | tail -1 | cut -d: -f2 | tr -d ' ')
-        if [[ -n "$exit_code" ]]; then
-            break
-        fi
-        echo "  Waiting for exit code... (attempt $i)"
-        sleep 2
-    done
+    finished_success=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p | grep "Goodbye, thank you for using oc-mirror" | tail -1 | cut -d: -f2 | tr -d ' ')
+    if [[ -n "$finished_success" ]]; then
+        exit_code=0
+    fi
     
     if [ "$exit_code" = "0" ]; then
         tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
