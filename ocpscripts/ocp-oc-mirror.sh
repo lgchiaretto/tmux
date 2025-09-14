@@ -81,10 +81,6 @@ create_imagesets
 
 IFS=$'\n'
 
-echo "Copying ~/auth.json to /run/user/1000/containers/auth.json"
-tmux send-keys -t $TMUX_SESSION:$current_window "cp ~/auth.json /run/user/1000/containers/auth.json" Enter
-sleep 2
-
 # Check if we're already in the target tmux session
 if [ "$TMUX" ] && [ "$(tmux display-message -p '#S')" = "$TMUX_SESSION" ]; then
     tmux list-windows -t $TMUX_SESSION -F '#{window_index}' | grep -v "^$(tmux display-message -p '#I')$" | xargs -I {} tmux kill-window -t $TMUX_SESSION:{}
@@ -104,9 +100,32 @@ current_window=$(tmux display-message -p '#I' 2>/dev/null || echo "0")
 
 tmux rename-window -t $TMUX_SESSION:$current_window 'script-running'
 
+# Create a dedicated window for auth copy
+auth_window=$((current_window + 1))
+tmux new-window -t $TMUX_SESSION -n 'auth-copy' -c $BASE_DIR
+
+echo "Copying ~/auth.json to /run/user/1000/containers/auth.json in dedicated window"
+tmux send-keys -t $TMUX_SESSION:$auth_window "mkdir -p /run/user/1000/containers" Enter
+sleep 1
+tmux send-keys -t $TMUX_SESSION:$auth_window "cp /home/lchiaret/auth.json /run/user/1000/containers/auth.json" Enter
+sleep 1
+tmux send-keys -t $TMUX_SESSION:$auth_window "echo 'Auth copy completed with exit code:'\$?" Enter
+sleep 2
+
+# Check if auth copy was successful
+auth_status=$(tmux capture-pane -t $TMUX_SESSION:$auth_window -p | grep "Auth copy completed" | tail -1)
+if [[ "$auth_status" == *"exit code:0"* ]]; then
+    tmux rename-window -t $TMUX_SESSION:$auth_window 'auth-success'
+    echo "Auth file copied successfully"
+else
+    tmux rename-window -t $TMUX_SESSION:$auth_window 'auth-failed'
+    echo "Failed to copy auth file"
+    echo "Check the auth-copy window for details"
+fi
+
 echo "Registry logins completed"
 
-window_index=$((current_window + 1))
+window_index=$((current_window + 2))  # Account for auth window
 
 for dir in "${DIRECTORIES[@]}"; do
     echo "Processing directory: $dir"
