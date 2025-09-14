@@ -75,7 +75,7 @@ selected_action=$(
 |  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
 |  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
 |  [D]........Copy or download and install OpenShift  |    [r]........Recreate cluster                       |
-|             client                                  |    [m]........Run OC Mirror operations               |
+|             client                                  |    [m]........Mirror to quay.chiaret.to              |
 |  [l]........OpenShift/Operators Lifecycle           |    [Enter]....Login with kubeadmin user              |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
