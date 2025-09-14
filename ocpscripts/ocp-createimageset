@@ -73,7 +73,7 @@ tmux new-window -t $TMUX_SESSION -n "${window_name}-running" -c "$BASE_DIR/$ocpv
 
 tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror for $ocpversion'" Enter
 tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror --v2 --config imageset-config.yaml --workspace file://$BASE_DIR/$ocpversion docker://quay.chiaret.to" Enter
-#tmux send-keys -t $TMUX_SESSION:$window_index "echo 'MIRROR_EXIT_CODE:'\$?" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'EXIT_CODE:'\$?" Enter
 
 echo "Waiting for completion of $ocpversion..."
 sleep 5
@@ -89,23 +89,26 @@ while true; do
 done
 
 sleep 2
-echo "  Checking exit code for $ocpversion..."
-finished_success=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p | grep "Goodbye, thank you for using oc-mirror" | tail -1)
-if [[ -n "$finished_success" ]]; then
-    exit_code=0
-fi
+echo "  Checking exit code for platform $version..."
+pane_output=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p)
+exit_code_line=$(echo "$pane_output" | grep "EXIT_CODE:" | tail -1)
+has_error=$(echo "$pane_output" | grep -i "\[ERROR\]" | wc -l)
 
+if [[ "$exit_code_line" == *"EXIT_CODE:0"* ]] && [[ "$has_error" -eq 0 ]]; then
+    exit_code=0
+else
+    exit_code=1
+fi
+    
 if [ "$exit_code" = "0" ]; then
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
-    echo "Completed successfully: $ocpversion (exit code: $exit_code)"
-    echo $ocpversion >> $BASE_DIR/versions.txt
-    echo "Added $ocpversion to versions.txt"
+    echo "Completed successfully: platform $version (exit code: $exit_code)"
 else
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-failed"
-    echo "Failed: $ocpversion (exit code: $exit_code)"
-    echo "Last output from $ocpversion:"
+    echo "Failed: platform $version (exit code: $exit_code)"
+    echo "Last output from platform $version:"
     tmux capture-pane -t $TMUX_SESSION:$window_index -p | tail -5
-    exit 1
+    # exit 1
 fi
 
 tmux rename-window -t $TMUX_SESSION:$current_window 'script-success'
