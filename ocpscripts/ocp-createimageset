@@ -98,8 +98,8 @@ fi
 if [ "$exit_code" = "0" ]; then
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
     echo "Completed successfully: $ocpversion (exit code: $exit_code)"
-    echo $ocpversion >> $BASE_DIR/directories.txt
-    echo "Added $ocpversion to directories.txt"
+    echo $ocpversion >> $BASE_DIR/versions.txt
+    echo "Added $ocpversion to versions.txt"
 else
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-failed"
     echo "Failed: $ocpversion (exit code: $exit_code)"

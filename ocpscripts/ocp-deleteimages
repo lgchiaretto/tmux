@@ -124,9 +124,9 @@ if [ "$exit_code" = "0" ]; then
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
     echo "Delete completed successfully: $ocpversion (exit code: $exit_code)"
     
-    echo "Removing $ocpversion from directories.txt"
-    sed -i "/^$ocpversion$/d" $BASE_DIR/directories.txt
-    echo "Removed $ocpversion from directories.txt"
+    echo "Removing $ocpversion from versions.txt"
+    sed -i "/^$ocpversion$/d" $BASE_DIR/versions.txt
+    echo "Removed $ocpversion from versions.txt"
 else
     tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-failed"
     echo "Delete failed: $ocpversion (exit code: $exit_code)"
