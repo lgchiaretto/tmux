@@ -69,13 +69,14 @@ selected_action=$(
 |  [c]........Create cluster                          |    [s]........Start cluster                          |
 |  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
 |  [E]........Edit cluster JSON file with vim         |    [d]........Destroy cluster                        |
-|                                                     |    [U]........Upgrade cluster                        |
-|------------------ OpenShift Tools ------------------|    [t]........Tmuxp sessions                         |
-|                                                     |    [p]........Copy kubeadmin password to clipboard   |
-|  [C]........Check latest OCP Versions available     |    [k]........kubeconfig for cluster                 |
-|  [u]........Show OpenShift update path              |    [f]........Enter cluster files directory          |
-|  [D]........Copy or download and install OpenShift  |    [r]........Recreate cluster                       |
-|             client                                  |    [m]........Mirror to quay.chiaret.to              |
+|  [m]........Mirror to quay.chiaret.to               |    [U]........Upgrade cluster                        |
+|                                                     |    [t]........Tmuxp sessions                         |
+|------------------ OpenShift Tools ------------------|    [p]........Copy kubeadmin password to clipboard   |
+|                                                     |    [k]........kubeconfig for cluster                 |
+|  [C]........Check latest OCP Versions available     |    [f]........Enter cluster files directory          |
+|  [u]........Show OpenShift update path              |    [r]........Recreate cluster                       |
+|  [D]........Copy or download and install OpenShift  |                                                      |
+|             client                                  |                                                      |
 |  [l]........OpenShift/Operators Lifecycle           |    [Enter]....Login with kubeadmin user              |
 |                                                     |                                                      |
 |  [Esc]......Exit                                    |                                                      |
