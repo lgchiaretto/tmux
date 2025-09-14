@@ -150,7 +150,7 @@ window_index=$((current_window + 2))  # Account for auth window
 for version in "${PLATFORM_DIRECTORIES[@]}"; do
     echo "Processing platform release: $version"
     
-    window_name="platform-${dir//\//-}"
+    window_name="platform-$version"
     tmux new-window -t $TMUX_SESSION -n "${window_name}-running" -c "$BASE_DIR/$version"
     
     tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror for platform $version'" Enter
@@ -190,7 +190,7 @@ for version in "${PLATFORM_DIRECTORIES[@]}"; do
         echo "Failed: platform $version (exit code: $exit_code)"
         echo "Last output from platform $version:"
         tmux capture-pane -t $TMUX_SESSION:$window_index -p | tail -5
-        exit 1
+        # exit 1
     fi
     
     window_index=$((window_index + 1))
