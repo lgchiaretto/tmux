@@ -8,19 +8,9 @@ fi
 
 set -e
 
-#DIRECTORIES=(
-#    "4.16"
-#    "4.17" 
-#    "4.18"
-#    "4.19"
-#    "operators/4.16"
-#    "operators/4.18"
-#    "operators/4.19"
-#)
-
+#Read DIRECTORIES from a file
 DIRECTORIES=(
-    "4.16"
-    "4.18" 
+$(cat /home/lchiaret/quay-files/directories.txt | grep -vE '^\s*#' | grep -vE '^\s*$')
 )
 
 TMUX_SESSION="oc-mirror-session"
@@ -68,12 +58,10 @@ if [[ "$confirm" != "y" ]]; then
     exit 0
 fi
 
-read -p "rh-ee-lchiaret password: " -s RHE_PASSWORD
-echo
+IFS=$'\n'
 
 # Check if we're already in the target tmux session
 if [ "$TMUX" ] && [ "$(tmux display-message -p '#S')" = "$TMUX_SESSION" ]; then
-    echo "Already in $TMUX_SESSION session, using current session"
     # Kill all windows except the current one
     tmux list-windows -t $TMUX_SESSION -F '#{window_index}' | grep -v "^$(tmux display-message -p '#I')$" | xargs -I {} tmux kill-window -t $TMUX_SESSION:{}
 else
@@ -84,7 +72,6 @@ fi
 
 # Check if we're already in the target tmux session
 if [ "$TMUX" ] && [ "$(tmux display-message -p '#S')" = "$TMUX_SESSION" ]; then
-    echo "Already in $TMUX_SESSION session, using current session"
     # Kill all windows except the current one
     tmux list-windows -t $TMUX_SESSION -F '#{window_index}' | grep -v "^$(tmux display-message -p '#I')$" | xargs -I {} tmux kill-window -t $TMUX_SESSION:{}
 else
@@ -96,17 +83,11 @@ fi
 # Get current window index
 current_window=$(tmux display-message -p '#I' 2>/dev/null || echo "0")
 
-tmux rename-window -t $TMUX_SESSION:$current_window 'login-running'
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-running'
 
-tmux send-keys -t $TMUX_SESSION:$current_window "echo 'Starting registry logins...'" Enter
-tmux send-keys -t $TMUX_SESSION:$current_window 'podman login -u "openshift-release-dev+rhnsupportlchiaret1y8edugpgprjr5umz7sdet52twt" -p "J4PVKQOS7LA1MK0OWVTS89QSU0IYAWMD4LOMTQAV7QLR98CEDW9IT42J773OJHC3" quay.io' Enter
-sleep 3
-tmux send-keys -t $TMUX_SESSION:$current_window 'podman login quay.chiaret.to -u chiaretto -p "JJ4Q0QihDH4*4O>"' Enter
-sleep 3
-tmux send-keys -t $TMUX_SESSION:$current_window "podman login registry.redhat.io -u rh-ee-lchiaret -p '$RHE_PASSWORD'" Enter
-sleep 3
-
-tmux rename-window -t $TMUX_SESSION:$current_window 'login-success'
+echo "Copying ~/auth.json to /run/user/1000/containers/auth.json"
+tmux send-keys -t $TMUX_SESSION:$current_window "cp ~/auth.json /run/user/1000/containers/auth.json" Enter
+sleep 2
 
 echo "Registry logins completed"
 
@@ -160,6 +141,7 @@ for dir in "${DIRECTORIES[@]}"; do
             # Show last few lines for debugging
             echo "Last output from $dir:"
             tmux capture-pane -t $TMUX_SESSION:$window_index -p | tail -5
+            exit 1
         fi
         
         window_index=$((window_index + 1))
@@ -167,6 +149,6 @@ for dir in "${DIRECTORIES[@]}"; do
         echo "Skipping $dir - no imageset-config.yaml found"
     fi
 done
-
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-success'
 echo "All oc-mirror operations completed"
 echo "Tmux session: $TMUX_SESSION"
