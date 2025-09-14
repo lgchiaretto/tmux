@@ -1,0 +1,121 @@
+#!/bin/bash
+
+if [ "$(hostname)" != "bastion.chiaret.to" ]; then
+    echo "This script must be run on bastion.chiaret.to. Exiting."
+    exit 0
+fi
+
+set -e
+
+ocpversion=$1
+
+if [ -z "$ocpversion" ]; then
+    echo "Usage: $0 <ocp-version>"
+    echo "Example: $0 4.16.1"
+    exit 1
+fi
+
+tmux_ocpversion=$(echo $ocpversion | tr . _)
+
+TMUX_SESSION="imageset-$tmux_ocpversion"
+BASE_DIR="/home/lchiaret/quay-files"
+
+mkdir -p $BASE_DIR/$ocpversion
+
+channel=$(echo $ocpversion | cut -d'.' -f1,2)
+
+cat > $BASE_DIR/$ocpversion/imageset-config.yaml <<EOF
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  registry:
+    imageURL: quay.chiaret.to/ocp4/oc-mirror-$ocpversion
+    skipTLS: false
+mirror:
+  platform:
+    architectures:
+    - "amd64"
+    channels:
+      - name: stable-$channel
+        minVersion: $ocpversion
+        maxVersion: $ocpversion
+EOF
+
+echo "Created imageset config for OpenShift $ocpversion"
+echo "Channel: stable-$channel"
+echo "Target registry: quay.chiaret.to/ocp4/oc-mirror-$ocpversion"
+
+read -p "Would you like to proceed with the mirror operation? (y/n): " confirm
+if [[ "$confirm" != "y" ]]; then
+    echo "Operation cancelled."
+    exit 0
+fi
+
+if [ "$TMUX" ] && [ "$(tmux display-message -p '#S')" = "$TMUX_SESSION" ]; then
+    tmux list-windows -t $TMUX_SESSION -F '#{window_index}' | grep -v "^$(tmux display-message -p '#I')$" | xargs -I {} tmux kill-window -t $TMUX_SESSION:{}
+else
+    tmux has-session -t $TMUX_SESSION 2>/dev/null && tmux kill-session -t $TMUX_SESSION
+    tmux new-session -d -s $TMUX_SESSION -c $BASE_DIR
+fi
+
+current_window=$(tmux display-message -p '#I' 2>/dev/null || echo "0")
+
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-running'
+
+echo "Copying ~/auth.json to /run/user/1000/containers/auth.json"
+tmux send-keys -t $TMUX_SESSION:$current_window "cp ~/auth.json /run/user/1000/containers/auth.json" Enter
+sleep 2
+
+echo "Registry logins completed"
+
+window_index=$((current_window + 1))
+
+echo "Processing directory: $ocpversion"
+
+window_name="mirror-${ocpversion//\./-}"
+tmux new-window -t $TMUX_SESSION -n "${window_name}-running" -c "$BASE_DIR/$ocpversion"
+
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror for $ocpversion'" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror --config imageset-config.yaml docker://quay.chiaret.to" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'MIRROR_EXIT_CODE:'\$?" Enter
+
+echo "Waiting for completion of $ocpversion..."
+sleep 5
+while true; do
+    current_command=$(tmux list-panes -t $TMUX_SESSION:$window_index -F '#{pane_current_command}' 2>/dev/null || echo "")
+    if [[ "$current_command" == "oc-mirror" ]]; then
+        echo "  oc-mirror still running for $ocpversion..."
+        sleep 15
+    else
+        echo "  oc-mirror process completed for $ocpversion"
+        break
+    fi
+done
+
+sleep 3
+echo "  Checking exit code for $ocpversion..."
+for i in {1..10}; do
+    exit_code=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p | grep "MIRROR_EXIT_CODE:" | tail -1 | cut -d: -f2 | tr -d ' ')
+    if [[ -n "$exit_code" ]]; then
+        break
+    fi
+    echo "  Waiting for exit code... (attempt $i)"
+    sleep 2
+done
+
+if [ "$exit_code" = "0" ]; then
+    tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
+    echo "Completed successfully: $ocpversion (exit code: $exit_code)"
+    echo $ocpversion >> $BASE_DIR/directories.txt
+    echo "Added $ocpversion to directories.txt"
+else
+    tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-failed"
+    echo "Failed: $ocpversion (exit code: $exit_code)"
+    echo "Last output from $ocpversion:"
+    tmux capture-pane -t $TMUX_SESSION:$window_index -p | tail -5
+    exit 1
+fi
+
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-success'
+echo "Imageset creation and mirror operation completed for OpenShift $ocpversion"
+echo "Tmux session: $TMUX_SESSION"
