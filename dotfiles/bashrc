@@ -18,6 +18,7 @@ export GO111MODULE=off
 export GOVC_USERNAME='administrator@chiaretto.local'
 export GOVC_PASSWORD='VMware1!VMware1!' #dummy-password
 export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
+export GOVC_INSECURE=true
 
 # -------------------- Shell Options --------------------
 shopt -s checkwinsize
