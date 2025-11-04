@@ -82,7 +82,7 @@ chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.vim/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.fzf/" > /dev/null 2>&1
 
-if [[ "$@" == *"--download-tmux"* ]]; then
+if [[ "$@" == *"--download-tmux"* || ! -f "/usr/local/bin/tmux" ]]; then
     log "Downloading tmux binary"
     wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O tmux > /dev/null 2>&1
     log "Copying tmux binary to /usr/local/bin"
