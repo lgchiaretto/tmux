@@ -29,11 +29,7 @@ if [[ "$@" == *"--help"* || "$@" == *"-h"* ]]; then
     show_help
 fi
 
-if [[ -n "$SUDO_USER" ]]; then
-    TARGET_USER="$SUDO_USER"
-    TARGET_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
-    TARGET_GROUP=$(id -gn "$SUDO_USER")
-else [[ $USER == "root" ]]; then
+if [[ $USER == "root" ]]; then
     TARGET_USER="root"
     TARGET_HOME="/root"
     TARGET_GROUP="root"
