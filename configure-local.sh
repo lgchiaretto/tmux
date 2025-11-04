@@ -29,34 +29,54 @@ if [[ "$@" == *"--help"* || "$@" == *"-h"* ]]; then
     show_help
 fi
 
-USER=$(id -un)
-GROUP=$(id -gn)
+if [[ -n "$SUDO_USER" ]]; then
+    TARGET_USER="$SUDO_USER"
+    TARGET_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+    TARGET_GROUP=$(id -gn "$SUDO_USER")
+else
+    TARGET_USER=$(id -un)
+    TARGET_HOME="$HOME"
+    TARGET_GROUP=$(id -gn)
+fi
+
 TMUX_DIR=$(pwd)
 
-log "Changing directory to /home/$USER"
-cd /home/$USER > /dev/null 2>&1
+log "Configuring environment for user: $TARGET_USER (home: $TARGET_HOME)"
+cd "$TARGET_HOME" > /dev/null 2>&1
+
+log "Configuring environment for user: $TARGET_USER (home: $TARGET_HOME)"
+cd "$TARGET_HOME" > /dev/null 2>&1
 
 log "Cloning fzf repository"
 git clone https://github.com/junegunn/fzf.git .fzf> /dev/null 2>&1
 cd .fzf > /dev/null 2>&1
 log "Installing fzf"
-./install --key-bindings --completion --update-rc > /dev/null 2>&1
+sudo -u "$TARGET_USER" ./install --key-bindings --completion --update-rc > /dev/null 2>&1
 cd $TMUX_DIR > /dev/null 2>&1
 log "Copying .bashrc, .vimrc, .dircolors, .inputrc and .tmux.conf files"
-cp $TMUX_DIR/dotfiles/bashrc /home/$USER/.bashrc > /dev/null 2>&1
-cp $TMUX_DIR/dotfiles/tmux.conf /home/$USER/.tmux.conf > /dev/null 2>&1
-cp $TMUX_DIR/dotfiles/vimrc /home/$USER/.vimrc > /dev/null 2>&1
-cp $TMUX_DIR/dotfiles/dircolors /home/$USER/.dircolors > /dev/null 2>&1
-cp $TMUX_DIR/dotfiles/inputrc /home/$USER/.inputrc > /dev/null 2>&1
-cp $TMUX_DIR/dotfiles/bash_functions /home/$USER/.bash_functions > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/bashrc "$TARGET_HOME/.bashrc" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/tmux.conf "$TARGET_HOME/.tmux.conf" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/vimrc "$TARGET_HOME/.vimrc" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/dircolors "$TARGET_HOME/.dircolors" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/inputrc "$TARGET_HOME/.inputrc" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/bash_functions "$TARGET_HOME/.bash_functions" > /dev/null 2>&1
+
+log "Installing vim-plug"
+curl -fLo "$TARGET_HOME/.vim/autoload/plug.vim" --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim > /dev/null 2>&1
+
+log "Installing vim plugins"
+sudo -u "$TARGET_USER" vim -E -s -u "$TARGET_HOME/.vimrc" +PlugInstall +qall > /dev/null 2>&1
 
 log "Creating .tmux directory"
-mkdir -p /home/$USER/.tmux/ > /dev/null 2>&1
+mkdir -p "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Copying fzf-files to .tmux directory"
-cp $TMUX_DIR/fzf-files/* /home/$USER/.tmux/ > /dev/null 2>&1
+cp $TMUX_DIR/fzf-files/* "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Changing ownership of configuration files"
-chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc} > /dev/null 2>&1
-chown -R $USER:$GROUP /home/$USER/.tmux/ > /dev/null 2>&1
+chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME"/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc,.bash_functions} > /dev/null 2>&1
+chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/" > /dev/null 2>&1
+chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.vim/" > /dev/null 2>&1
+chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.fzf/" > /dev/null 2>&1
 
 if [[ "$@" == *"--download-tmux"* ]]; then
     log "Downloading tmux binary"
@@ -90,9 +110,10 @@ sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
 
 log "Installing tmuxp and bat"
 sudo dnf install -y python3-pip bat -q > /dev/null 2>&1
-pip3 install tmuxp -q > /dev/null 2>&1
+sudo -u "$TARGET_USER" pip3 install --user tmuxp -q > /dev/null 2>&1
 
 log "Copying tmux-sessions directory to home"
-cp -R tmux-sessions ~/ > /dev/null 2>&1
+cp -R tmux-sessions "$TARGET_HOME/" > /dev/null 2>&1
+chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/tmux-sessions/" > /dev/null 2>&1
 
 log "Configuration complete"
