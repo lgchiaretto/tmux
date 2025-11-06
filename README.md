@@ -141,7 +141,7 @@ cp -r tmux-sessions ~/tmux-sessions/
 - **VMware usage**: `prefix + V` (view VMware resource usage)
 - **OCP versions**: `prefix + C` (select OCP version)
 - **Manage clusters**: `prefix + m` (cluster management menu)
-- **Quay releases**: `prefix + q` (OCP versions on quay.io)
+- **Quay releases**: `prefix + q` (OCP versions on quay.chiaret.to)
 
 #### File & Utility Operations
 
