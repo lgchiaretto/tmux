@@ -287,9 +287,3 @@ All components use the **Gruvbox** color palette:
 - Cyan (colour30) for projects
 
 ---
-
-## Integration with OpenShift4-Automation
-
-This tmux configuration integrates with the `openshift4-automation` Ansible framework located at `/home/lchiaret/git/openshift4-automation`. The FZF menus and wrapper scripts translate user actions into automation commands, creating tmux sessions with pre-configured monitoring layouts.
-
----
