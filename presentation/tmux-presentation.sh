@@ -18,10 +18,10 @@ SLIDES=(
     "04-tmux-config.sh"
     "05-project-overview.sh"
     "06-fzf-integration.sh"
-    "07-cluster-management.sh"
+    "07-bash-customization.sh"
     "08-resource-browsers.sh"
     "09-live-demo.sh"
-    "10-conclusions.sh"
+    "10-conclusion.sh"
     "11-questions.sh"
 )
 
@@ -36,8 +36,16 @@ create_presentation_session() {
     # Create new detached session
     tmux new-session -d -s "$SESSION_NAME"
     
+    # Configure window appearance for centered display
+    tmux set-option -t "$SESSION_NAME" status-justify centre
     tmux set-option -t "$SESSION_NAME" status-left ""
     tmux set-option -t "$SESSION_NAME" status-right ""
+    tmux set-option -t "$SESSION_NAME" status-style "bg=default,fg=colour245"
+    
+    # Set window options for better centering
+#    tmux set-window-option -t "$SESSION_NAME" window-status-format " #I:#W "
+#    tmux set-window-option -t "$SESSION_NAME" window-status-current-format " #[bold]#I:#W "
+#    tmux set-window-option -t "$SESSION_NAME" window-status-separator " | "
 
     for i in "${!SLIDES[@]}"; do
         local slide_script="${SLIDES[$i]}"
