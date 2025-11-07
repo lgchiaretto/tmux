@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SESSION_NAME="tmux-presentation"
+SESSION_NAME="talks-tmux"
 SLIDES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/slides" && pwd)"
 
 # Color definitions (Gruvbox theme)
@@ -38,14 +38,11 @@ create_presentation_session() {
     
     # Configure window appearance for centered display
     tmux set-option -t "$SESSION_NAME" status-justify centre
+    tmux set-option -t "$SESSION_NAME" status-position top
+#    tmux set-option -t "$SESSION_NAME" status-left "#[fg=colour214][#[fg=colour248]#S#[fg=colour214]] | "
     tmux set-option -t "$SESSION_NAME" status-left ""
     tmux set-option -t "$SESSION_NAME" status-right ""
     tmux set-option -t "$SESSION_NAME" status-style "bg=default,fg=colour245"
-    
-    # Set window options for better centering
-#    tmux set-window-option -t "$SESSION_NAME" window-status-format " #I:#W "
-#    tmux set-window-option -t "$SESSION_NAME" window-status-current-format " #[bold]#I:#W "
-#    tmux set-window-option -t "$SESSION_NAME" window-status-separator " | "
 
     for i in "${!SLIDES[@]}"; do
         local slide_script="${SLIDES[$i]}"
@@ -65,10 +62,6 @@ create_presentation_session() {
     done
 
     tmux select-window -t "$SESSION_NAME:0"
-
-    # === Navigation bindings ===
-    tmux bind-key -n -T root MouseDown1StatusLeft select-window -p -t "$SESSION_NAME"
-    tmux bind-key -n -T root MouseDown1StatusRight select-window -n -t "$SESSION_NAME"
 
     # === Attach or switch ===
     if [ -z "$TMUX" ]; then
