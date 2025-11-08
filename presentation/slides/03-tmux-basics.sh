@@ -7,7 +7,7 @@ source "$SCRIPT_DIR/../lib/center-content.sh"
 
 clear
 
-# Generate slide content and pipe to center function
+
 {
 echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
 echo -e "    │                                                                           │"
