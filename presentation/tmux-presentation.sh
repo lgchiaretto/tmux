@@ -28,21 +28,20 @@ SLIDES=(
 TOTAL_SLIDES=${#SLIDES[@]}
 
 create_presentation_session() {
-    # Kill existing session if it exists
     if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
         tmux kill-session -t "$SESSION_NAME"
     fi
 
-    # Create new detached session
     tmux new-session -d -s "$SESSION_NAME"
     
-    # Configure window appearance for centered display
     tmux set-option -t "$SESSION_NAME" status-justify centre
     tmux set-option -t "$SESSION_NAME" status-position top
-#    tmux set-option -t "$SESSION_NAME" status-left "#[fg=colour214][#[fg=colour248]#S#[fg=colour214]] | "
     tmux set-option -t "$SESSION_NAME" status-left ""
     tmux set-option -t "$SESSION_NAME" status-right ""
     tmux set-option -t "$SESSION_NAME" status-style "bg=default,fg=colour245"
+    tmux set-option -t "$SESSION_NAME" -gw window-status-current-format '#[fg=colour223,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
+    tmux set-option -t "$SESSION_NAME" -gw window-status-format '#[fg=colour244,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
+
 
     for i in "${!SLIDES[@]}"; do
         local slide_script="${SLIDES[$i]}"
@@ -63,7 +62,6 @@ create_presentation_session() {
 
     tmux select-window -t "$SESSION_NAME:0"
 
-    # === Attach or switch ===
     if [ -z "$TMUX" ]; then
         tmux attach-session -t "$SESSION_NAME"
     else

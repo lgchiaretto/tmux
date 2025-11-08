@@ -35,7 +35,7 @@ echo -e "    │  \033[38;5;142mHow We Use It\033[38;5;223m                     
 echo -e "    │                                                                           │"
 echo -e "    │  We integrate FZF with tmux keybindings to create interactive menus       │"
 echo -e "    │  for OpenShift resource management. Each script creates new tmux          │"
-echo -e "    │  windows with descriptive names like "logs:podname" or "desc:node".       │"
+echo -e "    │  windows with descriptive names like "logs:podname" or "desc:node".           │"
 echo -e "    │                                                                           │"
 echo -e "    │  This allows quick navigation and multi-tasking across cluster            │"
 echo -e "    │  resources without leaving the terminal.                                  │"
