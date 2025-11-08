@@ -1,0 +1,108 @@
+#!/bin/bash
+
+GRAPH_URL="https://api.openshift.com/api/upgrades_info/graph"
+CHANNELS=(
+    "eus-4.14"
+    "stable-4.15"
+    "eus-4.16"
+    "stable-4.17"
+    "eus-4.18"
+)
+
+HEADER="----------------------------------------- Update path tool ---------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Select the channel                                                                            |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n
+"
+
+fzf_select() {
+    local options="$1"
+    local header_text="$2"
+
+    full_header="${HEADER/Select the channel/$header_text}"
+
+    echo -e "$options" | sort -V | fzf-tmux \
+        --header "$full_header" \
+        --layout=reverse \
+        --border-label=" chiarettolabs.com.br " \
+        --border-label-pos=center \
+        -h "40%" -p "55%,46%" \
+        --exact \
+        --expect=b,esc \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+}
+
+fetch_upgrade_graph() {
+    local channel="$1"
+    local url="${GRAPH_URL}?channel=${channel}&arch=amd64"
+
+    response=$(curl -s "$url")
+    if [ $? -ne 0 ]; then
+        echo "Error fetching graph." >&2
+        exit 2
+    fi
+
+    echo "$response"
+}
+
+get_versions() {
+    local data="$1"
+    echo "$data" | jq -r '.nodes[].version'
+}
+
+versions=$(/usr/local/bin/ocpgetreleases.py)
+script_dir="/usr/local/bin/ocpgenerate-graph.py"
+
+while true; do
+    mapfile -t selection < <(fzf_select "$versions" "Select from Version")
+    key="${selection[0]}"
+    from_version="${selection[1]}"
+
+    case "$key" in
+        esc) exit 0 ;;
+        b) continue ;; 
+    esac
+
+    [ -z "$from_version" ] && continue
+
+    while true; do
+        mapfile -t selection < <(echo -e "$versions" | sort -rV | fzf-tmux \
+            --header=$'------------------------
+[b].....Back to select
+        from version
+[r].....Release notes\n
+[Esc]...Exit
+------------------------
+Select to version\n\n' \
+            --layout=reverse \
+            --border-label=" chiarettolabs.com.br " \
+            --border-label-pos=center \
+            -h "40%" \
+            -p "55%,46%" \
+            --exact \
+            --preview "python3 ${script_dir} --from-version ${from_version} --to-version {}" \
+            --bind "enter:ignore" \
+            --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {})" \
+            --expect=b,esc \
+            --preview-window "right:76%" \
+            --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+            --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+        )
+        key="${selection[0]}"
+        to_version="${selection[1]}"
+
+        case "$key" in
+            esc) exit 0 ;;
+            b) break ;;
+        esac
+
+        if [ -n "$to_version" ]; then
+            echo -e "\nFrom Version: $from_version"
+            echo "To Version:   $to_version"
+            exit 0
+        fi
+    done
+done

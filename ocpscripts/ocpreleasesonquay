@@ -1,0 +1,24 @@
+#!/bin/bash
+source ~/.quaytoken
+
+releases=$(timeout 1 curl -s -X GET -H "Authorization: Bearer $QUAYTOKEN" https://quay.chiaret.to/api/v1/repository/openshift/release-images | jq -r '.tags | keys[] | sub("-x86_64$"; "")')
+
+if [ -z "$releases" ]; then
+    tmux display-message -d 5000 "No releases found. Maybe Quay is not accessible or the token is invalid." 
+    exit 1
+fi
+
+selected_release=$(echo "$releases" | sort | fzf-tmux \
+    --header=$'Select a release:\n\n' \
+    --layout=reverse  \
+    --border-label=" chiarettolabs.com.br " \
+    --border-label-pos=center \
+    -h 40 -p "38%,50%" \
+    --exact \
+    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+    )
+
+if [ "$selected_release" ]; then
+    tmux send-keys $(echo "$selected_release" | tail -n1)
+fi

@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for updating OCP cache every 4 hours
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=4h
+Unit=update-ocp-cache.service
+
+[Install]
+WantedBy=timers.target

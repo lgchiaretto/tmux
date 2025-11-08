@@ -1,0 +1,24 @@
+#!/bin/bash
+
+selected_lifecycle=$(echo -e "OpenShift Lifecycle\nOperators Lifecycle" | fzf-tmux \
+  --layout=reverse -p "31%,40%" \
+  --no-input \
+  --header=$'-------------------------- Help --------------------------
+[Enter]     Open on firefox
+[Esc]       Exit
+----------------------------------------------------------\n\n' \
+  --height=40% --border \
+  --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+  --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+  )
+
+if [ -n "$selected_lifecycle" ]; then
+  case "$selected_lifecycle" in
+    "OpenShift Lifecycle")
+      firefox https://access.redhat.com/support/policy/updates/openshift
+      ;;
+    "Operators Lifecycle")
+      firefox https://access.redhat.com/support/policy/updates/openshift_operators
+      ;;
+  esac
+fi

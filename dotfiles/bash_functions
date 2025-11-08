@@ -1,0 +1,22 @@
+#!/usr/bin/env bash -x
+
+ossh(){
+  IP=$(oc get nodes $@ --no-headers -o jsonpath='{.status.addresses[0].address}')
+  # if [ -z $IP ]; then
+	# echo "Are you connected to the OCP cluster? Did you type a correct node?"
+  # else
+    ssh core@$IP
+  # fi
+}
+
+defunct(){
+    echo "Children:"
+    ps -ef | head -n1
+    ps -ef | grep defunct
+    echo "------------------------------"
+    echo "Parents:"
+    ppids="$(ps -ef | grep defunct | awk '{ print $3 }')"
+    echo "$ppids" | while read ppid; do
+        ps -A | grep "$ppid"
+    done
+}

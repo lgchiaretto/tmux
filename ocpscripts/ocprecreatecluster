@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+temp_file=$(mktemp)
+
+tmux new-window -n "recreate: $1" "bash -c 'read -p \"Are you sure you want to recreate the cluster \\\"$1\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
+
+while [ ! -s "$temp_file" ]; do
+  sleep 1
+done
+
+confirm=$(cat "$temp_file")
+rm -f "$temp_file"
+
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+  exit 0
+fi
+
+infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
+
+if [[ "$infra" == "vsphere" ]]; then
+  if [ "$(hostname)" = "bastion.chiaret.to" ]; then
+      tmux send-keys "nohup /home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py '$1' > /tmp/nohup-recreate.out 2>&1 &" C-m
+  else
+      tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"nohup /home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py '$1' > /tmp/nohup-recreate.out 2>&1 &\" " C-m
+  fi
+
+elif [[ "$infra" == "kvm" ]]; then
+  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml &" C-m
+fi

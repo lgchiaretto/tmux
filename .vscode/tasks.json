@@ -1,0 +1,124 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Git: Smart Commit",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "git add . && git commit -m \"chore: automated commit $(date +'%Y-%m-%d %H:%M:%S')\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Commit with AI-style message",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "git add . && git commit -m \"feat: update OpenShift automation playbooks\n\n- Enhanced MAC address allocation logic\n- Improved consistency across deployment scripts\n- Fixed indexing issues in worker node creation\n\nSigned-off-by: $(git config user.name) <$(git config user.email)>\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Status & Diff",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo '=== Git Status ===' && git status && echo '' && echo '=== Git Diff ===' && git diff --color=always"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Add & Commit Interactive",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo 'Files changed:' && git status --porcelain && echo '' && read -p 'Enter commit message: ' msg && git add . && git commit -m \"$msg\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Commit Fix",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo 'Files changed:' && git status --porcelain && echo '' && read -p 'Describe the fix: ' desc && git add . && git commit -m \"fix: $desc\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Commit Feature",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo 'Files changed:' && git status --porcelain && echo '' && read -p 'Describe the feature: ' desc && git add . && git commit -m \"feat: $desc\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Git: Commit Update",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-c",
+                "echo 'Files changed:' && git status --porcelain && echo '' && read -p 'Describe the update: ' desc && git add . && git commit -m \"update: $desc\""
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

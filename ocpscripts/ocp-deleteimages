@@ -1,0 +1,140 @@
+#!/bin/bash
+
+if [ "$(hostname)" != "bastion.chiaret.to" ]; then
+    echo "This script must be run on bastion.chiaret.to. Exiting."
+    exit 0
+fi
+
+set -e
+
+ocpversion=$1
+
+if [ -z "$ocpversion" ]; then
+    echo "Usage: $0 <ocp-version>"
+    echo "Example: $0 4.17.33"
+    exit 1
+fi
+
+tmux_ocpversion=$(echo $ocpversion | tr . _)
+TMUX_SESSION="delete-$tmux_ocpversion"
+BASE_DIR="/home/lchiaret/quay-files"
+
+if [ ! -d "$BASE_DIR/$ocpversion" ]; then
+    echo "Directory $BASE_DIR/$ocpversion does not exist."
+    echo "Cannot delete images for version $ocpversion"
+    exit 1
+fi
+
+if [ ! -f "$BASE_DIR/$ocpversion/imageset-config.yaml" ]; then
+    echo "ImageSet configuration not found at $BASE_DIR/$ocpversion/imageset-config.yaml"
+    echo "Cannot delete images for version $ocpversion"
+    exit 1
+fi
+
+# Create delete configuration based on the original imageset config
+channel=$(echo $ocpversion | cut -d'.' -f1,2)
+
+cat > $BASE_DIR/$ocpversion/delete-config.yaml <<EOF
+kind: DeleteImageSetConfiguration
+apiVersion: mirror.openshift.io/v2alpha1
+delete:
+  platform:
+    architectures:
+    - "amd64"
+    channels:
+      - name: stable-$channel
+        minVersion: $ocpversion
+        maxVersion: $ocpversion
+EOF
+
+echo "This will delete all mirrored images for OpenShift $ocpversion"
+echo "Target registry: quay.chiaret.to/ocp4/oc-mirror-$ocpversion"
+echo ""
+echo "WARNING: This action cannot be undone!"
+echo ""
+
+read -p "Are you sure you want to delete images for $ocpversion? (yes/no): " confirm
+if [[ "$confirm" != "yes" ]]; then
+    echo "Operation cancelled."
+    exit 0
+fi
+
+read -p "Type the version number again to confirm: " confirm_version
+if [[ "$confirm_version" != "$ocpversion" ]]; then
+    echo "Version mismatch. Operation cancelled."
+    exit 0
+fi
+
+if [ "$TMUX" ] && [ "$(tmux display-message -p '#S')" = "$TMUX_SESSION" ]; then
+    tmux list-windows -t $TMUX_SESSION -F '#{window_index}' | grep -v "^$(tmux display-message -p '#I')$" | xargs -I {} tmux kill-window -t $TMUX_SESSION:{}
+else
+    tmux has-session -t $TMUX_SESSION 2>/dev/null && tmux kill-session -t $TMUX_SESSION
+    tmux new-session -d -s $TMUX_SESSION -c $BASE_DIR
+fi
+
+current_window=$(tmux display-message -p '#I' 2>/dev/null || echo "0")
+
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-running'
+
+echo "Copying ~/auth.json to /run/user/1000/containers/auth.json"
+tmux send-keys -t $TMUX_SESSION:$current_window "cp ~/auth.json /run/user/1000/containers/auth.json" Enter
+sleep 2
+
+echo "Registry logins completed"
+
+window_index=$((current_window + 1))
+
+echo "Processing delete for: $ocpversion"
+
+window_name="delete-${ocpversion//\./-}"
+tmux new-window -t $TMUX_SESSION -n "${window_name}-running" -c "$BASE_DIR/$ocpversion"
+
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror delete phase 1 for $ocpversion'" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror delete --v2 --config delete-config.yaml --generate --workspace file://$BASE_DIR/$ocpversion --delete-id delete-$ocpversion docker://quay.chiaret.to" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'DELETE_PHASE1_EXIT_CODE:'\$?" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'Starting oc-mirror delete phase 2 for $ocpversion'" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "oc mirror delete --v2 --delete-yaml-file ./working-dir/delete/delete-images-delete-$ocpversion.yaml docker://quay.chiaret.to" Enter
+tmux send-keys -t $TMUX_SESSION:$window_index "echo 'DELETE_EXIT_CODE:'\$?" Enter
+
+echo "Waiting for completion of delete operation for $ocpversion..."
+sleep 5
+while true; do
+    current_command=$(tmux list-panes -t $TMUX_SESSION:$window_index -F '#{pane_current_command}' 2>/dev/null || echo "")
+    if [[ "$current_command" == "oc-mirror" ]]; then
+        echo "  oc-mirror delete still running for $ocpversion..."
+        sleep 15
+    else
+        echo "  oc-mirror delete process completed for $ocpversion"
+        break
+    fi
+done
+
+sleep 3
+echo "  Checking exit code for $ocpversion..."
+for i in {1..10}; do
+    exit_code=$(tmux capture-pane -t $TMUX_SESSION:$window_index -p | grep "DELETE_EXIT_CODE:" | tail -1 | cut -d: -f2 | tr -d ' ')
+    if [[ -n "$exit_code" ]]; then
+        break
+    fi
+    echo "  Waiting for exit code... (attempt $i)"
+    sleep 2
+done
+
+if [ "$exit_code" = "0" ]; then
+    tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-success"
+    echo "Delete completed successfully: $ocpversion (exit code: $exit_code)"
+    
+    echo "Removing $ocpversion from versions.txt"
+    sed -i "/^$ocpversion$/d" $BASE_DIR/versions.txt
+    echo "Removed $ocpversion from versions.txt"
+else
+    tmux rename-window -t $TMUX_SESSION:$window_index "${window_name}-failed"
+    echo "Delete failed: $ocpversion (exit code: $exit_code)"
+    echo "Last output from $ocpversion:"
+    tmux capture-pane -t $TMUX_SESSION:$window_index -p | tail -5
+    exit 1
+fi
+
+tmux rename-window -t $TMUX_SESSION:$current_window 'script-success'
+echo "Image delete operation completed for OpenShift $ocpversion"
+echo "Tmux session: $TMUX_SESSION"

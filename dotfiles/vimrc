@@ -1,0 +1,78 @@
+" General settings
+set bg=dark         " Set background to dark
+set tabstop=4       " Number of spaces a <Tab> counts for
+set softtabstop=4   " Makes spaces feel like tabs for editing
+set shiftwidth=4    " Number of spaces for autoindent
+set autoindent      " Enable automatic indentation
+set expandtab       " Convert tabs to spaces
+set statusline=%=%l/%L " Display current line and total lines in the status bar
+set cursorline      " Highlight the current line
+set encoding=utf-8  " Set file encoding to UTF-8
+set paste           " Enable paste mode (disabled - breaks indentation)
+set wildmenu       " Enable command-line completion
+set wildmode=longest:full,full " Command-line completion mode
+set smartindent    " Enable smart indentation
+" set number
+
+" Syntax highlighting
+syntax on           " Enable syntax highlighting
+
+" Key mappings
+nnoremap v <c-v>    " Remap `v` to `Ctrl-v` for visual block mode
+nnoremap <expr> q (!&modifiable ? ':bd!<CR>' : 'q') " Close readonly buffers with 'q'
+nnoremap <F2> :set paste!<CR> " Toggle paste mode with F2
+
+" Mouse support (commented out for now)
+" set mouse=a
+
+" Rename window title based on file name
+let g:remoteSession = ($STY == "")
+if !exists('$TMUX')
+    if g:remoteSession
+        autocmd BufEnter * let &titlestring = expand("%:t")
+        set title
+    endif
+else
+    autocmd BufEnter * let &titlestring = expand("%:f")
+    set title
+endif
+
+" Install vim-plug if not already installed
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" Plugin management
+call plug#begin('~/.vim/plugged')
+    Plug 'morhetz/gruvbox'                          " Gruvbox colorscheme
+    Plug 'Raimondi/delimitMate'                     " Auto-completion for brackets
+    Plug 'tomtom/tcomment_vim'                      " Commenting plugin
+    Plug 'tpope/vim-surround'                       " Surround text objects
+call plug#end()
+
+" Gruvbox settings
+autocmd FileType yaml,vim,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2,python colorscheme gruvbox
+autocmd FileType yaml,vim,sh,conf,puppet,tmux,json,htmlcheetah,tf,modula2,python highlight Normal ctermbg=None
+
+" TComment settings
+let g:tcomment_mapleader_comment_anyway = '#' " Use '#' for commenting
+let g:tcomment_mapleader_uncomment_anyway = 'g#' " Use 'g#' for uncommenting
+
+" Python-specific settings
+autocmd FileType python setlocal ai et ts=4 sts=4 sw=4 " Python indentation (4 spaces)
+autocmd FileType python setlocal indentkeys=0{,0},:,0#,!^F,o,O,e " Python indentation keys
+autocmd FileType python setlocal textwidth=79 " PEP8 line length
+
+" YAML-specific settings
+autocmd FileType yaml setlocal ai et ts=2 sts=2 sw=2 indentkeys=0{,0},:,0#,!^F,O,e,- " YAML indentation rules
+
+" Temporary file settings (commented out for now)
+" set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+" set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+
+" Terminal settings for 256-color support
+if &term =~ '256color'
+    set t_ut= " Disable background color erase
+endif
