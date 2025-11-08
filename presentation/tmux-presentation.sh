@@ -39,8 +39,8 @@ create_presentation_session() {
     tmux set-option -t "$SESSION_NAME" status-left ""
     tmux set-option -t "$SESSION_NAME" status-right ""
     tmux set-option -t "$SESSION_NAME" status-style "bg=default,fg=colour245"
-    tmux set-option -t "$SESSION_NAME" -gw window-status-current-format '#[fg=colour223,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
-    tmux set-option -t "$SESSION_NAME" -gw window-status-format '#[fg=colour244,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
+    #tmux set-option -t "$SESSION_NAME" -gw window-status-current-format '#[fg=colour223,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
+    #tmux set-option -t "$SESSION_NAME" -gw window-status-format '#[fg=colour244,  nobold, noitalics, nounderscore]#W #[fg=colour214] |'
 
 
     for i in "${!SLIDES[@]}"; do
