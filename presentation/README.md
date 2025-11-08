@@ -43,13 +43,13 @@ Navigation uses the same keybindings as tmux window navigation for consistency.
 - **Window-per-slide**: Each slide is a tmux window with descriptive name
 - **Centered display**: Custom centering logic via `lib/center-content.sh`
 - **Color scheme**: Gruvbox theme matching the main project
-- **Status bar**: Clean top-positioned status with minimal distractions
+- **Status bar**: Clean top-positioned status with minimal distractions used only in this presentation. By default the status bar is in the bottom.
 
 ### Important Keybindings Covered
 
 Keybindings **without prefix** (C-s):
 - **C-t**: Create new window
-- **C-\**: Horizontal split
+- **C-s -**: Horizontal split
 - **C-Arrow**: Navigate between panes
 - **S-Left/Right**: Switch between windows
 
@@ -58,7 +58,7 @@ Keybindings **with prefix** (C-s first):
 - **C-s m**: FZF cluster manager
 - **C-s n**: FZF nodes browser
 - **C-s o**: FZF operators browser
-- **C-s Ctrl-p**: FZF projects browser
+- **C-s Shift-p**: FZF projects browser
 
 See slide 11 for complete keybinding reference.
 
@@ -124,16 +124,14 @@ The presentation demonstrates:
 - **Resource browsers** for OpenShift pods, nodes, operators
 - **Bash customization** from `dotfiles/bashrc` and `dotfiles/bash_functions`
 - **Tmux configuration** from `dotfiles/tmux.conf`
-- **Automation integration** with `/home/lchiaret/git/openshift4-automation`
 
 Live demo (slide 9) showcases real cluster operations when OpenShift environment is available.
 
 ## Prerequisites
 
-- **tmux** installed (version 3.0+)
+- **tmux** installed (version 3.4+)
 - **bash** shell
 - Terminal with 256-color support
-- Minimum 80x24 terminal size (larger recommended for optimal display)
 
 Optional for full demo:
 - OpenShift cluster access
