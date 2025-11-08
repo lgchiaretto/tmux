@@ -58,7 +58,6 @@ cp -r tmux-sessions ~/tmux-sessions/
 - Run `tmux` in your terminal
 - Detach tmux: `prefix + d`
 - Attach an existing tmux session: `tmux a`
-- Load a session template: `tmuxp load ~/tmux-sessions/create-cluster-sessions.yaml`
 
 ## Key Shortcuts
 
@@ -66,7 +65,6 @@ cp -r tmux-sessions ~/tmux-sessions/
 
 ⚠️ **The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`.** All Tmux commands now use `Ctrl + s` as the prefix.
 
-- Send prefix to nested tmux: `Ctrl + s` then `Ctrl + s`
 - Switch to last session (when not in vim): `Ctrl + b`
 
 #### Session Management

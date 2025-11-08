@@ -86,9 +86,9 @@ if [[ "$@" == *"--download-tmux"* || ! -f "/usr/local/bin/tmux" ]]; then
     sudo chmod +x /usr/local/bin/tmux > /dev/null 2>&1
 fi
 
-if [[ "$@" == *"--download-oc"* ]]; then
+if [[ "$@" == *"--download-oc"* || ! -f "/usr/local/bin/oc" ]]; then
     log "Downloading OpenShift CLI client"
-    wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.16.21/openshift-client-linux.tar.gz > /dev/null 2>&1
+    wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux.tar.gz > /dev/null 2>&1
     log "Extracting OpenShift CLI client"
     tar xzf openshift-client-linux.tar.gz > /dev/null 2>&1
     log "Copying oc binary to /usr/local/bin"
