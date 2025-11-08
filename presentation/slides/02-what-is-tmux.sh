@@ -44,15 +44,6 @@ echo -e "    │      • Automate terminal workflows                           
 echo -e "    │      • Integration with other tools (FZF, scripts, automation)            │"
 echo -e "    │                                                                           │"
 echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Why tmux for OpenShift Management?                               \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Monitor multiple clusters simultaneously                             │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Persistent sessions for long-running operations                      │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Synchronized execution across multiple nodes                         │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Organized workspace for complex operations                           │"
-echo -e "    │                                                                           │"
 echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
 } | center_content
 

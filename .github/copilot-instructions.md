@@ -141,7 +141,7 @@ fzf-ocpversions.sh reads cache file for instant display
 
 ### Initial Environment Setup
 ```bash
-./configure-local.sh --download-tmux --download-oc  # Full installation
+./configure-local.sh
 # Installs: fzf, tmux binary, oc client, dotfiles to ~/, scripts to /usr/local/bin/
 # Creates: ~/.tmux/ with FZF scripts, ~/tmux-sessions/ with templates
 ```
@@ -168,17 +168,6 @@ All resource FZF scripts support multi-select (Ctrl-a toggle all):
 - `fzf-operators.sh`: Ctrl-d describe, Ctrl-e edit
 - `fzf-projects.sh`: Tab or Ctrl-p to switch project
 
-### Multi-Host SSH Synchronization
-```bash
-# Synchronized panes to 3 hosts
-tmux-sync-ssh host1 host2 host3
-
-# 4 panes to same host (numeric shorthand)
-tmux-sync-ssh hostname 4
-
-# Uses ossh instead of ssh (OpenShift debug pods)
-tmux-sync-ossh master-0 master-1 master-2
-```
 
 ## Integration with OpenShift4-Automation
 
