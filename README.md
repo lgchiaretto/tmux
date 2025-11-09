@@ -240,21 +240,6 @@ Clusters are stored in `/vms/clusters/$CLUSTERNAME/`:
 - `$CLUSTERNAME.json` - Cluster metadata
 - `started` - Empty marker file (VMs are running)
 
-### Multi-Host SSH Synchronization
-
-Execute commands on multiple hosts simultaneously:
-
-```bash
-# Synchronized panes to 3 hosts
-tmux-sync-ssh host1 host2 host3
-
-# 4 panes to same host
-tmux-sync-ssh hostname 4
-
-# OpenShift debug pods (uses oc debug)
-tmux-sync-ossh master-0 master-1 master-2
-```
-
 ## Additional Features
 
 - **Mouse support**: Navigate and select using the mouse
@@ -265,13 +250,6 @@ tmux-sync-ossh master-0 master-1 master-2
 - **Session templates**: Pre-configured layouts for cluster monitoring
 - **Background process management**: Long-running operations with nohup
 - **Automatic cache updates**: Systemd timer keeps OpenShift versions current
-
-### Bash Functions
-
-Custom bash functions for OpenShift workflows:
-- `tmux-sync-ssh` - Create synchronized SSH sessions
-- `tmux-sync-ossh` - Create synchronized oc debug sessions
-- Environment variables for VMware (`GOVC_*`) and FZF customization
 
 ### Color Scheme
 
