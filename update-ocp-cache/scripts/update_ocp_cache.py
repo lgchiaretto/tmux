@@ -63,6 +63,6 @@ if __name__ == "__main__":
     for line in all_outputs:
         print(line)
 
-    with open("/data/.ocp_versions_cache", "w", encoding="utf-8") as f:
+    with open("~/.ocp_versions_cache", "w", encoding="utf-8") as f:
         for line in all_outputs:
             f.write(line.replace("    ", "        ") + "\n")
