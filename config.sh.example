@@ -25,3 +25,7 @@ export DEFAULT_BASE_DOMAIN="${DEFAULT_BASE_DOMAIN:-chiarettolabs.com.br}"
 # Ansible playbook path for cluster management
 # Used by cluster creation and destruction scripts
 export ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-/home/lchiaret/git/ocp4_setup_upi_kvm_ansible}"
+
+# Check if running on bastion host before executing cluster operations
+# Set to "true" to enforce bastion host check, "false" to allow execution anywhere
+export CHECK_BASTION_HOST="${CHECK_BASTION_HOST:-false}"

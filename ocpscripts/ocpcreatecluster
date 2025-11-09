@@ -10,9 +10,11 @@ CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
 CLUSTER_VARIABLES_DIR="${CLUSTER_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files}"
 
 # Exit if not running on bastion.chiaret.to
-if [ "$(hostname)" != "bastion.chiaret.to" ]; then
-    echo "This script must be run on bastion.chiaret.to. Exiting."
-    exit 0
+if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
+    if [ "$(hostname)" != "${BASTION_HOSTNAME:-bastion.chiaret.to}" ]; then
+        echo "This script must be run on ${BASTION_HOSTNAME:-bastion.chiaret.to}. Exiting."
+        exit 0
+    fi
 fi
 
 #files=$(find $CLUSTER_VARIABLES_DIR/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
