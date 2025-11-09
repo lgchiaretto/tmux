@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# TMux OpenShift Cluster Management Configuration Example
+# Copy this file to config.sh and customize the values for your environment
+
+# Base directory where OpenShift clusters are stored
+# Each cluster should have its own subdirectory under this path
+# Example: ${CLUSTERS_BASE_PATH}/mycluster/mycluster.json
+export CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+
+# Cache directory for OCP clients and other cached data
+export OCP_CACHE_DIR="${OCP_CACHE_DIR:-${CLUSTERS_BASE_PATH}/.cache}"
+
+# Variables files directory for cluster templates
+export CLUSTER_VARIABLES_DIR="${CLUSTER_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files}"
+
+# Remote host for cluster state synchronization (optional)
+# Leave empty if not using remote synchronization
+# Example: "user@bastion.example.com"
+export REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.aap.chiaret.to}"
+
+# Default base domain for clusters
+# This will be used when creating new clusters if not specified
+export DEFAULT_BASE_DOMAIN="${DEFAULT_BASE_DOMAIN:-chiarettolabs.com.br}"
+
+# Ansible playbook path for cluster management
+# Used by cluster creation and destruction scripts
+export ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-/home/lchiaret/git/ocp4_setup_upi_kvm_ansible}"

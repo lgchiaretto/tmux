@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Set default if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+
 actions=$(
   cat <<EOF
 1 - Create cluster
@@ -16,19 +25,19 @@ EOF
 
 clusters() {
   local dir="$1"
-  vmwarenotes=$(jq -r '.vmwarenotes' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  ocpversion=$(jq -r '.ocpversion' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  clustertype=$(jq -r '.clustertype' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  sno=$(jq -r '.sno' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  vmwaredatastore=$(jq -r '.vmwaredatastore' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  vmwaredatastoreworkers=$(jq -r '.vmwaredatastoreworkers' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  vmwaredatastoreodf=$(jq -r '.vmwaredatastoreodf' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  platform=$(jq -r '.platform' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  n_worker=$(jq -r '.n_worker' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  vmwarenetwork=$(jq -r '.vmwarenetwork' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
-  created_at=$(stat -c %y /vms/clusters/$dir/$dir.json | cut -d' ' -f1)
-  started_file="/vms/clusters/$dir/started"
-  basedomain=$(jq -r '.basedomain' "/vms/clusters/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwarenotes=$(jq -r '.vmwarenotes' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  ocpversion=$(jq -r '.ocpversion' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  clustertype=$(jq -r '.clustertype' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  sno=$(jq -r '.sno' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwaredatastore=$(jq -r '.vmwaredatastore' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwaredatastoreworkers=$(jq -r '.vmwaredatastoreworkers' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwaredatastoreodf=$(jq -r '.vmwaredatastoreodf' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  platform=$(jq -r '.platform' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  n_worker=$(jq -r '.n_worker' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  vmwarenetwork=$(jq -r '.vmwarenetwork' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
+  created_at=$(stat -c %y $CLUSTERS_BASE_PATH/$dir/$dir.json | cut -d' ' -f1)
+  started_file="$CLUSTERS_BASE_PATH/$dir/started"
+  basedomain=$(jq -r '.basedomain' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
 
   if [ -f "$started_file" ]; then
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
@@ -45,7 +54,7 @@ clusters() {
   fi
 }
 
-selection_list=$(find /vms/clusters/ -mindepth 1 -maxdepth 1 -type d \
+selection_list=$(find $CLUSTERS_BASE_PATH/ -mindepth 1 -maxdepth 1 -type d \
   ! -name 'backup-20230903' \
   ! -name 'backup*' \
   ! -name '*-files' \
@@ -98,17 +107,17 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
     --bind 'C:execute-silent(tmux send-keys ~/.tmux/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
-    --bind 's:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./startvms.sh && touch started && ssh lchiaret@bastion.aap.chiaret.to \"touch /vms/clusters/{1}/started\"" C-m)+abort' \
-    --bind 'S:execute-silent(tmux send-keys "cd /vms/clusters/"{1}" && ./stopvms.sh  && rm -f started && ssh lchiaret@bastion.aap.chiaret.to \"rm -f /vms/clusters/{1}/started\"" C-m)+abort' \
-    --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="/vms/clusters/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; tmux send-keys "cd /vms/clusters/"{1} C-m; bash)+abort' \
+    --bind 's:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1}" && ./startvms.sh && touch started && ssh '$REMOTE_BASTION_HOST' \"touch '$CLUSTERS_BASE_PATH'/{1}/started\"" C-m)+abort' \
+    --bind 'S:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1}" && ./stopvms.sh  && rm -f started && ssh '$REMOTE_BASTION_HOST' \"rm -f '$CLUSTERS_BASE_PATH'/{1}/started\"" C-m)+abort' \
+    --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="'$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1} C-m; bash)+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
-    --bind 'E:execute-silent(tmux send-keys "vim /vms/clusters/"{1}"/{1}.json" C-m)+abort' \
+    --bind 'E:execute-silent(tmux send-keys "vim '$CLUSTERS_BASE_PATH'/"{1}"/{1}.json" C-m)+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
-    --bind 'f:execute-silent(tmux send-keys "cd /vms/clusters/"{1} C-m)+abort' \
+    --bind 'f:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1} C-m)+abort' \
     --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
-    --bind 'p:execute-silent(tmux send-keys "cat /vms/clusters/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
+    --bind 'p:execute-silent(tmux send-keys "cat '$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
     --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
     --bind 'm:execute-silent(tmux has-session -t oc-mirror-session 2>/dev/null || tmux new-session -d -s oc-mirror-session; tmux switch-client -t oc-mirror-session; tmux send-keys "ocp-oc-mirror.sh" C-m)+abort' \
@@ -117,7 +126,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
 
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
-  basedomain=$(jq -r '.basedomain' "/vms/clusters/$clustername/$clustername.json" 2>/dev/null || echo "chiarettolabs.com.br")
+  basedomain=$(jq -r '.basedomain' "$CLUSTERS_BASE_PATH/$clustername/$clustername.json" 2>/dev/null || echo "${DEFAULT_BASE_DOMAIN:-chiarettolabs.com.br}")
   if [[ -z "$KUBECONFIG" ]]; then
       selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
         --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
@@ -141,7 +150,7 @@ if [ -n "$selected_action" ]; then
     if [ -z "$selected_user" ]; then
         exit 0
     elif [ "$selected_user" == "kubeadmin" ]; then
-        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat /vms/clusters/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
     elif [ "$selected_user" == "chiaretto" ]; then
         tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
     fi

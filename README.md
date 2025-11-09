@@ -52,6 +52,50 @@ cp -r fzf-files ~/.tmux/
 cp -r tmux-sessions ~/tmux-sessions/
 ```
 
+### Configuration
+
+After installation, you can customize the base paths used by the OpenShift cluster management tools.
+
+**During Installation:**
+
+The `configure-local.sh` script will prompt you to customize the cluster path and domain during installation. If you skip this step, the defaults will be used.
+
+**After Installation:**
+
+Edit the configuration file at any time:
+
+```bash
+vim ~/.tmux/config.sh
+```
+
+**Available Configuration Options:**
+
+- `CLUSTERS_BASE_PATH`: Base directory where OpenShift clusters are stored (default: `/vms/clusters`)
+- `OCP_CACHE_DIR`: Cache directory for OCP clients and other cached data (default: `${CLUSTERS_BASE_PATH}/.cache`)
+- `CLUSTER_VARIABLES_DIR`: Directory for cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
+- `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional)
+- `DEFAULT_BASE_DOMAIN`: Default base domain for clusters (default: `chiarettolabs.com.br`)
+- `ANSIBLE_PLAYBOOK_PATH`: Path to Ansible playbook directory for cluster management
+
+**Example:**
+
+```bash
+export CLUSTERS_BASE_PATH="/data/openshift/clusters"
+export DEFAULT_BASE_DOMAIN="mycompany.com"
+```
+
+The configuration is automatically loaded by:
+- `bash_functions` when you start a new shell
+- All FZF scripts in `fzf-files/`
+- All OCP management scripts in `ocpscripts/`
+
+**Note:** The scripts will look for the configuration file in the following order:
+1. `$HOME/git/tmux/config.sh` (development location)
+2. `$HOME/.tmux/config.sh` (installed location)
+3. `/usr/local/etc/tmux-ocp/config.sh` (system-wide location)
+
+For detailed configuration information, see [CONFIGURATION.md](CONFIGURATION.md).
+
 ## Executing
 
 - Run `tmux` in your terminal

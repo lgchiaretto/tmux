@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+# Set defaults if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+
 error_exit() {
     echo -e "ERROR: $1" >&2
     exit 1
@@ -95,6 +103,6 @@ if [ $? -ne 0 ]; then
 fi
 
 CURRENT_VERSION=$(oc get clusterversion -o jsonpath='{.items[0].status.desired.version}')
-sed -i "s/$CURRENT_VERSION/$SELECTED_VERSION/" /vms/clusters/$clustername/$clustername.json
+sed -i "s/$CURRENT_VERSION/$SELECTED_VERSION/" $CLUSTERS_BASE_PATH/$clustername/$clustername.json
 
-yes | tmuxp load /vms/clusters/$clustername/upgrade-tmuxp.yaml
+yes | tmuxp load $CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml

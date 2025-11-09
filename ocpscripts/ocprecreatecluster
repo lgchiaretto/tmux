@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+# Set defaults if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-$ANSIBLE_PLAYBOOK_PATH}"
+
 temp_file=$(mktemp)
 
 tmux new-window -n "recreate: $1" "bash -c 'read -p \"Are you sure you want to recreate the cluster \\\"$1\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
@@ -15,7 +24,7 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   exit 0
 fi
 
-infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
+infra=$(jq -r '.infra' $CLUSTERS_BASE_PATH/$1/$1.json)
 
 if [[ "$infra" == "vsphere" ]]; then
   if [ "$(hostname)" = "bastion.chiaret.to" ]; then
@@ -25,5 +34,5 @@ if [[ "$infra" == "vsphere" ]]; then
   fi
 
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml &" C-m
+  tmux send-keys "ansible-playbook  -e@$CLUSTERS_BASE_PATH/$1/$1.json $ANSIBLE_PLAYBOOK_PATH/destroy-cluster.yml &" C-m
 fi

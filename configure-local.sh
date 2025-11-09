@@ -61,6 +61,45 @@ cp $TMUX_DIR/dotfiles/dircolors "$TARGET_HOME/.dircolors" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/inputrc "$TARGET_HOME/.inputrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/bash_functions "$TARGET_HOME/.bash_functions" > /dev/null 2>&1
 
+log "Setting up configuration file"
+if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
+    if [ -f "$TMUX_DIR/config.sh" ]; then
+        log "Copying existing config.sh"
+        cp "$TMUX_DIR/config.sh" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+    else
+        log "Creating config.sh from example"
+        cp "$TMUX_DIR/config.sh.example" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+        
+        # Interactive configuration prompt
+        if [ -t 0 ]; then
+            echo ""
+            echo "================================================"
+            echo "  Configuration Setup"
+            echo "================================================"
+            echo ""
+            echo "The default cluster path is: /vms/clusters"
+            read -p "Do you want to customize it? (y/N): " customize
+            
+            if [[ "$customize" =~ ^[Yy]$ ]]; then
+                read -p "Enter clusters base path: " clusters_path
+                if [ -n "$clusters_path" ]; then
+                    sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
+                    log "Set CLUSTERS_BASE_PATH to: $clusters_path"
+                fi
+                
+                read -p "Enter default base domain (press Enter for 'chiarettolabs.com.br'): " domain
+                if [ -n "$domain" ]; then
+                    sed -i "s|export DEFAULT_BASE_DOMAIN=.*|export DEFAULT_BASE_DOMAIN=\"${domain}\"|" "$TARGET_HOME/.tmux/config.sh"
+                    log "Set DEFAULT_BASE_DOMAIN to: $domain"
+                fi
+            fi
+        fi
+    fi
+    chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+else
+    log "Configuration file already exists, skipping"
+fi
+
 log "Installing vim-plug"
 curl -fLo "$TARGET_HOME/.vim/autoload/plug.vim" --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim > /dev/null 2>&1

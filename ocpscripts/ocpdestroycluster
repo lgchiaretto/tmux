@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+# Set defaults if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-$ANSIBLE_PLAYBOOK_PATH}"
+
 # Exit if not running on bastion.chiaret.to
 if [ "$(hostname)" != "bastion.chiaret.to" ]; then
     echo "This script must be run on bastion.chiaret.to. Exiting."
@@ -24,15 +33,15 @@ fi
 #clear
 #read -p "Do you also want to remove DNS and certs for cluster \"$1\"? (y/N): " confirm2
 #if [[ "$confirm2" == "y" || "$confirm2" == "Y" ]]; then
-#  jq '.deleteiffailed = "true"' /vms/clusters/$1/$1.json > /vms/clusters/$1/$1.json.tmp && mv /vms/clusters/$1/$1.json.tmp /vms/clusters/$1/$1.json
+#  jq '.deleteiffailed = "true"' $CLUSTERS_BASE_PATH/$1/$1.json > $CLUSTERS_BASE_PATH/$1/$1.json.tmp && mv $CLUSTERS_BASE_PATH/$1/$1.json.tmp $CLUSTERS_BASE_PATH/$1/$1.json
 #else
-#  jq '.deleteiffailed = "false"' /vms/clusters/$1/$1.json > /vms/clusters/$1/$1.json.tmp && mv /vms/clusters/$1/$1.json.tmp /vms/clusters/$1/$1.json
+#  jq '.deleteiffailed = "false"' $CLUSTERS_BASE_PATH/$1/$1.json > $CLUSTERS_BASE_PATH/$1/$1.json.tmp && mv $CLUSTERS_BASE_PATH/$1/$1.json.tmp $CLUSTERS_BASE_PATH/$1/$1.json
 #fi
 
-infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
+infra=$(jq -r '.infra' $CLUSTERS_BASE_PATH/$1/$1.json)
 
 if [[ "$infra" == "vsphere" ]]; then
     tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $1 & 2>&1" C-m
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml & 2>&1" C-m
+  tmux send-keys "ansible-playbook  -e@$CLUSTERS_BASE_PATH/$1/$1.json $ANSIBLE_PLAYBOOK_PATH/destroy-cluster.yml & 2>&1" C-m
 fi
