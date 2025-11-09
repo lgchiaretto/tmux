@@ -3,4 +3,4 @@ Description=Update the mlocate database
 
 [Service]
 Type=oneshot
-ExecStart=/usr/sbin/updatedb
+ExecStart=/usr/bin/updatedb
