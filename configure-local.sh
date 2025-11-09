@@ -116,4 +116,20 @@ log "Copying tmux-sessions directory to home"
 cp -R tmux-sessions "$TARGET_HOME/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/tmux-sessions/" > /dev/null 2>&1
 
+log "Installing update-ocp-cache systemd configuration"
+sudo cp update-ocp-cache/systemd/update-ocp-cache.service /etc/systemd/system/ > /dev/null 2>&1
+sudo cp update-ocp-cache/systemd/update-ocp-cache.timer /etc/systemd/system/ > /dev/null 2>&1
+sudo cp update-ocp-cache/scripts/update_ocp_cache.py /usr/local/bin/ > /dev/null 2>&1
+sudo chmod +x /usr/local/bin/update_ocp_cache.py > /dev/null 2>&1
+sudo systemctl daemon-reload > /dev/null 2>&1
+sudo systemctl enable update-ocp-cache.timer > /dev/null 2>&1
+sudo systemctl start update-ocp-cache.timer > /dev/null 2>&1
+
+log "Installing updatedb systemd configuration"
+sudo cp updatedb/systemd/updatedb.service /etc/systemd/system/ > /dev/null 2>&1
+sudo cp updatedb/systemd/updatedb.timer /etc/systemd/system/ > /dev/null 2>&1
+sudo systemctl daemon-reload > /dev/null 2>&1
+sudo systemctl enable updatedb.timer > /dev/null 2>&1
+sudo systemctl start updatedb.timer > /dev/null 2>&1
+
 log "Configuration complete"

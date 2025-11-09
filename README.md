@@ -224,7 +224,24 @@ Clusters are stored in `/vms/clusters/$CLUSTERNAME/`:
 - **Extended history**: 10,000 lines of scrollback buffer
 - **Session templates**: Pre-configured layouts for cluster monitoring
 - **Background process management**: Long-running operations with nohup
-- **Automatic cache updates**: Systemd timer keeps OpenShift versions current
+- **Automatic cache updates**: Systemd timers keep OpenShift versions and file database current
+
+### Systemd Timers
+
+The installation configures two systemd timers for automated maintenance:
+
+1. **update-ocp-cache.timer** - Updates OpenShift version cache every 4 hours
+   - Service: `update-ocp-cache.service`
+   - Script: `/usr/local/bin/update_ocp_cache.py`
+   - Cache file: `/data/.ocp_versions_cache`
+   - Fetches latest releases from mirror.openshift.com for versions 4.14-4.20
+
+2. **updatedb.timer** - Updates mlocate file database hourly
+   - Service: `updatedb.service`
+   - Command: `/usr/sbin/updatedb`
+   - Enables fast file searching with `locate` command
+
+Both timers are automatically enabled and started during installation.
 
 ### Color Scheme
 
