@@ -31,7 +31,7 @@ This repository contains a custom tmux configuration integrated with FZF interac
 Clone this repository and execute the `configure-local.sh` script to set up the complete environment:
 
 ```bash
-./configure-local.sh --download-tmux --download-oc
+./configure-local.sh
 ```
 
 This will:
