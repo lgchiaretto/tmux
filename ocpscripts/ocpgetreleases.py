@@ -3,7 +3,7 @@
 import os
 import json
 
-CACHE_DIR = "/home/lchiaret/.cache/ocpgraph"
+CACHE_DIR = "/opt/.ocpgraph"
 
 def list_versions():
     seen = set()

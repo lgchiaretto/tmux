@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate OCP Upgrade Graph Cache
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ocpgenerate-graph.py --refresh-cache
+User=root
+Environment=HOME=/root
+
+[Install]
+WantedBy=multi-user.target

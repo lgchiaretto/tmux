@@ -132,4 +132,11 @@ sudo systemctl daemon-reload > /dev/null 2>&1
 sudo systemctl enable updatedb.timer > /dev/null 2>&1
 sudo systemctl start updatedb.timer > /dev/null 2>&1
 
+log "Installing generate-graph systemd configuration"
+sudo cp ocpscripts/systemd/generate-graph.service /etc/systemd/system/ > /dev/null 2>&1
+sudo cp ocpscripts/systemd/generate-graph.timer /etc/systemd/system/ > /dev/null 2>&1
+sudo systemctl daemon-reload > /dev/null 2>&1
+sudo systemctl enable generate-graph.timer > /dev/null 2>&1
+sudo systemctl start generate-graph.timer > /dev/null 2>&1
+
 log "Configuration complete"

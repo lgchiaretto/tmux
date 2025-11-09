@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for updating OCP graph cache every 4 hours
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=4h
+Unit=generate-graph.service
+
+[Install]
+WantedBy=timers.target
