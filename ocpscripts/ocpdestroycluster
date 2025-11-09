@@ -21,7 +21,7 @@ temp_file=$(mktemp)
 
 tmux new-window -n "destroy: $1" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$1\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
 
-while [ ! -s "$temp_file" ]; do'
+while [ ! -s "$temp_file" ]; do
   sleep 1
 done
 
