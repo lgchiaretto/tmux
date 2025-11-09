@@ -107,8 +107,8 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
     --bind 'C:execute-silent(tmux send-keys ~/.tmux/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
-    --bind 's:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1}" && ./startvms.sh && touch started && ssh '$REMOTE_BASTION_HOST' \"touch '$CLUSTERS_BASE_PATH'/{1}/started\"" C-m)+abort' \
-    --bind 'S:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1}" && ./stopvms.sh  && rm -f started && ssh '$REMOTE_BASTION_HOST' \"rm -f '$CLUSTERS_BASE_PATH'/{1}/started\"" C-m)+abort' \
+    --bind 's:execute-silent(tmux send-keys "/usr/local/bin/ocpstartcluster "{1} C-m)+abort' \
+    --bind 'S:execute-silent(tmux send-keys "/usr/local/bin/ocpstopcluster "{1} C-m)+abort' \
     --bind 'k:execute-silent(tmux has-session -t {1} 2>/dev/null || tmux new-session -d -s {1} -e KUBECONFIG="'$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeconfig"; tmux switch-client -t {1}; tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1} C-m; bash)+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'E:execute-silent(tmux send-keys "vim '$CLUSTERS_BASE_PATH'/"{1}"/{1}.json" C-m)+abort' \
