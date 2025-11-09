@@ -133,7 +133,7 @@ sudo systemctl start updatedb.timer > /dev/null 2>&1
 log "Installing generate-graph systemd configuration"
 sudo cp generate-ocp-graph/systemd/generate-graph.service /etc/systemd/system/ > /dev/null 2>&1
 sudo cp generate-ocp-graph/systemd/generate-graph.timer /etc/systemd/system/ > /dev/null 2>&1
-sudo cp generate-ocp-graph/scripts/generate_graph.py /usr/local/bin/ > /dev/null 2>&1
+sudo cp generate-ocp-graph/scripts/ocpgenerate-graph.py /usr/local/bin/ > /dev/null 2>&1
 sudo systemctl daemon-reload > /dev/null 2>&1
 sudo systemctl enable generate-graph.timer > /dev/null 2>&1
 sudo systemctl start generate-graph.timer > /dev/null 2>&1
