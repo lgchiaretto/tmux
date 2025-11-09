@@ -12,7 +12,7 @@ fi
 
 chosen=$(echo "$content" | fzf-tmux \
   --header=$'--------------------------------- Help ---------------------------------
-[Enter]     Open the URL or IP in Firefox
+[Enter]     Open the URL or IP in Chrome
 [Tab]       Print the URL or IP
 [Ctrl-c]    Copy the URL or IP to clipboard
 [Esc]       Exit
@@ -24,7 +24,7 @@ chosen=$(echo "$content" | fzf-tmux \
   -p "100%,50%" \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
-  --bind 'ctrl-o:execute-silent(firefox {})+abort' \
+  --bind 'ctrl-o:execute-silent(google-chrome {} &>/dev/null &)+abort' \
   --bind 'tab:execute-silent(
         tmux send-keys {};
     )+abort' \
@@ -33,5 +33,5 @@ chosen=$(echo "$content" | fzf-tmux \
   --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
-    firefox "$(echo "$chosen" | tail -n1)"
+    google-chrome "$(echo "$chosen" | tail -n1)" &>/dev/null &
 fi

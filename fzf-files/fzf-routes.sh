@@ -9,11 +9,11 @@ fi
 
 chosen=$(echo "$content" | fzf-tmux \
      --header=$'-------------------------- Help --------------------------
-[Enter]     Open route on Firefox
+[Enter]     Open route on Chrome
 [Tab]       Print route hostname
 [Ctrl-e]    Run "oc edit <route>"
 [Ctrl-d]    Run "oc describe <route>"
-[Ctrl-o]    open the route on firefox
+[Ctrl-o]    open the route on Chrome
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
     --layout=reverse \
@@ -33,12 +33,12 @@ chosen=$(echo "$content" | fzf-tmux \
         tmux send-keys "oc describe route -n {1} {2}" C-m;
     )+abort' \
     --bind 'ctrl-o:execute-silent(
-         echo {3} | xargs firefox
+         echo {3} | xargs google-chrome &>/dev/null &
     )+abort' \
     --expect=enter \
     --color=fg:#d4be98,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
-  firefox $(echo "$chosen" | tail -n1 | awk '{print $3}')
+  google-chrome "https://$(echo "$chosen" | tail -n1 | awk '{print $3}')" &>/dev/null &
 fi

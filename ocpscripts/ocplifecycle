@@ -4,7 +4,7 @@ selected_lifecycle=$(echo -e "OpenShift Lifecycle\nOperators Lifecycle" | fzf-tm
   --layout=reverse -p "31%,40%" \
   --no-input \
   --header=$'-------------------------- Help --------------------------
-[Enter]     Open on firefox
+[Enter]     Open on Chrome
 [Esc]       Exit
 ----------------------------------------------------------\n\n' \
   --height=40% --border \
@@ -15,10 +15,10 @@ selected_lifecycle=$(echo -e "OpenShift Lifecycle\nOperators Lifecycle" | fzf-tm
 if [ -n "$selected_lifecycle" ]; then
   case "$selected_lifecycle" in
     "OpenShift Lifecycle")
-      firefox https://access.redhat.com/support/policy/updates/openshift
+      google-chrome https://access.redhat.com/support/policy/updates/openshift &>/dev/null &
       ;;
     "Operators Lifecycle")
-      firefox https://access.redhat.com/support/policy/updates/openshift_operators
+      google-chrome https://access.redhat.com/support/policy/updates/openshift_operators &>/dev/null &
       ;;
   esac
 fi

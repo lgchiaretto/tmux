@@ -4,4 +4,7 @@ if [[ $1 == *----* ]]; then
     exit 0
 fi
 
-firefox "https://docs.redhat.com/en/documentation/openshift_container_platform/$(cut -d'.' -f1-2 <<< $1)/html-single/release_notes/index#ocp-$(echo $1 | sed 's/\./-/g')_release-notes"
+URL="https://docs.redhat.com/en/documentation/openshift_container_platform/$(cut -d'.' -f1-2 <<< $1)/html-single/release_notes/index#ocp-$(echo $1 | sed 's/\./-/g')_release-notes"
+
+google-chrome "$URL" &>/dev/null &
+disown
