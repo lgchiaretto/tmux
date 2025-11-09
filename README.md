@@ -10,7 +10,6 @@ This repository contains a custom tmux configuration integrated with FZF interac
 - [Key Shortcuts](#key-shortcuts)
 - [OpenShift Integration](#openshift-integration)
 - [FZF Interactive Menus](#fzf-interactive-menus)
-- [Cluster Management](#cluster-management)
 - [Additional Features](#additional-features)
 
 ---
@@ -201,16 +200,6 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 - `fzf-projects.sh` - Browse and switch projects:
   - `Tab` or `Ctrl-p`: Switch to selected project
 
-### Cluster Management
-
-- `fzf-manageclusters.sh` - Master cluster management menu:
-  - `c`: Create new cluster
-  - `d`: Destroy cluster
-  - `s`: Start cluster VMs
-  - `S`: Stop cluster VMs
-  - `k`: Switch to cluster session with KUBECONFIG set
-  - Shows cluster metadata: version, type, workers, datastore, status (`*` = running)
-
 ### Additional Menus
 
 - `fzf-ocpversions.sh` - Browse available OpenShift versions
@@ -218,20 +207,6 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 - `fzf-routes.sh` - Browse OpenShift routes
 - `fzf-vmwareusage.sh` - View VMware resource usage
 - `fzf-tmuxp.sh` - Load tmuxp session templates
-
-## Cluster Management
-
-### Creating a New Cluster
-
-1. Run `ocpcreatecluster` (requires bastion.chiaret.to host)
-2. Select cluster type from FZF menu (IPI/UPI, baremetal/vSphere/none)
-3. Edit cluster variables in vim
-4. Automation creates tmux session named `install-clustername`
-5. Monitor installation in 4-pane layout:
-   - Failing pods
-   - Cluster operators
-   - CSR approvals (auto-approve loop)
-   - Nodes status
 
 ### Cluster Directory Structure
 
