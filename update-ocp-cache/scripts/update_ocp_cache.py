@@ -4,6 +4,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import re
+import os
 
 channels = ["4.14", "4.16", "4.17", "4.18", "4.19", "4.20"]
 
@@ -63,6 +64,7 @@ if __name__ == "__main__":
     for line in all_outputs:
         print(line)
 
-    with open("~/.ocp_versions_cache", "w", encoding="utf-8") as f:
+    cache_file_path = os.path.expanduser("/opt/.ocp_versions_cache")
+    with open(cache_file_path, "w", encoding="utf-8") as f:
         for line in all_outputs:
             f.write(line.replace("    ", "        ") + "\n")

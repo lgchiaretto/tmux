@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CACHE_FILE="~/.ocp_versions_cache"
+CACHE_FILE="/opt/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
     selected_version=$(cat "$CACHE_FILE" | fzf-tmux \
