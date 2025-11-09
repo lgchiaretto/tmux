@@ -100,10 +100,8 @@ fi
 log "Creating oc-logs-fzf.sh script"
 sudo cp oc-logs-fzf.sh /usr/local/bin/ > /dev/null 2>&1
 
-#if [[ "$USER" == "lchiaret" ]]; then
-    log "Creating OCP scripts to /usr/local/bin"
-    sudo cp ocpscripts/* /usr/local/bin/ > /dev/null 2>&1
-#fi
+log "Creating OCP scripts to /usr/local/bin"
+sudo cp ocpscripts/* /usr/local/bin/ > /dev/null 2>&1
 
 log "Setting executable permissions for oc-logs-fzf.sh"
 sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
@@ -133,8 +131,9 @@ sudo systemctl enable updatedb.timer > /dev/null 2>&1
 sudo systemctl start updatedb.timer > /dev/null 2>&1
 
 log "Installing generate-graph systemd configuration"
-sudo cp ocpscripts/systemd/generate-graph.service /etc/systemd/system/ > /dev/null 2>&1
-sudo cp ocpscripts/systemd/generate-graph.timer /etc/systemd/system/ > /dev/null 2>&1
+sudo cp generate-ocp-graph/systemd/generate-graph.service /etc/systemd/system/ > /dev/null 2>&1
+sudo cp generate-ocp-graph/systemd/generate-graph.timer /etc/systemd/system/ > /dev/null 2>&1
+sudo cp generate-ocp-graph/scripts/generate_ocp_graph.py /usr/local/bin/ > /dev/null 2>&1
 sudo systemctl daemon-reload > /dev/null 2>&1
 sudo systemctl enable generate-graph.timer > /dev/null 2>&1
 sudo systemctl start generate-graph.timer > /dev/null 2>&1
