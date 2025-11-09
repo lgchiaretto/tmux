@@ -139,4 +139,9 @@ sudo systemctl daemon-reload > /dev/null 2>&1
 sudo systemctl enable generate-graph.timer > /dev/null 2>&1
 sudo systemctl start generate-graph.timer > /dev/null 2>&1
 
+log "Starting initial runs of update-ocp-cache, updatedb, and generate-graph services"
+sudo systemctl start update-ocp-cache.service > /dev/null 2>&1
+sudo systemctl start updatedb.service > /dev/null 2>&1
+sudo systemctl start generate-graph.service > /dev/null 2>&1
+
 log "Configuration complete"
