@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 project_name=$(oc project -q)
 
 if [ -z "$project_name" -a $? -eq 0 ]; then
@@ -23,7 +28,7 @@ mapfile -t selected_pods_and_namespaces < <(
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
         --multi \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \

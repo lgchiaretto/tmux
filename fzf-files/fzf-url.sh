@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 content=$(tmux capture-pane -J -p -e -S - | \
     sed -r 's/\x1B\[[0-9;]*[mK]//g' | \
     grep -oE '\b((http|https)://[a-z0-9.-]+(/\S*)?|[a-z0-9.-]+\.[a-z]{2,}(/\S*)?|([0-9]{1,3}\.){3}[0-9]{1,3})\b' | \
@@ -18,7 +23,7 @@ chosen=$(echo "$content" | fzf-tmux \
 [Esc]       Exit
 -----------------------------------------------------------------------\n\n' \
   --layout=reverse \
-  --border-label=" chiarettolabs.com.br " \
+  --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \
   -h 40 \
   -p "100%,50%" \

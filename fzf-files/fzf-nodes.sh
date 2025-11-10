@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 nodes=$(timeout 2s oc get nodes -o "custom-columns=NOME:.metadata.name,STATUS:.status.conditions[?(@.type=='Ready')].status" --no-headers)
 
 if [ -z "$nodes" -a $? -eq 0 ]; then
@@ -68,7 +73,7 @@ selected_nodes=$(
 [Esc]       Exit
 ----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \

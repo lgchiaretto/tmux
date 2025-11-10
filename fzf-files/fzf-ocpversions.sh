@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 CACHE_FILE="/opt/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
@@ -15,7 +20,7 @@ if [ -f "$CACHE_FILE" ]; then
 Version             Release Date
 ---------------------------------------\n' \
                        --layout=reverse \
-                       --border-label=" chiarettolabs.com.br " \
+                       --border-label=" $FZF_BORDER_LABEL " \
                        --border-label-pos=center \
                        -h 40 \
                        -p "23%,86%" \

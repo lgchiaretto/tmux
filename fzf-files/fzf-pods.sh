@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 oc_logs_fzf() {
     local pod="$1"
     tmux new-window -n "logs:$pod" "/usr/local/bin/oc-logs-fzf.sh \"$pod\""
@@ -64,7 +69,7 @@ selected_pod=$(
 [Esc]       Exit
 ----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \

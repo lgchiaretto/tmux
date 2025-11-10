@@ -35,7 +35,7 @@ selected_file=$(echo -e "$actions" | sort | fzf-tmux \
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
-    --border-label=" chiarettolabs.com.br " \
+    --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
     -h 40 -p "55%,46%" \
     --no-input \

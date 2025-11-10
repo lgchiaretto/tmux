@@ -26,7 +26,7 @@ fzf_select() {
     echo -e "$options" | sort -V | fzf-tmux \
         --header "$full_header" \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h "40%" -p "55%,46%" \
         --exact \
@@ -78,7 +78,7 @@ while true; do
 ------------------------
 Select to version\n\n' \
             --layout=reverse \
-            --border-label=" chiarettolabs.com.br " \
+            --border-label=" $FZF_BORDER_LABEL " \
             --border-label-pos=center \
             -h "40%" \
             -p "55%,46%" \

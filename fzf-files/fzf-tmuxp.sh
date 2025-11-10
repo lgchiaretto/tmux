@@ -6,9 +6,6 @@ if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
 
-# Set default if not configured
-CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
-
 error_exit() {
     echo -e "ERROR: $1" >&2
     exit 1
@@ -24,7 +21,7 @@ tmuxpfile=$(echo -e "$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml\n$CLUSTE
 [Esc]       Exit
 ---------------------------------------------------------------------------------------------------------------\n\n' \
   --height=40% --border \
-  --border-label=" chiarettolabs.com.br " \
+  --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \
   --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
   --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \

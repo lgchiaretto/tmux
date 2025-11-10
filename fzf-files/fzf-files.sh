@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 selected_file=$(
     locate -i "" | fzf-tmux \
         --header=$'---------------------------------- Help ----------------------------------
@@ -11,7 +16,7 @@ selected_file=$(
 [Esc]       Exit
 --------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -p "100%,50%" \
         --exact \

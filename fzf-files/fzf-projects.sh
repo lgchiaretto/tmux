@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 projects=$(timeout 2s oc get namespaces -o custom-columns=NAME:.metadata.name --no-headers)
 
 if [ -z "$projects" ]; then
@@ -14,7 +19,7 @@ selected_project=$(echo "$projects" | fzf-tmux \
 [Esc]             Exit
 ----------------------------------------------------------\n\n' \
     --layout=reverse \
-    --border-label=" chiarettolabs.com.br " \
+    --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
     -h 40 \
     -p "100%,50%" \

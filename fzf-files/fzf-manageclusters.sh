@@ -6,9 +6,6 @@ if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
 
-# Set default if not configured
-CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
-
 actions=$(
   cat <<EOF
 1 - Create cluster
@@ -57,7 +54,7 @@ clusters() {
 selection_list=$(find $CLUSTERS_BASE_PATH/ -mindepth 1 -maxdepth 1 -type d \
   ! -name 'backup-20230903' \
   ! -name 'backup*' \
-  ! -name '*-files' \
+  ! -name '*-files*' \
   ! -name 'quay*' \
   ! -name 'archived' \
   ! -name 'multiclusterfiles' \
@@ -96,7 +93,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
-    --border-label=" chiarettolabs.com.br " \
+    --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
     --border=rounded \
     -h 40 \
@@ -134,7 +131,7 @@ if [ -n "$selected_action" ]; then
 [Esc]       Exit
 ----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
         -p "100%,50%" \

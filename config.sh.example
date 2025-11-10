@@ -13,6 +13,10 @@ export OCP_CACHE_DIR="${OCP_CACHE_DIR:-${CLUSTERS_BASE_PATH}/.cache}"
 # Variables files directory for cluster templates
 export CLUSTER_VARIABLES_DIR="${CLUSTER_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files}"
 
+# KVM cluster variables files directory
+# Directory containing JSON variable files for KVM clusters
+export KVM_VARIABLES_DIR="${KVM_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files-kvm}"
+
 # Remote host for cluster state synchronization (optional)
 # Leave empty if not using remote synchronization
 # Example: "user@bastion.example.com"
@@ -29,3 +33,7 @@ export ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-/home/lchiaret/git/ocp4_s
 # Check if running on bastion host before executing cluster operations
 # Set to "true" to enforce bastion host check, "false" to allow execution anywhere
 export CHECK_BASTION_HOST="${CHECK_BASTION_HOST:-false}"
+
+# FZF border label for all interactive menus
+# This label appears in the border of FZF selection menus
+export FZF_BORDER_LABEL="${FZF_BORDER_LABEL:-chiarettolabs.com.br}"

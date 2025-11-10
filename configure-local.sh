@@ -92,6 +92,18 @@ if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
                     sed -i "s|export DEFAULT_BASE_DOMAIN=.*|export DEFAULT_BASE_DOMAIN=\"${domain}\"|" "$TARGET_HOME/.tmux/config.sh"
                     log "Set DEFAULT_BASE_DOMAIN to: $domain"
                 fi
+
+                read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
+                if [ -n "$kvm_vars_dir" ]; then
+                    sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
+                    log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
+                fi
+
+                read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
+                if [ -n "$fzf_label" ]; then
+                    sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
+                    log "Set FZF_BORDER_LABEL to: $fzf_label"
+                fi
             fi
         fi
     fi
@@ -145,8 +157,8 @@ sudo cp ocpscripts/* /usr/local/bin/ > /dev/null 2>&1
 log "Setting executable permissions for oc-logs-fzf.sh"
 sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
 
-log "Installing tmuxp and bat"
-sudo dnf install -y python3-pip bat -q > /dev/null 2>&1
+log "Installing tmuxp, bat and yq"
+sudo dnf install -y python3-pip bat yq -q > /dev/null 2>&1
 sudo -u "$TARGET_USER" pip3 install --user tmuxp -q > /dev/null 2>&1
 
 log "Copying tmux-sessions directory to home"
