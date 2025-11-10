@@ -44,7 +44,7 @@ cd "$CLUSTER_DIR" || exit 1
 # Execute stopvms.sh if it exists
 if [ -f "./stopvms.sh" ]; then
     echo "Executing stopvms.sh..."
-    ./stopvms.sh --force
+    ./stopvms.sh force
     
     # Remove started file locally
     rm -f started
