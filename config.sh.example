@@ -22,10 +22,6 @@ export KVM_VARIABLES_DIR="${KVM_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-f
 # Example: "user@bastion.example.com"
 export REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.aap.chiaret.to}"
 
-# Default base domain for clusters
-# This will be used when creating new clusters if not specified
-export DEFAULT_BASE_DOMAIN="${DEFAULT_BASE_DOMAIN:-chiarettolabs.com.br}"
-
 # Ansible playbook path for cluster management
 # Used by cluster creation and destruction scripts
 export ANSIBLE_PLAYBOOK_KVM_PATH="${ANSIBLE_PLAYBOOK_KVM_PATH:-/home/lchiaret/git/ocp4_setup_upi_kvm_ansible}"

@@ -74,14 +74,12 @@ vim ~/.tmux/config.sh
 - `OCP_CACHE_DIR`: Cache directory for OCP clients and other cached data (default: `${CLUSTERS_BASE_PATH}/.cache`)
 - `CLUSTER_VARIABLES_DIR`: Directory for cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
 - `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional)
-- `DEFAULT_BASE_DOMAIN`: Default base domain for clusters (default: `chiarettolabs.com.br`)
 - `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for cluster management
 
 **Example:**
 
 ```bash
 export CLUSTERS_BASE_PATH="/data/openshift/clusters"
-export DEFAULT_BASE_DOMAIN="mycompany.com"
 ```
 
 The configuration is automatically loaded by:

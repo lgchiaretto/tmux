@@ -80,12 +80,6 @@ if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
                 sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
                 log "Set CLUSTERS_BASE_PATH to: $clusters_path"
             fi
-                
-            read -p "Enter default base domain (press Enter for 'chiarettolabs.com.br'): " domain
-            if [ -n "$domain" ]; then
-                sed -i "s|export DEFAULT_BASE_DOMAIN=.*|export DEFAULT_BASE_DOMAIN=\"${domain}\"|" "$TARGET_HOME/.tmux/config.sh"
-                log "Set DEFAULT_BASE_DOMAIN to: $domain"
-            fi
 
             read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
             if [ -n "$kvm_vars_dir" ]; then
