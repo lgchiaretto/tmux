@@ -16,17 +16,19 @@ if [ -z "$content" ]; then
 fi
 
 chosen=$(echo "$content" | fzf-tmux \
-  --header=$'--------------------------------- Help ---------------------------------
-[Enter]     Open the URL or IP in Chrome
-[Tab]       Print the URL or IP
-[Ctrl-c]    Copy the URL or IP to clipboard
-[Esc]       Exit
------------------------------------------------------------------------\n\n' \
+  --header=$'┌───────────────────────────────────────── Help ─────────────────────────────────────────┐
+│                                                                                        │
+│  [Enter]     Open the URL or IP in Chrome                                              │
+│  [Tab]       Print the URL or IP                                                       │
+│  [Ctrl-c]    Copy the URL or IP to clipboard                                           │
+│  [Esc]       Exit                                                                      │
+│                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
   --layout=reverse \
   --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \
   -h 40 \
-  -p "100%,50%" \
+  -p "58%,50%" \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
   --bind 'ctrl-o:execute-silent(google-chrome {} &>/dev/null &)+abort' \

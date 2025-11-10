@@ -63,20 +63,22 @@ colored_nodes=$(echo "$nodes" | awk '{
 
 selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
-        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
-[Enter]     Print node name
-[Tab]       Select node
-[Ctrl-a]    Select all nodes
-[Ctrl-d]    Run "oc describe <node>" in new tmux window
-[Ctrl-e]    Run "oc edit <node>" in new tmux window
-[Ctrl-s]    SSH to node in new tmux window
-[Esc]       Exit
-----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
+        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
+│                                                                                                                   │
+│  [Enter]     Print node name                                                                                      │
+│  [Tab]       Select node                                                                                          │
+│  [Ctrl-a]    Select all nodes                                                                                     │
+│  [Ctrl-d]    Run "oc describe <node>" in new tmux window                                                          │
+│  [Ctrl-e]    Run "oc edit <node>" in new tmux window                                                              │
+│  [Ctrl-s]    SSH to node in new tmux window                                                                       │
+│  [Esc]       Exit                                                                                                 │
+│                                                                                                                   │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
-        -p "100%,50%" \
+        -p "58%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \

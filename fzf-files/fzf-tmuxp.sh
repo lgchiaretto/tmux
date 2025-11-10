@@ -16,10 +16,12 @@ clustername=$1
 tmuxpfile=$(echo -e "$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml\n$CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml" | fzf-tmux \
   --layout=reverse -p "55%,50%" \
   --no-input \
-  --header=$'--------------------------------------------------- Help ------------------------------------------------------
-[Enter]     Open tmuxp sessions file
-[Esc]       Exit
----------------------------------------------------------------------------------------------------------------\n\n' \
+  --header=$'┌────────────────────────────────────────────────── Help ───────────────────────────────────────────────────┐
+│                                                                                                           │
+│  [Enter]     Open tmuxp sessions file                                                                     │
+│  [Esc]       Exit                                                                                         │
+│                                                                                                           │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
   --height=40% --border \
   --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \

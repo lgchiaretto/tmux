@@ -14,14 +14,16 @@ if [ -z "$content" ]; then
 fi
 
 chosen=$(echo "$content" | fzf-tmux \
-     --header=$'-------------------------- Help --------------------------
-[Enter]     Open route on Chrome
-[Tab]       Print route hostname
-[Ctrl-e]    Run "oc edit <route>"
-[Ctrl-d]    Run "oc describe <route>"
-[Ctrl-o]    open the route on Chrome
-[Esc]       Exit
-----------------------------------------------------------\n\n' \
+     --header=$'┌───────────────────────────────── Help ─────────────────────────────────┐
+│                                                                        │
+│  [Enter]     Open route on Chrome                                      │
+│  [Tab]       Print route hostname                                      │
+│  [Ctrl-e]    Run "oc edit <route>"                                     │
+│  [Ctrl-d]    Run "oc describe <route>"                                 │
+│  [Ctrl-o]    open the route on Chrome                                  │
+│  [Esc]       Exit                                                      │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘\n\n' \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \

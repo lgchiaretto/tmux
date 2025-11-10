@@ -25,19 +25,21 @@ fi
 mapfile -t selected_pods < <(
     oc get pods --field-selector=status.phase=Running --no-headers -o custom-columns=":metadata.name" |
         fzf-tmux \
-            --header=$'-------------------------- Help --------------------------
-[Enter]     Show pod(s) logs
-[Tab]       Select pod to show log
-[Ctrl-a]    Select all pods
-[Esc]       Exit
-----------------------------------------------------------\n\n' \
+            --header=$'┌──────────────────────────────── Help ──────────────────────────────────┐
+│                                                                        │
+│  [Enter]     Show pod(s) logs                                          │
+│  [Tab]       Select pod to show log                                    │
+│  [Ctrl-a]    Select all pods                                           │
+│  [Esc]       Exit                                                      │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘\n\n' \
             --multi \
             --bind "ctrl-a:toggle-all" \
             --layout=reverse \
             --border-label=" $FZF_BORDER_LABEL " \
             --border-label-pos=center \
             -h 40 \
-            -p "100%,50%" \
+            -p "58%,50%" \
             --exact \
             --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
             --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665

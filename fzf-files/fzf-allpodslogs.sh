@@ -19,11 +19,13 @@ mapfile -t selected_pods_and_namespaces < <(
     oc get pods -A --field-selector=status.phase=Running --no-headers -o jsonpath="{range .items[*]}{.metadata.namespace}{'\t'}{.metadata.name}{'\n'}{end}" |
         column -t -s $'\t' |
         fzf-tmux \
-        --header=$'----------------------------------------------------- Help ------------------------------------------------------
-[Enter]     Show pod(s) logs
-[Tab]       Select pod to show log
-[Esc]       Exit
------------------------------------------------------------------------------------------------------------------\n\n' \
+        --header=$'┌──────────────────────────────────────────────────── Help ─────────────────────────────────────────────────────┐
+│                                                                                                               │
+│  [Enter]     Show pod(s) logs                                                                                 │
+│  [Tab]       Select pod to show log                                                                           │
+│  [Esc]       Exit                                                                                             │
+│                                                                                                               │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
         --multi \
@@ -31,7 +33,7 @@ mapfile -t selected_pods_and_namespaces < <(
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
-        -p "100%,50%" \
+        -p "58%,50%" \
         --exact \
         | awk '{print $1 " " $2}'
 )

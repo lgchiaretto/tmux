@@ -9,21 +9,22 @@ CACHE_FILE="/opt/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
     selected_version=$(cat "$CACHE_FILE" | fzf-tmux \
-                       --header=$'---------------------------------------
-
-[r]       Release notes
-[d]       Documentation
-[m]       Mirror to quay.chiaret.to
-[Enter]   Print release name
-[Esc]     Exit
-
-Version             Release Date
----------------------------------------\n' \
+                       --header=$'┌──────────────────────────────────────┐
+│                                      │
+│  [r]       Release notes             │
+│  [d]       Documentation             │
+│  [m]       Mirror to quay.chiaret.to │
+│  [Enter]   Print release name        │
+│  [Esc]     Exit                      │
+│                                      │
+│  Version             Release Date    │
+│                                      │
+└──────────────────────────────────────┘\n' \
                        --layout=reverse \
                        --border-label=" $FZF_BORDER_LABEL " \
                        --border-label-pos=center \
                        -h 40 \
-                       -p "23%,86%" \
+                       -p "23%,90%" \
                        --with-nth=1,2,3,4,5,6,7,8 \
                        --no-input \
                        --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {1})" \

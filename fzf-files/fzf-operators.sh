@@ -15,13 +15,15 @@ fi
 selected_operator=$(
     echo "$operators" | fzf-tmux \
         --ansi \
-        --header=$'--------------------------- Help ---------------------------
-[Enter]     Print cluster operator name
-[Tab]       Print cluster operator name
-[Ctrl-d]    Run "oc describe <cluster operator>"
-[Ctrl-e]    Run "oc edit <cluster operator>"
-[Esc]       Exit
-------------------------------------------------------------\n\n' \
+        --header=$'┌───────────────────────── Help ───────────────────────────┐
+│                                                          │
+│  [Enter]     Print cluster operator name                 │
+│  [Tab]       Print cluster operator name                 │
+│  [Ctrl-d]    Run "oc describe <cluster operator>"        │
+│  [Ctrl-e]    Run "oc edit <cluster operator>"            │
+│  [Esc]       Exit                                        │
+│                                                          │
+└──────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \

@@ -60,19 +60,21 @@ colored_pods=$(echo "$pods" | awk '{
 
 selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
-        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
-[Enter]     Print pod name
-[Tab]       Print pod name
-[Ctrl-d]    Run "oc describe <pod>" in new tmux window
-[Ctrl-e]    Run "oc edit <pod>" in new tmux window
-[Ctrl-l]    Run "oc logs <pod>" in new tmux window
-[Esc]       Exit
-----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
+        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
+│                                                                                                                   │
+│  [Enter]     Print pod name                                                                                       │
+│  [Tab]       Print pod name                                                                                       │
+│  [Ctrl-d]    Run "oc describe <pod>" in new tmux window                                                           │
+│  [Ctrl-e]    Run "oc edit <pod>" in new tmux window                                                               │
+│  [Ctrl-l]    Run "oc logs <pod>" in new tmux window                                                               │
+│  [Esc]       Exit                                                                                                 │
+│                                                                                                                   │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
-        -p "100%,50%" \
+        -p "58%,50%" \
         --exact \
         --with-nth=1,2,3 \
         --ansi \

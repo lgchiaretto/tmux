@@ -70,26 +70,26 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'------------------ Cluster creation -------------------------------------- Cluster actions -------------------
-|                                                     |                                                      |
-|  [c]........Create cluster                          |    [s]........Start cluster                          |
-|  [e]........Edit cluster install config files       |    [S]........Stop cluster                           |
-|  [E]........Edit cluster JSON file with vim         |    [d]........Destroy cluster                        |
-|  [m]........Mirror to quay.chiaret.to               |    [U]........Upgrade cluster                        |
-|                                                     |    [t]........Tmuxp sessions                         |
-|------------------ OpenShift Tools ------------------|    [p]........Copy kubeadmin password to clipboard   |
-|                                                     |    [k]........kubeconfig for cluster                 |
-|  [C]........Check latest OCP Versions available     |    [f]........Enter cluster files directory          |
-|  [u]........Show OpenShift update path              |    [r]........Recreate cluster                       |
-|  [D]........Copy or download and install OpenShift  |                                                      |
-|             client                                  |                                                      |
-|  [l]........OpenShift/Operators Lifecycle           |    [Enter]....Login with kubeadmin user              |
-|                                                     |                                                      |
-|  [Esc]......Exit                                    |                                                      |
-|                                                     |                                                      |
---------------------------------------------------------------------------------------------------------------
+    --header=$'┌─────────────────── Cluster creation ────────────────────┬─────────────────── Cluster actions ─────────────────────┐
+│                                                         │                                                         │
+│  [c]........Create cluster                              │    [s]........Start cluster                             │
+│  [e]........Edit cluster install config files           │    [S]........Stop cluster                              │
+│  [E]........Edit cluster JSON file with vim             │    [d]........Destroy cluster                           │
+│  [m]........Mirror to quay.chiaret.to                   │    [U]........Upgrade cluster                           │
+│                                                         │    [t]........Tmuxp sessions                            │
+├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard      │
+│                                                         │    [k]........kubeconfig for cluster                    │
+│  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory             │
+│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                          │
+│  [D]........Copy or download and install OpenShift      │                                                         │
+│             client                                      │                                                         │
+│  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                 │
+│                                                         │                                                         │
+│  [Esc]......Exit                                        │                                                         │
+│                                                         │                                                         │
+└─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┘
 Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Description
---------------------------------------------------------------------------------------------------------------' \
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
@@ -97,7 +97,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --border-label-pos=center \
     --border=rounded \
     -h 40 \
-    -p "55%,50%" \
+    -p "58%,50%" \
     --sort \
     --no-input \
     --multi \
@@ -131,15 +131,17 @@ if [ -n "$selected_action" ]; then
         tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
     else
       selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
-        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
-[Enter]     Select user to connect to cluster
-[Esc]       Exit
-----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
+        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
+│                                                                                                                   │
+│  [Enter]     Select user to connect to cluster                                                                    │
+│  [Esc]       Exit                                                                                                 │
+│                                                                                                                   │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
-        -p "100%,50%" \
+        -p "58%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \
@@ -165,3 +167,4 @@ fi
 if [ $? -ne 0 ]; then
     exit 0
 fi
+

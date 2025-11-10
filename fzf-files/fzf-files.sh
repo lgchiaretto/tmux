@@ -7,14 +7,16 @@ fi
 
 selected_file=$(
     locate -i "" | fzf-tmux \
-        --header=$'---------------------------------- Help ----------------------------------
-[Enter]     Open file or directory
-[Ctrl-c]    Copy the content of the file to clipboard
-[Ctrl-a]    Execute oc apply -f on the file
-[Ctrl-p]    Print the file or directory name in the terminal
-[Tab]       Open using Visual Studio Code
-[Esc]       Exit
---------------------------------------------------------------------------\n\n' \
+        --header=$'┌───────────────────────────────── Help ─────────────────────────────────────┐
+│                                                                            │
+│  [Enter]     Open file or directory                                        │
+│  [Ctrl-c]    Copy the content of the file to clipboard                     │
+│  [Ctrl-a]    Execute oc apply -f on the file                               │
+│  [Ctrl-p]    Print the file or directory name in the terminal              │
+│  [Tab]       Open using Visual Studio Code                                 │
+│  [Esc]       Exit                                                          │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
