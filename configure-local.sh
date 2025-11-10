@@ -63,49 +63,41 @@ cp $TMUX_DIR/dotfiles/bash_functions "$TARGET_HOME/.bash_functions" > /dev/null 
 
 log "Setting up configuration file"
 if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
-    if [ -f "$TMUX_DIR/config.sh" ]; then
-        log "Copying existing config.sh"
-        cp "$TMUX_DIR/config.sh" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
-    else
-        log "Creating config.sh from example"
-        cp "$TMUX_DIR/config.sh.example" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+    cp "$TMUX_DIR/config.sh.example" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
         
-        # Interactive configuration prompt
-        if [ -t 0 ]; then
-            echo ""
-            echo "================================================"
-            echo "  Configuration Setup"
-            echo "================================================"
-            echo ""
-            echo "The default cluster path is: /vms/clusters"
-            read -p "Do you want to customize it? (y/N): " customize
+    if [ -t 0 ]; then
+        echo ""
+        echo "================================================"
+        echo "  Configuration Setup"
+        echo "================================================"
+        echo ""
+        echo "The default cluster path is: /vms/clusters"
+        read -p "Do you want to customize it? (y/N): " customize
             
-            if [[ "$customize" =~ ^[Yy]$ ]]; then
-                read -p "Enter clusters base path: " clusters_path
-                if [ -n "$clusters_path" ]; then
-                    sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
-                    log "Set CLUSTERS_BASE_PATH to: $clusters_path"
-                fi
-                
-                read -p "Enter default base domain (press Enter for 'chiarettolabs.com.br'): " domain
-                if [ -n "$domain" ]; then
-                    sed -i "s|export DEFAULT_BASE_DOMAIN=.*|export DEFAULT_BASE_DOMAIN=\"${domain}\"|" "$TARGET_HOME/.tmux/config.sh"
-                    log "Set DEFAULT_BASE_DOMAIN to: $domain"
-                fi
-
-                read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
-                if [ -n "$kvm_vars_dir" ]; then
-                    sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
-                    log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
-                fi
-
-                read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
-                if [ -n "$fzf_label" ]; then
-                    sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
-                    log "Set FZF_BORDER_LABEL to: $fzf_label"
-                fi
+        if [[ "$customize" =~ ^[Yy]$ ]]; then
+            read -p "Enter clusters base path: " clusters_path
+            if [ -n "$clusters_path" ]; then
+                sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set CLUSTERS_BASE_PATH to: $clusters_path"
             fi
-        fi
+                
+            read -p "Enter default base domain (press Enter for 'chiarettolabs.com.br'): " domain
+            if [ -n "$domain" ]; then
+                sed -i "s|export DEFAULT_BASE_DOMAIN=.*|export DEFAULT_BASE_DOMAIN=\"${domain}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set DEFAULT_BASE_DOMAIN to: $domain"
+            fi
+
+            read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
+            if [ -n "$kvm_vars_dir" ]; then
+                sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
+            fi
+
+            read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
+            if [ -n "$fzf_label" ]; then
+                sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set FZF_BORDER_LABEL to: $fzf_label"
+            fi
     fi
     chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
 else
