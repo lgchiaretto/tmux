@@ -98,6 +98,7 @@ if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
                 sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
                 log "Set FZF_BORDER_LABEL to: $fzf_label"
             fi
+        fi
     fi
     chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
 else
