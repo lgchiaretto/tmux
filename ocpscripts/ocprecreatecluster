@@ -5,9 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
-# Set defaults if not configured
-CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
-ANSIBLE_PLAYBOOK_PATH="${ANSIBLE_PLAYBOOK_PATH:-$ANSIBLE_PLAYBOOK_PATH}"
 
 temp_file=$(mktemp)
 
@@ -34,5 +31,5 @@ if [[ "$infra" == "vsphere" ]]; then
   fi
 
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@$CLUSTERS_BASE_PATH/$1/$1.json $ANSIBLE_PLAYBOOK_PATH/destroy-cluster.yml &" C-m
+  tmux send-keys "ansible-playbook  -e@$CLUSTERS_BASE_PATH/$1/$1.json $ANSIBLE_PLAYBOOK_KVM_PATH/destroy-cluster.yml &" C-m
 fi

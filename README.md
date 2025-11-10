@@ -75,7 +75,7 @@ vim ~/.tmux/config.sh
 - `CLUSTER_VARIABLES_DIR`: Directory for cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
 - `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional)
 - `DEFAULT_BASE_DOMAIN`: Default base domain for clusters (default: `chiarettolabs.com.br`)
-- `ANSIBLE_PLAYBOOK_PATH`: Path to Ansible playbook directory for cluster management
+- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for cluster management
 
 **Example:**
 

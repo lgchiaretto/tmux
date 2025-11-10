@@ -59,6 +59,6 @@ infra=$(yq -r '.infra' "$config_file" || true)
 if [[ "$infra" == "vsphere" ]]; then
     tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $cluster_name & 2>&1" C-m
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@$config_file $ANSIBLE_PLAYBOOK_PATH/destroy-cluster.yml & 2>&1" C-m
+  tmux send-keys "ansible-playbook  -e@$config_file $ANSIBLE_PLAYBOOK_KVM_PATH/destroy-cluster.yml & 2>&1" C-m
   echo
 fi
