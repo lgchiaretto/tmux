@@ -184,12 +184,12 @@ function createKVMCluster(){
 
     selected_file=$(echo "$files" | fzf-tmux \
         --header=$'
------------------------------------------ Create KVM cluster -------------------------------------------------
-|                                                                                                            |
-|  [Enter]....Select cluster variable file                                                                   |
-|  [Esc]......Exit                                                                                           |
-|                                                                                                            |
---------------------------------------------------------------------------------------------------------------\n\n' \
+┌────────────────────────────────────── Create KVM cluster ──────────────────────────────────────────────┐
+│                                                                                                        │
+│  [Enter]....Select cluster variable file                                                               │
+│  [Esc]......Exit                                                                                       │
+│                                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
