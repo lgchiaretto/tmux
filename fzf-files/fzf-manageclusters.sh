@@ -124,7 +124,12 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
   basedomain=$(jq -r '.basedomain' "$CLUSTERS_BASE_PATH/$clustername/$clustername.json" 2>/dev/null || echo "No notes")
+  infra=$(jq -r '.infra' "$CLUSTERS_BASE_PATH/$clustername/$clustername.json" 2>/dev/null || echo "No notes")
+  
   if [[ -z "$KUBECONFIG" ]]; then
+    if [ "$infra" == "kvm" ]; then
+        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+    else
       selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
         --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
 [Enter]     Select user to connect to cluster
@@ -144,12 +149,13 @@ if [ -n "$selected_action" ]; then
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
       )
       selected_user=$(echo "$selected_user_raw" | tail -1)
-    if [ -z "$selected_user" ]; then
-        exit 0
-    elif [ "$selected_user" == "kubeadmin" ]; then
-        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
-    elif [ "$selected_user" == "chiaretto" ]; then
-        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
+      if [ -z "$selected_user" ]; then
+          exit 0
+      elif [ "$selected_user" == "kubeadmin" ]; then
+          tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+      elif [ "$selected_user" == "chiaretto" ]; then
+          tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
+      fi
     fi
   else
     tmux display -d 5000 "KUBECONFIG is set, not logging in with kubeadmin user"
