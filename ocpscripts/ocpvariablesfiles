@@ -8,133 +8,112 @@ fi
 # Set defaults if not configured
 CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
 CLUSTER_VARIABLES_DIR="${CLUSTER_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files}"
+KVM_VARIABLES_DIR="${KVM_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files-kvm}"
 
-#files=$(find $CLUSTER_VARIABLES_DIR/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
-
-
-actions="- Baremetal IPI 3-node cluster
-- Baremetal IPI 4-node cluster
-- Baremetal IPI 5-node cluster
-- Baremetal UPI Single node OpenShift
-- Baremetal UPI Single node OpenShift with worker nodes
-- Baremetal UPI Single node OpenShift with ODF nodes
-- Baremetal UPI Single node OpenShift with Virt nodes
-- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo
-- None UPI 3-node cluster
-- None UPI 3-node cluster with 'ODF'
-- vSphere IPI 3-node cluster
-- vSphere UPI 3-node cluster"
-
-
-selected_file=$(echo -e "$actions" | sort | fzf-tmux \
+# First, select the infrastructure type
+infra_type=$(echo -e "vSphere\nKVM" | fzf-tmux \
     --header=$'
------------------------------------------ Create cluster -----------------------------------------------------
+------------------------------------ Select Infrastructure Type ------------------------------------------
 |                                                                                                            |
-|  [Enter]....Edit the cluster configuration                                                                 |
+|  [Enter]....Select infrastructure type                                                                    |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
-    -h 40 -p "55%,46%" \
-    --no-input \
-    --no-sort \
+    -h 15 -p "55%,46%" \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     )
 
+if [ -z "$infra_type" ]; then
+    tmux display -d 3000 "No infrastructure type selected"
+    exit 0
+fi
 
-variablesfile=$(echo "$selected_file" | tail -n1)
+# Based on infrastructure type, list available variable files
+if [ "$infra_type" = "vSphere" ]; then
+    # Check if directory exists
+    if [ ! -d "$CLUSTER_VARIABLES_DIR" ]; then
+        tmux display -d 3000 "Error: vSphere variables directory not found: $CLUSTER_VARIABLES_DIR"
+        exit 1
+    fi
+    
+    # Find all JSON files in the vSphere variables directory
+    files=$(find "$CLUSTER_VARIABLES_DIR" -maxdepth 1 -type f -name "*.json" -exec basename {} \; | sort)
+    
+    if [ -z "$files" ]; then
+        tmux display -d 3000 "No vSphere variable files found in $CLUSTER_VARIABLES_DIR"
+        exit 0
+    fi
+    
+    selected_file=$(echo "$files" | fzf-tmux \
+        --header=$'
+------------------------------------ vSphere Variable Files ----------------------------------------------
+|                                                                                                            |
+|  [Enter]....Edit the selected variable file                                                                |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+        --layout=reverse \
+        --border-label=" $FZF_BORDER_LABEL " \
+        --border-label-pos=center \
+        -h 40 -p "55%,46%" \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+        )
+    
+    if [ -n "$selected_file" ]; then
+        file="$CLUSTER_VARIABLES_DIR/$selected_file"
+        if [ -f "$file" ]; then
+            tmux new-window -n "vim $(basename $file)" "vim $file; tmux wait-for -S vim-done"
+            tmux wait-for vim-done
+        else
+            tmux display -d 3000 "Error: File not found: $file"
+        fi
+    fi
 
-if [ -n "$selected_file" ]; then
-    case "$variablesfile" in
-        "- Baremetal IPI 3-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-3node-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+elif [ "$infra_type" = "KVM" ]; then
+    # Check if directory exists
+    if [ ! -d "$KVM_VARIABLES_DIR" ]; then
+        tmux display -d 3000 "Error: KVM variables directory not found: $KVM_VARIABLES_DIR"
+        exit 1
+    fi
+    
+    # Find all YAML files in the KVM variables directory
+    files=$(find "$KVM_VARIABLES_DIR" -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" \) -exec basename {} \; | sort)
+    
+    if [ -z "$files" ]; then
+        tmux display -d 3000 "No KVM variable files found in $KVM_VARIABLES_DIR"
+        exit 0
+    fi
+    
+    selected_file=$(echo "$files" | fzf-tmux \
+        --header=$'
+------------------------------------- KVM Variable Files -------------------------------------------------
+|                                                                                                            |
+|  [Enter]....Edit the selected variable file                                                               |
+|  [Esc]......Exit                                                                                           |
+|                                                                                                            |
+--------------------------------------------------------------------------------------------------------------\n\n' \
+        --layout=reverse \
+        --border-label=" $FZF_BORDER_LABEL " \
+        --border-label-pos=center \
+        -h 40 -p "55%,46%" \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+        )
+    
+    if [ -n "$selected_file" ]; then
+        file="$KVM_VARIABLES_DIR/$selected_file"
+        if [ -f "$file" ]; then
+            tmux new-window -n "vim $(basename $file)" "vim $file; tmux wait-for -S vim-done"
             tmux wait-for vim-done
-            ;;
-        "- Baremetal IPI 4-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-4node-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal IPI 5-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-5node-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal UPI Single node OpenShift")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal UPI Single node OpenShift with ODF nodes")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-odf-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal UPI Single node OpenShift with worker nodes")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-worker-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal UPI Single node OpenShift with Virt nodes")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-virt-baremetal.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-virt-baremetal-demo.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- None UPI 3-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-none.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- None UPI 3-node cluster with 'ODF'")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-odf-none.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- None UPI Single node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-none.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- None UPI Single node cluster with 'OCP Virt'")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-ocpvirt-none.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- None UPI Single node cluster with 'ODF'")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-odf-none.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- vSphere IPI 3-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-3node-vsphere.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- vSphere UPI 3-node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-vsphere.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- vSphere UPI Single node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-vsphere.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-        "- vSphere IPI Single node cluster")
-            file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-sno.json"
-            tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-            tmux wait-for vim-done
-            ;;
-    esac
+        else
+            tmux display -d 3000 "Error: File not found: $file"
+        fi
+    fi
 fi
 
 if [ -z "$selected_file" ]; then
