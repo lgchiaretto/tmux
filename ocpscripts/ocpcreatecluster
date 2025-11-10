@@ -216,7 +216,9 @@ function createKVMCluster(){
         exit 1
     fi
 
-    tmux send-keys "ansible-playbook -i localhost -e \"clustername=$clustername\" -e \"@$file\" /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/create-cluster-upi-kvm-modular.yaml" C-m
+    # Create new tmux session for KVM cluster creation
+    session_name="create-kvm-${clustername}"
+    tmux has-session -t "$session_name" 2>/dev/null && tmux kill-session -t "$session_name"; tmux new-session -d -s "$session_name"; tmux switch-client -t "$session_name"; tmux send-keys -t "$session_name" "ansible-playbook -i localhost -e \"clustername=$clustername\" -e \"@$file\" $ANSIBLE_PLAYBOOK_KVM_PATH/create-cluster-upi-kvm-modular.yaml" C-m
 }
 
 # begin
