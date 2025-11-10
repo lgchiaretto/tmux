@@ -74,14 +74,14 @@ selected_action=$(
 │                                                         │                                                         │
 │  [c]........Create cluster                              │    [s]........Start cluster                             │
 │  [e]........Edit cluster install config files           │    [S]........Stop cluster                              │
-│  [E]........Edit cluster JSON file with vim             │    [d]........Destroy cluster                           │
-│  [m]........Mirror to quay.chiaret.to                   │    [U]........Upgrade cluster                           │
+│                                                         │    [d]........Destroy cluster                           │
+│  [m]........Mirror to quay.chiaret.to (chiarettolabs)   │    [U]........Upgrade cluster                           │
 │                                                         │    [t]........Tmuxp sessions                            │
 ├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard      │
 │                                                         │    [k]........kubeconfig for cluster                    │
 │  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory             │
 │  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                          │
-│  [D]........Copy or download and install OpenShift      │                                                         │
+│  [D]........Copy or download and install OpenShift      │    [E]........Edit cluster JSON file with vim           │
 │             client                                      │                                                         │
 │  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                 │
 │                                                         │                                                         │
