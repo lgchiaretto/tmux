@@ -53,13 +53,14 @@ cd .fzf > /dev/null 2>&1
 log "Installing fzf"
 sudo -u "$TARGET_USER" ./install --key-bindings --completion --update-rc > /dev/null 2>&1
 cd $TMUX_DIR > /dev/null 2>&1
-log "Copying .bashrc, .vimrc, .dircolors, .inputrc and .tmux.conf files"
+log "Copying .bashrc, .vimrc, .dircolors, .inputrc, .tmux.conf and .ansible.cfg files"
 cp $TMUX_DIR/dotfiles/bashrc "$TARGET_HOME/.bashrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/tmux.conf "$TARGET_HOME/.tmux.conf" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/vimrc "$TARGET_HOME/.vimrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/dircolors "$TARGET_HOME/.dircolors" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/inputrc "$TARGET_HOME/.inputrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/bash_functions "$TARGET_HOME/.bash_functions" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/ansible.cfg "$TARGET_HOME/.ansible.cfg" > /dev/null 2>&1
 
 log "Setting up configuration file"
 if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
@@ -111,7 +112,7 @@ mkdir -p "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Copying fzf-files to .tmux directory"
 cp $TMUX_DIR/fzf-files/* "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Changing ownership of configuration files"
-chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME"/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc,.bash_functions} > /dev/null 2>&1
+chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME"/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc,.bash_functions,.ansible.cfg} > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.vim/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.fzf/" > /dev/null 2>&1
