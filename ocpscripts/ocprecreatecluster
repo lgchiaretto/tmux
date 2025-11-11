@@ -22,6 +22,11 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
 fi
 
 infra=$(jq -r '.infra' $CLUSTERS_BASE_PATH/$1/$1.json)
+destroy_if_exists=$(jq -r '.destroy_if_exists' $CLUSTERS_BASE_PATH/$1/$1.json)
+
+if [[ "$destroy_if_exists" != "true" ]]; then
+  jq '.destroy_if_exists = "true"' $CLUSTERS_BASE_PATH/$1/$1.json > "$CLUSTERS_BASE_PATH/$1/${1}_tmp.json" && mv "$CLUSTERS_BASE_PATH/$1/${1}_tmp.json" "$CLUSTERS_BASE_PATH/$1/$1.json"
+fi 
 
 if [[ "$infra" == "vsphere" ]]; then
   if [ "$(hostname)" = "bastion.chiaret.to" ]; then
@@ -30,6 +35,8 @@ if [[ "$infra" == "vsphere" ]]; then
       tmux send-keys "ssh -t lchiaret@bastion.aap.chiaret.to \"nohup /home/lchiaret/git/openshift4-automation/run-playbooks-recreate.py '$1' > /tmp/nohup-recreate.out 2>&1 &\" " C-m
   fi
 
+session_name="recreate-$1"
+
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@$CLUSTERS_BASE_PATH/$1/$1.json $ANSIBLE_PLAYBOOK_KVM_PATH/destroy-cluster.yml &" C-m
+  tmux has-session -t "$session_name" 2>/dev/null && tmux kill-session -t "$session_name"; tmux new-session -d -s "$session_name"; tmux switch-client -t "$session_name"; tmux send-keys -t "$session_name" "ansible-playbook -i localhost -e \"clustername=$clustername\" -e \"@$file\" $ANSIBLE_PLAYBOOK_KVM_PATH/create-cluster-upi-kvm-modular.yaml" C-m
 fi

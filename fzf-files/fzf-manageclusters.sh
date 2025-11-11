@@ -80,7 +80,7 @@ selected_action=$(
 ├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard      │
 │                                                         │    [k]........kubeconfig for cluster                    │
 │  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory             │
-│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster  (vsphere only)          │
+│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                          │
 │  [D]........Copy or download and install OpenShift      │    [E]........Edit cluster JSON file with vim           │
 │             client                                      │                                                         │
 │  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                 │
