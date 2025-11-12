@@ -71,7 +71,7 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'┌─────────────────── Cluster creation ────────────────────┬──────────────────────────── Cluster actions ────────────────────┐
+    --header=$'┌─────────────────── Cluster creation ────────────────────┬──────────────────────── Cluster actions ────────────────────────┐
 │                                                         │                                                                 │
 │  [c]........Create cluster                              │    [s]........Start cluster                                     │
 │  [e]........Edit cluster install config files           │    [S]........Stop cluster                                      │
@@ -90,7 +90,7 @@ selected_action=$(
 │                                                         │                                                                 │
 └─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
 Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Infra    Description
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
