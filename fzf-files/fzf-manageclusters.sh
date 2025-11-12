@@ -33,20 +33,21 @@ clusters() {
   n_worker=$(jq -r '.n_worker' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
   vmwarenetwork=$(jq -r '.vmwarenetwork' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
   created_at=$(stat -c %y $CLUSTERS_BASE_PATH/$dir/$dir.json | cut -d' ' -f1)
+  infra=$(jq -r '.infra' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
   started_file="$CLUSTERS_BASE_PATH/$dir/started"
   basedomain=$(jq -r '.basedomain' "$CLUSTERS_BASE_PATH/$dir/$dir.json" 2>/dev/null || echo "No notes")
 
   if [ -f "$started_file" ]; then
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
-        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenetwork" "$vmwarenotes"
+        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenetwork" "$infra" "$vmwarenotes"
     else
-        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$vmwarenetwork" "$vmwarenotes"
+        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$infra" "$vmwarenetwork" "$vmwarenotes"
     fi
   else
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
-        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenetwork" "$vmwarenotes"
+        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenetwork" "$infra" "$vmwarenotes"
     else
-        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$vmwarenetwork" "$vmwarenotes"
+        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$vmwarenetwork" "$infra" "$vmwarenotes"
     fi
   fi
 }
@@ -70,26 +71,26 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'┌─────────────────── Cluster creation ────────────────────┬─────────────────── Cluster actions ─────────────────────┐
-│                                                         │                                                         │
-│  [c]........Create cluster                              │    [s]........Start cluster                             │
-│  [e]........Edit cluster install config files           │    [S]........Stop cluster                              │
-│                                                         │    [d]........Destroy cluster                           │
-│  [m]........Mirror to quay.chiaret.to (chiarettolabs)   │    [U]........Upgrade cluster                           │
-│                                                         │    [t]........Tmuxp sessions                            │
-├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard      │
-│                                                         │    [k]........kubeconfig for cluster                    │
-│  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory             │
-│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                          │
-│  [D]........Copy or download and install OpenShift      │    [E]........Edit cluster JSON file with vim           │
-│             client                                      │                                                         │
-│  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                 │
-│                                                         │                                                         │
-│  [Esc]......Exit                                        │                                                         │
-│                                                         │                                                         │
-└─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┘
-Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Description
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
+    --header=$'┌─────────────────── Cluster creation ────────────────────┬──────────────────────────── Cluster actions ────────────────────┐
+│                                                         │                                                                 │
+│  [c]........Create cluster                              │    [s]........Start cluster                                     │
+│  [e]........Edit cluster install config files           │    [S]........Stop cluster                                      │
+│                                                         │    [d]........Destroy cluster                                   │
+│  [m]........Mirror to quay.chiaret.to (chiarettolabs)   │    [U]........Upgrade cluster                                   │
+│                                                         │    [t]........Tmuxp sessions                                    │
+├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard              │
+│                                                         │    [k]........kubeconfig for cluster                            │
+│  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory                     │
+│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                                  │
+│  [D]........Copy or download and install OpenShift      │    [E]........Edit cluster JSON file with vim                   │
+│             client                                      │                                                                 │
+│  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                         │
+│                                                         │                                                                 │
+│  [Esc]......Exit                                        │                                                                 │
+│                                                         │                                                                 │
+└─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
+Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Infra    Description
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
     --layout=reverse \
@@ -97,7 +98,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --border-label-pos=center \
     --border=rounded \
     -h 40 \
-    -p "58%,50%" \
+    -p "63%,50%" \
     --sort \
     --no-input \
     --multi \
