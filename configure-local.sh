@@ -146,8 +146,8 @@ log "Setting executable permissions for oc-logs-fzf.sh"
 sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
 
 log "Installing tmuxp, bat and yq"
-sudo dnf install -y python3-pip bat yq -q > /dev/null 2>&1
-sudo -u "$TARGET_USER" pip3 install --user tmuxp -q > /dev/null 2>&1
+sudo dnf install -y python3-pip -q > /dev/null 2>&1
+sudo -u "$TARGET_USER" pip3 install --user tmuxp yq bat -q > /dev/null 2>&1
 
 log "Copying tmux-sessions directory to home"
 cp -R tmux-sessions "$TARGET_HOME/" > /dev/null 2>&1
