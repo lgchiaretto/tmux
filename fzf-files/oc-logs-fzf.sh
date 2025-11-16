@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 pod="$1"
 project_name=$(oc project -q)
 containers=$(oc get pod "$pod" -o jsonpath='{.spec.containers[*].name}' 2>/dev/null)
@@ -9,7 +15,7 @@ if [ "$count" -eq 1 ]; then
 else
     container=$(echo "$containers" | tr ' ' '\n' | fzf-tmux \
         --header="Select container for pod $pod" \       
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         --layout=reverse \
         -h 10 \

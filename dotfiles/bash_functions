@@ -1,5 +1,9 @@
 #!/usr/bin/env bash -x
 
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 ossh(){
   IP=$(oc get nodes $@ --no-headers -o jsonpath='{.status.addresses[0].address}')
   # if [ -z $IP ]; then

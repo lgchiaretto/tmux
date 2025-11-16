@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 operators=$(timeout 2s oc get clusteroperators -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.conditions[?(@.type=="Available")]}{.status}{"\t"}{end}{range .status.conditions[?(@.type=="Progressing")]}{.status}{"\t"}{end}{range .status.conditions[?(@.type=="Degraded")]}{.status}{"\n"}{end}{end}' | awk -F'\t' '{if ($3=="True" || $4=="True") print "\033[31m"$0"\033[0m"; else print $0}' | column -t -s $'\t' 2>/dev/null)
 
 if [ -z "$operators" ]; then
@@ -10,15 +15,17 @@ fi
 selected_operator=$(
     echo "$operators" | fzf-tmux \
         --ansi \
-        --header=$'--------------------------- Help ---------------------------
-[Enter]     Print cluster operator name
-[Tab]       Print cluster operator name
-[Ctrl-d]    Run "oc describe <cluster operator>"
-[Ctrl-e]    Run "oc edit <cluster operator>"
-[Esc]       Exit
-------------------------------------------------------------\n\n' \
+        --header=$'┌───────────────────────── Help ───────────────────────────┐
+│                                                          │
+│  [Enter]     Print cluster operator name                 │
+│  [Tab]       Print cluster operator name                 │
+│  [Ctrl-d]    Run "oc describe <cluster operator>"        │
+│  [Ctrl-e]    Run "oc edit <cluster operator>"            │
+│  [Esc]       Exit                                        │
+│                                                          │
+└──────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \

@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 projects=$(timeout 2s oc get namespaces -o custom-columns=NAME:.metadata.name --no-headers)
 
 if [ -z "$projects" ]; then
@@ -8,16 +13,18 @@ if [ -z "$projects" ]; then
 fi
 
 selected_project=$(echo "$projects" | fzf-tmux \
-     --header=$'-------------------------- Help --------------------------
-[Enter]           Change to project
-[Tab]             Print project name
-[Esc]             Exit
-----------------------------------------------------------\n\n' \
+     --header=$'┌───────────────────────────────── Help ─────────────────────────────────┐
+│                                                                        │
+│  [Enter]           Change to project                                   │
+│  [Tab]             Print project name                                  │
+│  [Esc]             Exit                                                │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘\n\n' \
     --layout=reverse \
-    --border-label=" chiarettolabs.com.br " \
+    --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
     -h 40 \
-    -p "100%,50%" \
+    -p "40%,70%" \
     --exact \
     --bind "tab:execute-silent(tmux send-keys '{}')+abort" \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \

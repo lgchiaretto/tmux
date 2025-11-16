@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Set defaults if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.aap.chiaret.to}"
+
+# Check if cluster name was provided
+if [ -z "$1" ]; then
+    echo "Error: Cluster name is required"
+    echo "Usage: ocpstartcluster <cluster-name>"
+    exit 1
+fi
+
+CLUSTER_NAME="$1"
+CLUSTER_DIR="$CLUSTERS_BASE_PATH/$CLUSTER_NAME"
+CLUSTER_JSON="$CLUSTER_DIR/$CLUSTER_NAME.json"
+
+# Check if cluster directory exists
+if [ ! -d "$CLUSTER_DIR" ]; then
+    echo "Error: Cluster directory not found: $CLUSTER_DIR"
+    exit 1
+fi
+
+# Check if cluster JSON exists
+if [ ! -f "$CLUSTER_JSON" ]; then
+    echo "Error: Cluster JSON not found: $CLUSTER_JSON"
+    exit 1
+fi
+
+# Get infrastructure type from cluster JSON
+INFRA=$(jq -r '.infra' "$CLUSTER_JSON" 2>/dev/null || echo "unknown")
+
+echo "Starting cluster: $CLUSTER_NAME (infrastructure: $INFRA)"
+
+# Change to cluster directory
+cd "$CLUSTER_DIR" || exit 1
+
+# Execute startvms.sh if it exists
+if [ -f "./startvms.sh" ]; then
+    echo "Executing startvms.sh..."
+    ./startvms.sh
+    
+    # Create started file locally
+    touch started
+    
+    # For vsphere clusters, also create the started file on bastion
+    if [ "$INFRA" = "vsphere" ] && [ -n "$REMOTE_BASTION_HOST" ]; then
+        echo "Creating started marker on bastion for vsphere cluster..."
+        ssh "$REMOTE_BASTION_HOST" "touch $CLUSTERS_BASE_PATH/$CLUSTER_NAME/started" 2>/dev/null
+    fi
+    
+    echo "Cluster $CLUSTER_NAME started successfully"
+else
+    echo "Warning: startvms.sh not found in $CLUSTER_DIR"
+    exit 1
+fi

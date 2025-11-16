@@ -53,13 +53,52 @@ cd .fzf > /dev/null 2>&1
 log "Installing fzf"
 sudo -u "$TARGET_USER" ./install --key-bindings --completion --update-rc > /dev/null 2>&1
 cd $TMUX_DIR > /dev/null 2>&1
-log "Copying .bashrc, .vimrc, .dircolors, .inputrc and .tmux.conf files"
+log "Copying .bashrc, .vimrc, .dircolors, .inputrc, .tmux.conf and .ansible.cfg files"
 cp $TMUX_DIR/dotfiles/bashrc "$TARGET_HOME/.bashrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/tmux.conf "$TARGET_HOME/.tmux.conf" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/vimrc "$TARGET_HOME/.vimrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/dircolors "$TARGET_HOME/.dircolors" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/inputrc "$TARGET_HOME/.inputrc" > /dev/null 2>&1
 cp $TMUX_DIR/dotfiles/bash_functions "$TARGET_HOME/.bash_functions" > /dev/null 2>&1
+cp $TMUX_DIR/dotfiles/ansible.cfg "$TARGET_HOME/.ansible.cfg" > /dev/null 2>&1
+
+log "Setting up configuration file"
+if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
+    cp "$TMUX_DIR/config.sh.example" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+        
+    if [ -t 0 ]; then
+        echo ""
+        echo "================================================"
+        echo "  Configuration Setup"
+        echo "================================================"
+        echo ""
+        echo "The default cluster path is: /vms/clusters"
+        read -p "Do you want to customize it? (y/N): " customize
+            
+        if [[ "$customize" =~ ^[Yy]$ ]]; then
+            read -p "Enter clusters base path: " clusters_path
+            if [ -n "$clusters_path" ]; then
+                sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set CLUSTERS_BASE_PATH to: $clusters_path"
+            fi
+
+            read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
+            if [ -n "$kvm_vars_dir" ]; then
+                sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
+            fi
+
+            read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
+            if [ -n "$fzf_label" ]; then
+                sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
+                log "Set FZF_BORDER_LABEL to: $fzf_label"
+            fi
+        fi
+    fi
+    chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
+else
+    log "Configuration file already exists, skipping"
+fi
 
 log "Installing vim-plug"
 curl -fLo "$TARGET_HOME/.vim/autoload/plug.vim" --create-dirs \
@@ -73,7 +112,7 @@ mkdir -p "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Copying fzf-files to .tmux directory"
 cp $TMUX_DIR/fzf-files/* "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 log "Changing ownership of configuration files"
-chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME"/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc,.bash_functions} > /dev/null 2>&1
+chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME"/{.bashrc,.tmux.conf,.vimrc,.dircolors,.inputrc,.bash_functions,.ansible.cfg} > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.vim/" > /dev/null 2>&1
 chown -R $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.fzf/" > /dev/null 2>&1
@@ -106,9 +145,9 @@ sudo cp ocpscripts/* /usr/local/bin/ > /dev/null 2>&1
 log "Setting executable permissions for oc-logs-fzf.sh"
 sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
 
-log "Installing tmuxp and bat"
-sudo dnf install -y python3-pip bat -q > /dev/null 2>&1
-sudo -u "$TARGET_USER" pip3 install --user tmuxp -q > /dev/null 2>&1
+log "Installing tmuxp, bat and yq"
+sudo dnf install -y python3-pip -q > /dev/null 2>&1
+sudo -u "$TARGET_USER" pip3 install --user tmuxp yq bat -q > /dev/null 2>&1
 
 log "Copying tmux-sessions directory to home"
 cp -R tmux-sessions "$TARGET_HOME/" > /dev/null 2>&1

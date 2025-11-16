@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 selected_file=$(
     locate -i "" | fzf-tmux \
-        --header=$'---------------------------------- Help ----------------------------------
-[Enter]     Open file or directory
-[Ctrl-c]    Copy the content of the file to clipboard
-[Ctrl-a]    Execute oc apply -f on the file
-[Ctrl-p]    Print the file or directory name in the terminal
-[Tab]       Open using Visual Studio Code
-[Esc]       Exit
---------------------------------------------------------------------------\n\n' \
+        --header=$'┌───────────────────────────────── Help ─────────────────────────────────────┐
+│                                                                            │
+│  [Enter]     Open file or directory                                        │
+│  [Ctrl-c]    Copy the content of the file to clipboard                     │
+│  [Ctrl-a]    Execute oc apply -f on the file                               │
+│  [Ctrl-p]    Print the file or directory name in the terminal              │
+│  [Ctrl-f]    Change directory to the file\'s directory                      │
+│  [Tab]       Open using Visual Studio Code                                 │
+│  [Esc]       Exit                                                          │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -p "100%,50%" \
         --exact \
@@ -21,6 +29,7 @@ selected_file=$(
         --bind 'ctrl-p:execute-silent(tmux send-keys -l {})+abort' \
         --bind 'tab:execute-silent(tmux send-keys "code -n " {} C-m)+abort' \
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
+        --bind 'ctrl-f:execute-silent([[ -f {} ]] && tmux send-keys "cd $(dirname {})" C-m || tmux send-keys "cd {}" C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
         --query "" \
