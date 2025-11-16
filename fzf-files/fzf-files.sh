@@ -13,6 +13,7 @@ selected_file=$(
 │  [Ctrl-c]    Copy the content of the file to clipboard                     │
 │  [Ctrl-a]    Execute oc apply -f on the file                               │
 │  [Ctrl-p]    Print the file or directory name in the terminal              │
+│  [Ctrl-f]    Change directory to the file\'s directory                      │
 │  [Tab]       Open using Visual Studio Code                                 │
 │  [Esc]       Exit                                                          │
 │                                                                            │
@@ -28,6 +29,7 @@ selected_file=$(
         --bind 'ctrl-p:execute-silent(tmux send-keys -l {})+abort' \
         --bind 'tab:execute-silent(tmux send-keys "code -n " {} C-m)+abort' \
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
+        --bind 'ctrl-f:execute-silent([[ -f {} ]] && tmux send-keys "cd $(dirname {})" C-m || tmux send-keys "cd {}" C-m)+abort' \
         --preview '[[ -f {} ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltra {}' \
         --preview-window=right:60%:wrap \
         --query "" \

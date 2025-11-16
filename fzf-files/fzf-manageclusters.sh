@@ -130,6 +130,8 @@ if [ -n "$selected_action" ]; then
   if [[ -z "$KUBECONFIG" ]]; then
     if [ "$infra" == "kvm" ]; then
         tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+    elif [ "$infra" == "rhdp" ]; then
+        tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u admin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/admin-password) --insecure-skip-tls-verify" C-m
     else
       selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
         --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
