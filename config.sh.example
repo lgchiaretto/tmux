@@ -20,11 +20,11 @@ export KVM_VARIABLES_DIR="${KVM_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-f
 # Remote host for cluster state synchronization (optional)
 # Leave empty if not using remote synchronization
 # Example: "user@bastion.example.com"
-export REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.aap.chiaret.to}"
+export REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.chiarettolabs.com.br}"
 
 # Ansible playbook path for cluster management
 # Used by cluster creation and destruction scripts
-export ANSIBLE_PLAYBOOK_KVM_PATH="${ANSIBLE_PLAYBOOK_KVM_PATH:-/home/lchiaret/git/ocp4_setup_upi_kvm_ansible}"
+export ANSIBLE_PLAYBOOK_KVM_PATH="${ANSIBLE_PLAYBOOK_KVM_PATH:-$HOME/git/ocp4_setup_upi_kvm_ansible}"
 
 # Check if running on bastion host before executing cluster operations
 # Set to "true" to enforce bastion host check, "false" to allow execution anywhere
