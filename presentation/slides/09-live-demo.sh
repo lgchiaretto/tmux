@@ -19,6 +19,7 @@ echo -e "    │                                                                
 echo -e "    │  \033[38;5;142mDemo Scenarios\033[38;5;223m                                                           │"
 echo -e "    │                                                                           │"
 echo -e "    │    \033[38;5;208m1. Basic Tmux Navigation\033[38;5;223m                                               │"
+echo -e "    │    \033[38;5;208m•\033[38;5;223m C-s N to create session                                              │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-t to create windows                                                │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-\\ to split horizontal                                              │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-Arrow to navigate panes                                            │"

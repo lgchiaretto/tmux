@@ -12,7 +12,8 @@ COLOR_HIGHLIGHT="\033[1;32m"  # Green bold
 COLOR_CODE="\033[35m"         # Magenta
 
 SLIDES=(
-    "01-intro.sh"
+    "00-intro.sh"
+    "01-productivity.sh"
     "02-what-is-tmux.sh"
     "03-tmux-basics.sh"
     "04-tmux-config.sh"

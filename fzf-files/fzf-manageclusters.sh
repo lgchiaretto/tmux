@@ -41,7 +41,7 @@ clusters() {
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
         printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore" "$created_at" "$vmwarenetwork" "$infra" "$vmwarenotes"
     else
-        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$infra" "$vmwarenetwork" "$vmwarenotes"
+        printf "%-15s %-8s %-7s %-6s %-10s %-8s %-10s %-12s %-8s %-8s %s\n" "$dir *" "$ocpversion" "$(echo "$clustertype" | tr '[:lower:]' '[:upper:]')" "$sno" "$platform" "$n_worker" "$vmwaredatastore,$vmwaredatastoreodf" "$created_at" "$vmwarenetwork" "$infra" "$vmwarenotes"
     fi
   else
     if [ "$vmwaredatastore" == "$vmwaredatastoreodf" ]; then
@@ -97,8 +97,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
     --border=rounded \
-    -h 40 \
-    -p "63%,50%" \
+    -p "63%,55%" \
     --sort \
     --no-input \
     --multi \
@@ -143,7 +142,6 @@ if [ -n "$selected_action" ]; then
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 \
         -p "58%,50%" \
         --exact \
         --with-nth=1,2 \
