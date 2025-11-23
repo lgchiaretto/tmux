@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TMux OpenShift Cluster Management Configuration Example
+# Tmux OpenShift Cluster Management Configuration Example
 # Copy this file to config.sh and customize the values for your environment
 
 # Base directory where OpenShift clusters are stored
@@ -33,3 +33,17 @@ export CHECK_BASTION_HOST="${CHECK_BASTION_HOST:-false}"
 # FZF border label for all interactive menus
 # This label appears in the border of FZF selection menus
 export FZF_BORDER_LABEL="${FZF_BORDER_LABEL:-chiarettolabs.com.br}"
+
+# OpenShift admin credentials
+# Username for OpenShift cluster login (non-kubeadmin)
+export OCP_USERNAME="${OCP_USERNAME:-chiaretto}"
+# Password for OpenShift admin user (leave empty to prompt at login)
+export OCP_PASSWORD=""
+
+# vSphere credentials (used by Chiaretto Labs scripts)
+# Username for VMware vSphere/govc operations
+export VSPHERE_USERNAME="${VSPHERE_USERNAME:-administrator@chiaretto.local}"
+# Password for vSphere user
+export VSPHERE_PASSWORD="${VSPHERE_PASSWORD:-VMware1!VMware1!}"
+# vSphere vCenter URL
+export GOVC_URL="${GOVC_URL:-https://chiaretto-vcsa01.chiaret.to}"

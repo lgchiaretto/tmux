@@ -132,7 +132,7 @@ if [ -n "$selected_action" ]; then
     elif [ "$infra" == "rhdp" ]; then
         tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u admin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/admin-password) --insecure-skip-tls-verify" C-m
     else
-      selected_user_raw=$(echo -e "chiaretto\nkubeadmin" | fzf-tmux \
+      selected_user_raw=$(echo -e "$OCP_USERNAME\nkubeadmin" | fzf-tmux \
         --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
 │                                                                                                                   │
 │  [Enter]     Select user to connect to cluster                                                                    │
@@ -156,8 +156,12 @@ if [ -n "$selected_action" ]; then
           exit 0
       elif [ "$selected_user" == "kubeadmin" ]; then
           tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u kubeadmin -p \$(cat $CLUSTERS_BASE_PATH/$clustername/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
-      elif [ "$selected_user" == "chiaretto" ]; then
-          tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u chiaretto -p \"JJ4Q0QihDH4*4O>\" --insecure-skip-tls-verify" C-m
+      else
+        if [ -z "$OCP_PASSWORD" ]; then
+            tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u $OCP_USERNAME --insecure-skip-tls-verify" C-m
+        else
+            tmux send-keys "oc login https://api.$clustername.$basedomain:6443 -u $OCP_USERNAME -p \"$OCP_PASSWORD\" --insecure-skip-tls-verify" C-m
+        fi
       fi
     fi
   else

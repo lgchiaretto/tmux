@@ -54,11 +54,18 @@ cp -r tmux-sessions ~/tmux-sessions/
 
 ### Configuration
 
-After installation, you can customize the base paths used by the OpenShift cluster management tools.
+After installation, you can customize the base paths, credentials, and settings used by the OpenShift cluster management tools.
 
 **During Installation:**
 
-The `configure-local.sh` script will prompt you to customize the cluster path and domain during installation. If you skip this step, the defaults will be used.
+The `configure-local.sh` script will prompt you interactively to customize:
+- Cluster base path
+- KVM variables directory
+- FZF border label
+- vSphere credentials (username and password)
+- OpenShift admin credentials (username and password)
+
+If you skip any prompt, the defaults from `config.sh.example` will be used.
 
 **After Installation:**
 
@@ -70,17 +77,40 @@ vim ~/.tmux/config.sh
 
 **Available Configuration Options:**
 
+**Paths:**
 - `CLUSTERS_BASE_PATH`: Base directory where OpenShift clusters are stored (default: `/vms/clusters`)
 - `OCP_CACHE_DIR`: Cache directory for OCP clients and other cached data (default: `${CLUSTERS_BASE_PATH}/.cache`)
-- `CLUSTER_VARIABLES_DIR`: Directory for cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
-- `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional)
-- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for cluster management
+- `CLUSTER_VARIABLES_DIR`: Directory for vSphere cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
+- `KVM_VARIABLES_DIR`: Directory for KVM cluster template files in YAML format (default: `${CLUSTERS_BASE_PATH}/variables-files-kvm`)
+- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for KVM cluster management
+
+**Remote Synchronization:**
+- `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional, format: `user@host`)
+
+**VMware/vSphere Credentials:**
+- `VSPHERE_USERNAME`: Username for VMware vSphere/govc operations (default: `administrator@vsphere.local`)
+- `VSPHERE_PASSWORD`: Password for vSphere user
+- `GOVC_URL`: vSphere vCenter URL (default: `https://vcsa.example.com`)
+
+**OpenShift Credentials:**
+- `OCP_USERNAME`: Username for OpenShift cluster login (non-kubeadmin) (default: `admin`)
+- `OCP_PASSWORD`: Password for OpenShift admin user
+
+**UI Customization:**
+- `FZF_BORDER_LABEL`: Border label for all FZF interactive menus (default: `chiarettolabs.com.br`)
+- `CHECK_BASTION_HOST`: Enforce bastion host check before cluster operations (default: `false`)
 
 **Example:**
 
 ```bash
 export CLUSTERS_BASE_PATH="/data/openshift/clusters"
+export VSPHERE_USERNAME="admin@myvcenter.local"
+export VSPHERE_PASSWORD="MySecurePassword123"
+export OCP_USERNAME="myadmin"
+export FZF_BORDER_LABEL="mylab.example.com"
 ```
+
+**Security Note:** The `config.sh` file contains sensitive credentials and is excluded from git via `.gitignore`. Keep this file secure with appropriate permissions (600).
 
 The configuration is automatically loaded by:
 - `bash_functions` when you start a new shell
@@ -252,10 +282,12 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 
 ### Cluster Directory Structure
 
-Clusters are stored in `/vms/clusters/$CLUSTERNAME/`:
+Clusters are stored in `${CLUSTERS_BASE_PATH}/$CLUSTERNAME/`:
 - `auth/kubeconfig` - Cluster authentication
 - `$CLUSTERNAME.json` - Cluster metadata
 - `started` - Empty marker file (VMs are running)
+
+The base path is configurable via the `CLUSTERS_BASE_PATH` variable in `~/.tmux/config.sh`.
 
 ## Additional Features
 

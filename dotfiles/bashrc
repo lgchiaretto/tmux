@@ -15,10 +15,19 @@ export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.local/bin/
 #export LIBVIRT_DEFAULT_URI=qemu:///system
 export GO111MODULE=off
-export GOVC_USERNAME='administrator@chiaretto.local'
-export GOVC_PASSWORD='VMware1!VMware1!' #dummy-password
-export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
-export GOVC_INSECURE=true
+
+# Load TMux/OCP configuration if available
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+elif [ -f "$HOME/git/tmux/config.sh" ]; then
+    source "$HOME/git/tmux/config.sh"
+fi
+
+# vSphere/govc credentials (use config.sh values or defaults)
+#export GOVC_USERNAME="${VSPHERE_USERNAME:-administrator@vsphere.local}"
+#export GOVC_PASSWORD="${VSPHERE_PASSWORD:-your-password-here}"
+#export GOVC_URL="${GOVC_URL:-https://vcsa.example.com}"
+#export GOVC_INSECURE=true
 
 # -------------------- Shell Options --------------------
 shopt -s checkwinsize

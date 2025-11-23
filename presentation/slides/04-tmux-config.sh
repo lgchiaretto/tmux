@@ -41,7 +41,7 @@ echo -e "    │  \033[38;5;142m│\033[38;5;223m  Dynamic Status Bar (ocp-clust
 echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
 echo -e "    │                                                                           │"
 echo -e "    │    Auto-detects cluster context:                                          │"
-echo -e "    │      1. Check /vms/clusters/$SESSION_NAME/auth/kubeconfig                              │"
+echo -e "    │      1. Check \$CLUSTERS_BASE_PATH/\$SESSION_NAME/auth/kubeconfig                         │"
 echo -e "    │      2. Fallback to 'oc whoami' for active context                        │"
 echo -e "    │                                                                           │"
 echo -e "    │    Display format:                                                        │"

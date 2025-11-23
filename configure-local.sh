@@ -66,35 +66,67 @@ log "Setting up configuration file"
 if [ ! -f "$TARGET_HOME/.tmux/config.sh" ]; then
     cp "$TMUX_DIR/config.sh.example" "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
         
-    if [ -t 0 ]; then
-        echo ""
-        echo "================================================"
-        echo "  Configuration Setup"
-        echo "================================================"
-        echo ""
-        echo "The default cluster path is: /vms/clusters"
-        read -p "Do you want to customize it? (y/N): " customize
-            
-        if [[ "$customize" =~ ^[Yy]$ ]]; then
-            read -p "Enter clusters base path: " clusters_path
-            if [ -n "$clusters_path" ]; then
-                sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
-                log "Set CLUSTERS_BASE_PATH to: $clusters_path"
-            fi
-
-            read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
-            if [ -n "$kvm_vars_dir" ]; then
-                sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
-                log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
-            fi
-
-            read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
-            if [ -n "$fzf_label" ]; then
-                sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
-                log "Set FZF_BORDER_LABEL to: $fzf_label"
-            fi
-        fi
-    fi
+#    if [ -t 0 ]; then
+#        echo ""
+#        echo "================================================"
+#        echo "  Configuration Setup"
+#        echo "================================================"
+#        echo ""
+#        echo "The default cluster path is: /vms/clusters"
+#        read -p "Do you want to customize it? (y/N): " customize
+#            
+#        if [[ "$customize" =~ ^[Yy]$ ]]; then
+#            read -p "Enter clusters base path: " clusters_path
+#            if [ -n "$clusters_path" ]; then
+#                sed -i "s|export CLUSTERS_BASE_PATH=.*|export CLUSTERS_BASE_PATH=\"${clusters_path}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set CLUSTERS_BASE_PATH to: $clusters_path"
+#            fi
+#
+#            read -p "Enter KVM variables directory path (press Enter for default): " kvm_vars_dir
+#            if [ -n "$kvm_vars_dir" ]; then
+#                sed -i "s|export KVM_VARIABLES_DIR=.*|export KVM_VARIABLES_DIR=\"${kvm_vars_dir}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set KVM_VARIABLES_DIR to: $kvm_vars_dir"
+#            fi
+#
+#            read -p "Enter the border label for FZF menus (press Enter for 'chiarettolabs.com.br'): " fzf_label
+#            if [ -n "$fzf_label" ]; then
+#                sed -i "s|export FZF_BORDER_LABEL=.*|export FZF_BORDER_LABEL=\"${fzf_label}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set FZF_BORDER_LABEL to: $fzf_label"
+#            fi
+#
+#            read -p "Enter vSphere username (press Enter for default 'administrator@vsphere.local'): " vsphere_user
+#            if [ -n "$vsphere_user" ]; then
+#                sed -i "s|export VSPHERE_USERNAME=.*|export VSPHERE_USERNAME=\"${vsphere_user}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set VSPHERE_USERNAME to: $vsphere_user"
+#            fi
+#
+#            read -s -p "Enter vSphere password (press Enter to skip): " vsphere_pass
+#            echo
+#            if [ -n "$vsphere_pass" ]; then
+#                sed -i "s|export VSPHERE_PASSWORD=.*|export VSPHERE_PASSWORD=\"${vsphere_pass}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set VSPHERE_PASSWORD"
+#            fi
+#
+#            read -p "Enter vSphere vCenter URL (press Enter for default 'https://vcsa.example.com'): " govc_url
+#            if [ -n "$govc_url" ]; then
+#                sed -i "s|export GOVC_URL=.*|export GOVC_URL=\"${govc_url}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set GOVC_URL to: $govc_url"
+#            fi
+#
+#            read -p "Enter OpenShift admin username (press Enter for default 'admin'): " ocp_user
+#            if [ -n "$ocp_user" ]; then
+#                sed -i "s|export OCP_USERNAME=.*|export OCP_USERNAME=\"${ocp_user}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set OCP_USERNAME to: $ocp_user"
+#            fi
+#
+#            read -s -p "Enter OpenShift admin password (press Enter to skip): " ocp_pass
+#            echo
+#            if [ -n "$ocp_pass" ]; then
+#                sed -i "s|export OCP_PASSWORD=.*|export OCP_PASSWORD=\"${ocp_pass}\"|" "$TARGET_HOME/.tmux/config.sh"
+#                log "Set OCP_PASSWORD"
+#            fi
+#        fi
+#    fi
     chown $TARGET_USER:$TARGET_GROUP "$TARGET_HOME/.tmux/config.sh" > /dev/null 2>&1
 else
     log "Configuration file already exists, skipping"
