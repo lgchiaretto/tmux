@@ -40,6 +40,10 @@ export OCP_USERNAME="${OCP_USERNAME:-chiaretto}"
 # Password for OpenShift admin user (leave empty to prompt at login)
 export OCP_PASSWORD=""
 
+# Browser to use for opening URLs (e.g., OpenShift web console)
+# Available options: firefox, google-chrome, chromium, etc.
+export BROWSER="${BROWSER:-firefox}"
+
 # vSphere credentials (used by Chiaretto Labs scripts)
 # Username for VMware vSphere/govc operations
 export VSPHERE_USERNAME="${VSPHERE_USERNAME:-administrator@chiaretto.local}"

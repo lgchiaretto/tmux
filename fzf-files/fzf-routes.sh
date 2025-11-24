@@ -41,12 +41,12 @@ chosen=$(echo "$content" | fzf-tmux \
         tmux send-keys "oc describe route -n {1} {2}" C-m;
     )+abort' \
     --bind 'ctrl-o:execute-silent(
-         echo {3} | xargs google-chrome &>/dev/null &
+         echo {3} | xargs $BROWSER &>/dev/null &
     )+abort' \
     --expect=enter \
     --color=fg:#d4be98,bg:#1d2021,hl:#d8a657 \
     --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
-  google-chrome "https://$(echo "$chosen" | tail -n1 | awk '{print $3}')" &>/dev/null &
+  $BROWSER "https://$(echo "$chosen" | tail -n1 | awk '{print $3}')" &>/dev/null &
 fi

@@ -15,10 +15,10 @@ selected_lifecycle=$(echo -e "OpenShift Lifecycle\nOperators Lifecycle" | fzf-tm
 if [ -n "$selected_lifecycle" ]; then
   case "$selected_lifecycle" in
     "OpenShift Lifecycle")
-      google-chrome https://access.redhat.com/support/policy/updates/openshift &>/dev/null &
+      $BROWSER https://access.redhat.com/support/policy/updates/openshift &>/dev/null &
       ;;
     "Operators Lifecycle")
-      google-chrome https://access.redhat.com/support/policy/updates/openshift_operators &>/dev/null &
+      $BROWSER https://access.redhat.com/support/policy/updates/openshift_operators &>/dev/null &
       ;;
   esac
 fi

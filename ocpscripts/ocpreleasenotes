@@ -6,5 +6,5 @@ fi
 
 URL="https://docs.redhat.com/en/documentation/openshift_container_platform/$(cut -d'.' -f1-2 <<< $1)/html-single/release_notes/index#ocp-$(echo $1 | sed 's/\./-/g')_release-notes"
 
-google-chrome "$URL" &>/dev/null &
+$BROWSER "$URL" &>/dev/null &
 disown

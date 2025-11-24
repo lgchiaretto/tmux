@@ -31,7 +31,7 @@ chosen=$(echo "$content" | fzf-tmux \
   -p "58%,50%" \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
-  --bind 'ctrl-o:execute-silent(google-chrome {} &>/dev/null &)+abort' \
+  --bind 'ctrl-o:execute-silent($BROWSER {} &>/dev/null &)+abort' \
   --bind 'tab:execute-silent(
         tmux send-keys {};
     )+abort' \
@@ -40,5 +40,5 @@ chosen=$(echo "$content" | fzf-tmux \
   --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
 )
 if [ -n "$chosen" ]; then
-    google-chrome "$(echo "$chosen" | tail -n1)" &>/dev/null &
+    $BROWSER "$(echo "$chosen" | tail -n1)" &>/dev/null &
 fi
