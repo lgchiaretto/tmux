@@ -4,49 +4,39 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] - $1"
 }
 
-# Function to update user dotfiles
-update_user_dotfiles() {
-    local target_user="$1"
-    local target_home="$2"
-    local use_sudo="$3"
+# Function to copy dotfiles to a user home directory
+copy_dotfiles_to_user() {
+    local target_home="$1"
+    local target_user="$2"
     
     log "Updating configuration for user: $target_user"
     
-    local cmd_prefix=""
-    if [ "$use_sudo" = "true" ]; then
-        cmd_prefix="sudo -u $target_user"
-    else
-        cmd_prefix="sudo"
+    # Copy dotfiles from /etc/skel (which is our source of truth)
+    sudo cp /etc/skel/.bashrc "$target_home/.bashrc" > /dev/null 2>&1
+    sudo cp /etc/skel/.tmux.conf "$target_home/.tmux.conf" > /dev/null 2>&1
+    sudo cp /etc/skel/.vimrc "$target_home/.vimrc" > /dev/null 2>&1
+    sudo cp /etc/skel/.dircolors "$target_home/.dircolors" > /dev/null 2>&1
+    sudo cp /etc/skel/.inputrc "$target_home/.inputrc" > /dev/null 2>&1
+    sudo cp /etc/skel/.bash_functions "$target_home/.bash_functions" > /dev/null 2>&1
+    sudo cp /etc/skel/.ansible.cfg "$target_home/.ansible.cfg" > /dev/null 2>&1
+    
+    # Copy vim-plug
+    sudo mkdir -p "$target_home/.vim/autoload" > /dev/null 2>&1
+    sudo cp /etc/skel/.vim/autoload/plug.vim "$target_home/.vim/autoload/plug.vim" > /dev/null 2>&1
+    
+    # Create .tmux directory and copy config.sh if it doesn't exist
+    sudo mkdir -p "$target_home/.tmux" > /dev/null 2>&1
+    if [ ! -f "$target_home/.tmux/config.sh" ]; then
+        sudo cp /etc/skel/.tmux/config.sh "$target_home/.tmux/config.sh" > /dev/null 2>&1
+        sudo chmod 600 "$target_home/.tmux/config.sh" > /dev/null 2>&1
+        log "Created config at $target_home/.tmux/config.sh"
     fi
     
-    $cmd_prefix cp $TMUX_DIR/dotfiles/bashrc "$target_home/.bashrc" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/tmux.conf "$target_home/.tmux.conf" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/vimrc "$target_home/.vimrc" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/dircolors "$target_home/.dircolors" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/inputrc "$target_home/.inputrc" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/bash_functions "$target_home/.bash_functions" > /dev/null 2>&1
-    $cmd_prefix cp $TMUX_DIR/dotfiles/ansible.cfg "$target_home/.ansible.cfg" > /dev/null 2>&1
-    
-    # Create .tmux directory and copy config.sh
-    $cmd_prefix mkdir -p "$target_home/.tmux" > /dev/null 2>&1
-    if [ -f "$TMUX_DIR/config.sh.example" ]; then
-        $cmd_prefix cp "$TMUX_DIR/config.sh.example" "$target_home/.tmux/config.sh" > /dev/null 2>&1
-        $cmd_prefix chmod 600 "$target_home/.tmux/config.sh" > /dev/null 2>&1
-        log "Created local config at $target_home/.tmux/config.sh"
-    fi
-    
-    # Install vim-plug if not already installed
-    if [ ! -f "$target_home/.vim/autoload/plug.vim" ]; then
-        log "Installing vim-plug for user: $target_user"
-        $cmd_prefix mkdir -p "$target_home/.vim/autoload" > /dev/null 2>&1
-        $cmd_prefix cp $TMUX_DIR/dotfiles/plug.vim "$target_home/.vim/autoload/plug.vim" > /dev/null 2>&1
-        
-        if [ "$use_sudo" = "true" ]; then
-            sudo -u "$target_user" vim -E -s -u "$target_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
-        else
-            sudo vim -E -s -u "$target_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
-        fi
-    fi
+    # Fix ownership
+    sudo chown -R "$target_user:$target_user" "$target_home/.bashrc" "$target_home/.tmux.conf" \
+        "$target_home/.vimrc" "$target_home/.dircolors" "$target_home/.inputrc" \
+        "$target_home/.bash_functions" "$target_home/.ansible.cfg" \
+        "$target_home/.vim" "$target_home/.tmux" > /dev/null 2>&1
 }
 
 show_help() {
@@ -207,19 +197,17 @@ sudo cp "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh > /dev/null 2>&1
 sudo chmod 600 /etc/skel/.tmux/config.sh > /dev/null 2>&1
 log "Created config template for new users at /etc/skel/.tmux/config.sh"
 
-# Get current user (the one who invoked sudo, or current user if not using sudo)
 CURRENT_USER="${SUDO_USER:-$USER}"
 CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
 
 # Always update current user
-if [ "$CURRENT_USER" = "root" ]; then
-    update_user_dotfiles "root" "/root" "false"
-else
-    update_user_dotfiles "$CURRENT_USER" "$CURRENT_USER_HOME" "true"
-fi
+log "Updating current user: $CURRENT_USER"
+copy_dotfiles_to_user "$CURRENT_USER_HOME" "$CURRENT_USER"
 
 if [ "$UPDATE_USERS" = true ]; then
     log "Updating other existing users (--update-users flag enabled)"
+    
+    # Update all users in /home
     for user_home in /home/*; do
         if [ -d "$user_home" ]; then
             username=$(basename "$user_home")
@@ -227,14 +215,13 @@ if [ "$UPDATE_USERS" = true ]; then
             if [ "$username" = "$CURRENT_USER" ]; then
                 continue
             fi
-            
-            update_user_dotfiles "$username" "$user_home" "true"
+            copy_dotfiles_to_user "$user_home" "$username"
         fi
     done
 
     # Also update root user if current user is not root
     if [ -d "/root" ] && [ "$CURRENT_USER" != "root" ]; then
-        update_user_dotfiles "root" "/root" "false"
+        copy_dotfiles_to_user "/root" "root"
     fi
 else
     log "Skipping other user updates (use --update-users to update all other existing users)"
