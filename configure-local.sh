@@ -4,6 +4,43 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] - $1"
 }
 
+# Function to update user dotfiles
+update_user_dotfiles() {
+    local target_user="$1"
+    local target_home="$2"
+    local use_sudo="$3"
+    
+    log "Updating configuration for user: $target_user"
+    
+    local cmd_prefix=""
+    if [ "$use_sudo" = "true" ]; then
+        cmd_prefix="sudo -u $target_user"
+    else
+        cmd_prefix="sudo"
+    fi
+    
+    $cmd_prefix cp $TMUX_DIR/dotfiles/bashrc "$target_home/.bashrc" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/tmux.conf "$target_home/.tmux.conf" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/vimrc "$target_home/.vimrc" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/dircolors "$target_home/.dircolors" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/inputrc "$target_home/.inputrc" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/bash_functions "$target_home/.bash_functions" > /dev/null 2>&1
+    $cmd_prefix cp $TMUX_DIR/dotfiles/ansible.cfg "$target_home/.ansible.cfg" > /dev/null 2>&1
+    
+    # Install vim-plug if not already installed
+    if [ ! -f "$target_home/.vim/autoload/plug.vim" ]; then
+        log "Installing vim-plug for user: $target_user"
+        $cmd_prefix mkdir -p "$target_home/.vim/autoload" > /dev/null 2>&1
+        $cmd_prefix cp $TMUX_DIR/dotfiles/plug.vim "$target_home/.vim/autoload/plug.vim" > /dev/null 2>&1
+        
+        if [ "$use_sudo" = "true" ]; then
+            sudo -u "$target_user" vim -E -s -u "$target_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
+        else
+            sudo vim -E -s -u "$target_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
+        fi
+    fi
+}
+
 show_help() {
     cat << 'EOF'
 Tmux OpenShift Tools - Global Configuration Installer
@@ -78,29 +115,6 @@ EXAMPLES:
     
     Full installation updating everything:
         ./configure-local.sh --update-users --download-tmux --download-oc
-
-NEW USER CREATION:
-    
-    After installation, new users automatically get the correct configuration:
-        sudo useradd -m newuser
-    
-    The new user will have all dotfiles and access to global configuration.
-
-CONFIGURATION:
-    
-    Global configuration (all users):
-        sudo vim /etc/tmux-ocp/config.sh
-    
-    User-specific override (optional):
-        cp /etc/tmux-ocp/config.sh $HOME/.tmux/config.sh
-        vim $HOME/.tmux/config.sh
-
-NOTES:
-    
-    • Existing user configurations are preserved by default
-    • Use --update-users only when you want to update existing users
-    • Global configuration is shared and readable by all users
-    • Individual users can still override settings in $HOME/.tmux/config.sh
 
 EOF
     exit 0
@@ -185,49 +199,37 @@ log "Installing vim-plug for new users"
 sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
 sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
 
+# Get current user (the one who invoked sudo, or current user if not using sudo)
+CURRENT_USER="${SUDO_USER:-$USER}"
+CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
+
+# Always update current user
+if [ "$CURRENT_USER" = "root" ]; then
+    update_user_dotfiles "root" "/root" "false"
+else
+    update_user_dotfiles "$CURRENT_USER" "$CURRENT_USER_HOME" "true"
+fi
+
 if [ "$UPDATE_USERS" = true ]; then
-    log "Updating existing user home directories (--update-users flag enabled)"
+    log "Updating other existing users (--update-users flag enabled)"
     for user_home in /home/*; do
         if [ -d "$user_home" ]; then
             username=$(basename "$user_home")
-            log "Updating configuration for user: $username"
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/bashrc "$user_home/.bashrc" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/tmux.conf "$user_home/.tmux.conf" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/vimrc "$user_home/.vimrc" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/dircolors "$user_home/.dircolors" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/inputrc "$user_home/.inputrc" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/bash_functions "$user_home/.bash_functions" > /dev/null 2>&1
-            sudo -u "$username" cp $TMUX_DIR/dotfiles/ansible.cfg "$user_home/.ansible.cfg" > /dev/null 2>&1
-            
-            # Install vim-plug for existing users
-            if [ ! -f "$user_home/.vim/autoload/plug.vim" ]; then
-                log "Installing vim-plug for user: $username"
-                sudo -u "$username" mkdir -p "$user_home/.vim/autoload" > /dev/null 2>&1
-                sudo -u "$username" cp $TMUX_DIR/dotfiles/plug.vim "$user_home/.vim/autoload/plug.vim" > /dev/null 2>&1
-                sudo -u "$username" vim -E -s -u "$user_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
+            # Skip current user (already updated above)
+            if [ "$username" = "$CURRENT_USER" ]; then
+                continue
             fi
+            
+            update_user_dotfiles "$username" "$user_home" "true"
         fi
     done
 
-    # Also update root user
-    if [ -d "/root" ]; then
-        log "Updating configuration for root user"
-        sudo cp $TMUX_DIR/dotfiles/bashrc /root/.bashrc > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/tmux.conf /root/.tmux.conf > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/vimrc /root/.vimrc > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/dircolors /root/.dircolors > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/inputrc /root/.inputrc > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/bash_functions /root/.bash_functions > /dev/null 2>&1
-        sudo cp $TMUX_DIR/dotfiles/ansible.cfg /root/.ansible.cfg > /dev/null 2>&1
-        
-        if [ ! -f "/root/.vim/autoload/plug.vim" ]; then
-            log "Installing vim-plug for root user"
-            sudo cp $TMUX_DIR/dotfiles/plug.vim /root/.vim/autoload/plug.vim > /dev/null 2>&1
-            sudo vim -E -s -u /root/.vimrc +PlugInstall +qall > /dev/null 2>&1
-        fi
+    # Also update root user if current user is not root
+    if [ -d "/root" ] && [ "$CURRENT_USER" != "root" ]; then
+        update_user_dotfiles "root" "/root" "false"
     fi
 else
-    log "Skipping existing user updates (use --update-users to update existing users)"
+    log "Skipping other user updates (use --update-users to update all other existing users)"
 fi
 
 log "Setting up global configuration file"
