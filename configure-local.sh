@@ -156,10 +156,15 @@ sudo mkdir -p /usr/local/share/tmux-ocp/{fzf-files,tmux-sessions} > /dev/null 2>
 
 log "Installing fzf globally for all users"
 if [ ! -d "/usr/local/share/fzf" ]; then
+    log "Cloning fzf repository"
     sudo git clone https://github.com/junegunn/fzf.git /usr/local/share/fzf > /dev/null 2>&1
-    sudo /usr/local/share/fzf/install --bin > /dev/null 2>&1
+    log "Installing fzf binary and shell integration"
+    cd /usr/local/share/fzf > /dev/null 2>&1
+    sudo ./install --bin --no-update-rc --no-bash --no-zsh --no-fish > /dev/null 2>&1
+    cd - > /dev/null 2>&1
     sudo cp /usr/local/share/fzf/bin/fzf /usr/local/bin/ > /dev/null 2>&1
     sudo chmod +x /usr/local/bin/fzf > /dev/null 2>&1
+    log "fzf installed globally at /usr/local/share/fzf"
 else
     log "fzf already installed globally"
 fi
@@ -188,17 +193,11 @@ if [ "$UPDATE_USERS" = true ]; then
             sudo -u "$username" cp $TMUX_DIR/dotfiles/bash_functions "$user_home/.bash_functions" > /dev/null 2>&1
             sudo -u "$username" cp $TMUX_DIR/dotfiles/ansible.cfg "$user_home/.ansible.cfg" > /dev/null 2>&1
             
-            # Install fzf for existing users
-            if [ ! -d "$user_home/.fzf" ]; then
-                log "Installing fzf for user: $username"
-                sudo -u "$username" git clone https://github.com/junegunn/fzf.git "$user_home/.fzf" > /dev/null 2>&1
-                sudo -u "$username" "$user_home/.fzf/install" --key-bindings --completion --update-rc > /dev/null 2>&1
-            fi
-            
             # Install vim-plug for existing users
             if [ ! -f "$user_home/.vim/autoload/plug.vim" ]; then
                 log "Installing vim-plug for user: $username"
-                sudo -u "$username" cp $TMUX_DIR/dotfiles/plug.vim "$user_home/.vim/autoload/plug.vim"
+                sudo -u "$username" mkdir -p "$user_home/.vim/autoload" > /dev/null 2>&1
+                sudo -u "$username" cp $TMUX_DIR/dotfiles/plug.vim "$user_home/.vim/autoload/plug.vim" > /dev/null 2>&1
                 sudo -u "$username" vim -E -s -u "$user_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
             fi
         fi
@@ -214,12 +213,6 @@ if [ "$UPDATE_USERS" = true ]; then
         sudo cp $TMUX_DIR/dotfiles/inputrc /root/.inputrc > /dev/null 2>&1
         sudo cp $TMUX_DIR/dotfiles/bash_functions /root/.bash_functions > /dev/null 2>&1
         sudo cp $TMUX_DIR/dotfiles/ansible.cfg /root/.ansible.cfg > /dev/null 2>&1
-        
-        if [ ! -d "/root/.fzf" ]; then
-            log "Installing fzf for root user"
-            sudo git clone https://github.com/junegunn/fzf.git /root/.fzf > /dev/null 2>&1
-            sudo /root/.fzf/install --key-bindings --completion --update-rc > /dev/null 2>&1
-        fi
         
         if [ ! -f "/root/.vim/autoload/plug.vim" ]; then
             log "Installing vim-plug for root user"

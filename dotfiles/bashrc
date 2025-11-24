@@ -65,6 +65,13 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # -------------------- FZF Configuration --------------------
+# Load global fzf installation
+if [ -f /usr/local/share/fzf/shell/completion.bash ]; then
+    source /usr/local/share/fzf/shell/completion.bash
+fi
+if [ -f /usr/local/share/fzf/shell/key-bindings.bash ]; then
+    source /usr/local/share/fzf/shell/key-bindings.bash
+fi
 
 # -------------------- Tmux Smart Attach --------------------
 tmux_smart_attach() {
@@ -83,8 +90,6 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 --cycle \
 --exact
 "
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # -------------------- Additional Scripts --------------------
 if [ -f ~/.bash_aliases ]; then
