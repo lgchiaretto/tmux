@@ -68,16 +68,16 @@ REQUIREMENTS:
 EXAMPLES:
     
     Basic installation (recommended for first-time setup):
-        sudo ./configure-local.sh
+        ./configure-local.sh
     
     Install and update all existing users:
-        sudo ./configure-local.sh --update-users
+        ./configure-local.sh --update-users
     
     Install with tmux and oc downloads:
-        sudo ./configure-local.sh --download-tmux --download-oc
+        ./configure-local.sh --download-tmux --download-oc
     
     Full installation updating everything:
-        sudo ./configure-local.sh --update-users --download-tmux --download-oc
+        ./configure-local.sh --update-users --download-tmux --download-oc
 
 NEW USER CREATION:
     
@@ -198,8 +198,7 @@ if [ "$UPDATE_USERS" = true ]; then
             # Install vim-plug for existing users
             if [ ! -f "$user_home/.vim/autoload/plug.vim" ]; then
                 log "Installing vim-plug for user: $username"
-                sudo -u "$username" curl -fLo "$user_home/.vim/autoload/plug.vim" --create-dirs \
-                    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim > /dev/null 2>&1
+                sudo -u "$username" cp $TMUX_DIR/dotfiles/plug.vim "$user_home/.vim/autoload/plug.vim"
                 sudo -u "$username" vim -E -s -u "$user_home/.vimrc" +PlugInstall +qall > /dev/null 2>&1
             fi
         fi
@@ -224,8 +223,7 @@ if [ "$UPDATE_USERS" = true ]; then
         
         if [ ! -f "/root/.vim/autoload/plug.vim" ]; then
             log "Installing vim-plug for root user"
-            sudo curl -fLo /root/.vim/autoload/plug.vim --create-dirs \
-                https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim > /dev/null 2>&1
+            sudo cp $TMUX_DIR/dotfiles/plug.vim /root/.vim/autoload/plug.vim > /dev/null 2>&1
             sudo vim -E -s -u /root/.vimrc +PlugInstall +qall > /dev/null 2>&1
         fi
     fi

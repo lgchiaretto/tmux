@@ -108,7 +108,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --no-input \
     --multi \
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
-    --bind 'C:execute-silent(tmux send-keys ~/.tmux/fzf-ocpversions.sh C-m)+abort' \
+    --bind 'C:execute-silent(tmux send-keys /usr/local/share/tmux-ocp/fzf-files/fzf-ocpversions.sh C-m)+abort' \
     --bind 'd:execute-silent(tmux send-keys "/usr/local/bin/ocpdestroycluster "{1} C-m)+abort' \
     --bind 's:execute-silent(tmux send-keys "/usr/local/bin/ocpstartcluster "{1} C-m)+abort' \
     --bind 'S:execute-silent(tmux send-keys "/usr/local/bin/ocpstopcluster "{1} C-m)+abort' \
@@ -119,7 +119,7 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
     --bind 'f:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1} C-m)+abort' \
-    --bind 't:execute-silent(tmux send-keys "~/.tmux/fzf-tmuxp.sh " {1} C-m)+abort' \
+    --bind 't:execute-silent(tmux send-keys "/usr/local/share/tmux-ocp/fzf-files/fzf-tmuxp.sh " {1} C-m)+abort' \
     --bind 'p:execute-silent(tmux send-keys "cat '$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
     --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
     --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
