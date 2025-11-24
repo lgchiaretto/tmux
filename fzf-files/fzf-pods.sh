@@ -4,9 +4,6 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
-if [ -f "$HOME/git/tmux/config.sh" ]; then
-    source "$HOME/git/tmux/config.sh"
-fi
 
 oc_logs_fzf() {
     local pod="$1"

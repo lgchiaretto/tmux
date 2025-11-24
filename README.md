@@ -37,10 +37,10 @@ sudo ./configure-local.sh
 ```
 
 This will:
-- **Install global configuration** at `/etc/tmux-ocp/config.sh` (shared by all users)
+- **Create user configuration** at `~/.tmux/config.sh` (independent per user)
 - **Install all scripts** to `/usr/local/bin/` (accessible to everyone)
 - **Set up skeleton files** in `/etc/skel/` for new users
-- Install FZF globally and per-user
+- Install FZF globally
 - Download and install tmux binary (if needed)
 - Install OpenShift CLI (oc) if it doesn't exist
 - Install systemd services for cache updates
@@ -81,18 +81,14 @@ All dotfiles and configurations are copied from `/etc/skel/` automatically.
 
 ### Configuration
 
-After installation, **all users share the configuration** at `/etc/tmux-ocp/config.sh`. To customize:
+After installation, **each user has their own independent configuration** at `~/.tmux/config.sh`.
 
-**For all users (requires sudo)**:
+**Edit your configuration**:
 ```bash
-sudo vim /etc/tmux-ocp/config.sh
-```
-
-**For a single user only** (create user override):
-```bash
-cp /etc/tmux-ocp/config.sh $HOME/.tmux/config.sh
 vim $HOME/.tmux/config.sh
 ```
+
+**Note**: Each user's configuration is independent. There is no global shared configuration file.
 
 See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for complete details on the configuration system.
 

@@ -4,9 +4,6 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
-if [ -f "$HOME/git/tmux/config.sh" ]; then
-    source "$HOME/git/tmux/config.sh"
-fi
 
 
 content=$(timeout 2s oc get routes -A -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,URL:.spec.host --no-headers | grep -v '<none>')

@@ -4,9 +4,6 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
-if [ -f "$HOME/git/tmux/config.sh" ]; then
-    source "$HOME/git/tmux/config.sh"
-fi
 
 content=$(tmux capture-pane -J -p -e -S - | \
     sed -r 's/\x1B\[[0-9;]*[mK]//g' | \

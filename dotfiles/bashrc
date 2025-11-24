@@ -16,14 +16,10 @@ export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.local/bin/
 #export LIBVIRT_DEFAULT_URI=qemu:///system
 export GO111MODULE=off
 
-# Load TMux/OCP configuration if available (global first, then user override)
-if [ -f "/etc/tmux-ocp/config.sh" ]; then
-    source "/etc/tmux-ocp/config.sh"
-fi
+# Load TMux/OCP configuration if available
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
-fi
-if [ -f "$HOME/git/tmux/config.sh" ]; then
+elif [ -f "$HOME/git/tmux/config.sh" ]; then
     source "$HOME/git/tmux/config.sh"
 fi
 

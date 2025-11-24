@@ -29,8 +29,9 @@ update_user_dotfiles() {
     
     # Create .tmux directory and copy config.sh
     $cmd_prefix mkdir -p "$target_home/.tmux" > /dev/null 2>&1
-    if [ -f "/etc/tmux-ocp/config.sh" ]; then
-        $cmd_prefix cp /etc/tmux-ocp/config.sh "$target_home/.tmux/config.sh" > /dev/null 2>&1
+    if [ -f "$TMUX_DIR/config.sh.example" ]; then
+        $cmd_prefix cp "$TMUX_DIR/config.sh.example" "$target_home/.tmux/config.sh" > /dev/null 2>&1
+        $cmd_prefix chmod 600 "$target_home/.tmux/config.sh" > /dev/null 2>&1
         log "Created local config at $target_home/.tmux/config.sh"
     fi
     
@@ -78,14 +79,14 @@ WHAT THIS SCRIPT DOES:
     
     Global Installation (always performed):
     ---------------------------------------
-    • Creates /etc/tmux-ocp/ directory for global configuration
-    • Installs config.sh to /etc/tmux-ocp/config.sh (shared by all users)
+    • Creates /etc/tmux-ocp/ directory for global scripts
     • Installs all scripts to /usr/local/bin/ (ocpcreatecluster, fzf-*, etc.)
     • Installs shared resources to /usr/local/share/tmux-ocp/
-    • Sets up /etc/skel/ with dotfiles for NEW users
+    • Sets up /etc/skel/ with dotfiles and config.sh template for NEW users
     • Installs fzf globally
     • Installs Python packages globally (tmuxp, yq, bat)
     • Installs and enables systemd services (update-ocp-cache, updatedb, generate-graph)
+    • Creates ~/.tmux/config.sh for current user
     
     User Updates (only with --update-users):
     ----------------------------------------
@@ -96,7 +97,7 @@ WHAT THIS SCRIPT DOES:
 
 INSTALLATION LOCATIONS:
     
-    /etc/tmux-ocp/config.sh              Global configuration (all users)
+    ~/.tmux/config.sh                    User configuration (independent per user)
     /usr/local/bin/                      Executable scripts (global)
     /usr/local/share/tmux-ocp/           Shared resources (fzf-files, tmux-sessions)
     /etc/skel/                           Template for new users
@@ -156,11 +157,7 @@ done
 
 TMUX_DIR=$(pwd)
 
-log "Configuring global Tmux environment for all users"
-
-# Create global configuration directory
-log "Creating /etc/tmux-ocp directory for global configuration"
-sudo mkdir -p /etc/tmux-ocp > /dev/null 2>&1
+log "Configuring Tmux environment for all users"
 
 # Create directory for global fzf scripts and tmux sessions
 log "Creating /usr/local/share/tmux-ocp directory"
@@ -206,21 +203,11 @@ log "Installing vim-plug for new users"
 sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
 sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
 
-log "Setting up global configuration file"
-if [ ! -f "/etc/tmux-ocp/config.sh" ]; then
-    sudo cp "$TMUX_DIR/config.sh.example" "/etc/tmux-ocp/config.sh" > /dev/null 2>&1
-    sudo chmod 644 /etc/tmux-ocp/config.sh > /dev/null 2>&1
-    log "Created global configuration at /etc/tmux-ocp/config.sh"
-else
-    log "Global configuration file already exists, skipping"
-fi
-
 log "Setting up .tmux/config.sh for new users in /etc/skel"
 sudo mkdir -p /etc/skel/.tmux > /dev/null 2>&1
-if [ -f "/etc/tmux-ocp/config.sh" ]; then
-    sudo cp /etc/tmux-ocp/config.sh /etc/skel/.tmux/config.sh > /dev/null 2>&1
-    log "Created config template for new users at /etc/skel/.tmux/config.sh"
-fi
+sudo cp "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh > /dev/null 2>&1
+sudo chmod 600 /etc/skel/.tmux/config.sh > /dev/null 2>&1
+log "Created config template for new users at /etc/skel/.tmux/config.sh"
 
 # Get current user (the one who invoked sudo, or current user if not using sudo)
 CURRENT_USER="${SUDO_USER:-$USER}"
@@ -335,7 +322,7 @@ echo "========================================================================"
 echo "  Installation Complete!"
 echo "========================================================================"
 echo ""
-echo "Global configuration installed at: /etc/tmux-ocp/config.sh"
+echo "Configuration file: ~/.tmux/config.sh (independent per user)"
 echo "Scripts installed at: /usr/local/bin/"
 echo "Shared resources at: /usr/local/share/tmux-ocp/"
 echo ""
@@ -347,11 +334,11 @@ fi
 echo ""
 echo "NEW USERS:"
 echo "  Create new users with: sudo useradd -m username"
-echo "  They will automatically get the correct configuration"
+echo "  They will automatically get their own ~/.tmux/config.sh"
 echo ""
 echo "CONFIGURATION:"
-echo "  Edit global config (all users): sudo vim /etc/tmux-ocp/config.sh"
-echo "  User-specific override:         vim \$HOME/.tmux/config.sh"
+echo "  Edit your config: vim \$HOME/.tmux/config.sh"
+echo "  Each user has independent configuration"
 echo ""
 echo "DOCUMENTATION:"
 echo "  See GLOBAL-CONFIGURATION.md for complete documentation"
