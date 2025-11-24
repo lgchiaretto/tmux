@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Tmux OpenShift Cluster Management Configuration
+#
+# USER CONFIGURATION:
+# This file should be copied to $HOME/.tmux/config.sh for each user.
+# Each user has their own independent configuration file.
+#
+# CONFIGURATION LOADING ORDER:
+# 1. $HOME/.tmux/config.sh (user configuration - copied from this template during installation)
+# 2. $HOME/git/tmux/config.sh (optional developer override for testing)
+#
+# INSTALLATION:
+# Run configure-local.sh to install this configuration for all users.
+# - New users automatically get this file in ~/.tmux/config.sh
+# - Existing users get this file when using --update-users flag
+#
+# SECURITY:
+# This file contains credentials. Keep it secure:
+#   chmod 600 $HOME/.tmux/config.sh
+
+##############################################################
+#                                                            #
+#                   General Variables                        #
+#                                                            #
+##############################################################
+
+# Base directory where OpenShift clusters and downloads are stored
+# Each cluster should have its own subdirectory under this path
+# create it if it does not exist
+# 
+export CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/labs}"
+
+# Cache directory for OCP clients and other cached data
+export OCP_CACHE_DIR="${OCP_CACHE_DIR:-${CLUSTERS_BASE_PATH}/.cache}"
+
+# FZF border label for all interactive menus
+# This label appears in the border of FZF selection menus
+export FZF_BORDER_LABEL="${FZF_BORDER_LABEL:-chiarettolabs.com.br}"
+
+# OpenShift admin credentials
+# Username for OpenShift cluster login (non-kubeadmin)
+export OCP_USERNAME="${OCP_USERNAME:-chiaretto}"
+
+# Password for OpenShift admin user (leave empty to prompt at login)
+export OCP_PASSWORD=""
+
+# Browser to use for opening URLs (e.g., OpenShift web console)
+# Available options: firefox, google-chrome, chromium, etc.
+export BROWSER="${BROWSER:-firefox}"
+
+##############################################################
+#                                                            #
+#          Change this Only if you are using                 #
+#  https://github.com/lgchiaretto/ocp4_setup_upi_kvm_ansible #
+#                                                            #
+##############################################################
+
+# KVM cluster variables files directory
+# Directory containing JSON variable files for KVM clusters
+export KVM_VARIABLES_DIR="${KVM_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files-kvm}"
+
+# Ansible playbook path for cluster management
+# Used by cluster creation and destruction scripts
+
+export ANSIBLE_PLAYBOOK_KVM_PATH="${ANSIBLE_PLAYBOOK_KVM_PATH:-$HOME/git/ocp4_setup_upi_kvm_ansible}"
+
+##############################################################
+#                                                            #
+#       Variables used only by Chiaretto Labs scripts        #
+#           and you do not need to modify them               #
+#                                                            #
+##############################################################
+
+# Check if running on bastion host before executing cluster operations
+# Set to "true" to enforce bastion host check, "false" to allow execution anywhere
+export CHECK_BASTION_HOST="${CHECK_BASTION_HOST:-false}"
+
+# Remote host for cluster state synchronization (optional)
+export REMOTE_BASTION_HOST="${REMOTE_BASTION_HOST:-lchiaret@bastion.chiarettolabs.com.br}"
+
+# Variables files directory for cluster templates
+export CLUSTER_VARIABLES_DIR="${CLUSTER_VARIABLES_DIR:-${CLUSTERS_BASE_PATH}/variables-files}"
+
+# vSphere credentials
+# Username for VMware vSphere/govc operations
+export VSPHERE_USERNAME="${VSPHERE_USERNAME:-administrator@chiaretto.local}"
+
+# Password for vSphere user
+export VSPHERE_PASSWORD="${VSPHERE_PASSWORD:-Th1sIsASecurePassword84!}"
+
+# vSphere vCenter URL
+export GOVC_URL="${GOVC_URL:-https://chiaretto-vcsa01.chiaret.to}"
+
+##############################################################

@@ -1,14 +1,35 @@
 #!/usr/bin/env bash
 
-# Exit if not running on bastion.chiaret.to
-if [ "$(hostname)" != "bastion.chiaret.to" ]; then
-    echo "This script must be run on bastion.chiaret.to. Exiting."
-    exit 0
+# Load configuration (global first, then user override)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
 fi
+
+cluster_name="$1"
+# -----------------------------------------------------
+
+# Exit if not running on bastion.chiaret.to
+if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
+    if [ "$(hostname)" != "${BASTION_HOSTNAME:-bastion.chiaret.to}" ]; then
+        echo "This script must be run on ${BASTION_HOSTNAME:-bastion.chiaret.to}. Exiting."
+        exit 0
+    fi
+fi
+
+config_base_path="$CLUSTERS_BASE_PATH/$cluster_name/$cluster_name"
+config_file=""
+
+if [[ -f "${config_base_path}.json" ]]; then
+    config_file="${config_base_path}.json"
+elif [[ -f "${config_base_path}.yaml" ]]; then
+    config_file="${config_base_path}.yaml"
+fi
+# -----------------------------------------------------
 
 temp_file=$(mktemp)
 
-tmux new-window -n "destroy: $1" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$1\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
+tmux new-window -n "destroy: $cluster_name" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$cluster_name\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
 
 while [ ! -s "$temp_file" ]; do
   sleep 1
@@ -21,18 +42,24 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   exit 0
 fi
 
+## MUDANÇA: Seção comentada atualizada para usar 'yq' e a variável '$config_file'
 #clear
-#read -p "Do you also want to remove DNS and certs for cluster \"$1\"? (y/N): " confirm2
+#read -p "Do you also want to remove DNS and certs for cluster \"$cluster_name\"? (y/N): " confirm2
 #if [[ "$confirm2" == "y" || "$confirm2" == "Y" ]]; then
-#  jq '.deleteiffailed = "true"' /vms/clusters/$1/$1.json > /vms/clusters/$1/$1.json.tmp && mv /vms/clusters/$1/$1.json.tmp /vms/clusters/$1/$1.json
+#  # 'yq -i' edita o arquivo no local (in-place), muito mais limpo que criar .tmp
+#  yq -i '.deleteiffailed = "true"' "$config_file"
 #else
-#  jq '.deleteiffailed = "false"' /vms/clusters/$1/$1.json > /vms/clusters/$1/$1.json.tmp && mv /vms/clusters/$1/$1.json.tmp /vms/clusters/$1/$1.json
+#  yq -i '.deleteiffailed = "false"' "$config_file"
 #fi
+# -----------------------------------------------------
 
-infra=$(jq -r '.infra' /vms/clusters/$1/$1.json)
+
+infra=$(yq -r '.infra' "$config_file" || true)
 
 if [[ "$infra" == "vsphere" ]]; then
-    tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $1 & 2>&1" C-m
+    tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $cluster_name & 2>&1" C-m
 elif [[ "$infra" == "kvm" ]]; then
-  tmux send-keys "ansible-playbook  -e@/vms/clusters/$1/$1.json /home/lchiaret/git/ocp4_setup_upi_kvm_ansible/destroy-cluster.yml & 2>&1" C-m
+    # Create new tmux session for KVM cluster destruction
+    session_name="destroy-kvm-${cluster_name}"
+    tmux has-session -t "$session_name" 2>/dev/null && tmux kill-session -t "$session_name"; tmux new-session -d -s "$session_name"; tmux switch-client -t "$session_name"; tmux send-keys -t "$session_name" "ansible-playbook -e@$config_file $ANSIBLE_PLAYBOOK_KVM_PATH/destroy-cluster.yml" C-m
 fi

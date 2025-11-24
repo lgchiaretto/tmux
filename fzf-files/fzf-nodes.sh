@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
 nodes=$(timeout 2s oc get nodes -o "custom-columns=NOME:.metadata.name,STATUS:.status.conditions[?(@.type=='Ready')].status" --no-headers)
 
 if [ -z "$nodes" -a $? -eq 0 ]; then
@@ -58,20 +63,22 @@ colored_nodes=$(echo "$nodes" | awk '{
 
 selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
-        --header=$'----------------------------------------------------------------- Help -----------------------------------------------------------------
-[Enter]     Print node name
-[Tab]       Select node
-[Ctrl-a]    Select all nodes
-[Ctrl-d]    Run "oc describe <node>" in new tmux window
-[Ctrl-e]    Run "oc edit <node>" in new tmux window
-[Ctrl-s]    SSH to node in new tmux window
-[Esc]       Exit
-----------------------------------------------------------------------------------------------------------------------------------------\n\n' \
+        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
+│                                                                                                                   │
+│  [Enter]     Print node name                                                                                      │
+│  [Tab]       Select node                                                                                          │
+│  [Ctrl-a]    Select all nodes                                                                                     │
+│  [Ctrl-d]    Run "oc describe <node>" in new tmux window                                                          │
+│  [Ctrl-e]    Run "oc edit <node>" in new tmux window                                                              │
+│  [Ctrl-s]    SSH to node in new tmux window                                                                       │
+│  [Esc]       Exit                                                                                                 │
+│                                                                                                                   │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
         --layout=reverse \
-        --border-label=" chiarettolabs.com.br " \
+        --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 \
-        -p "100%,50%" \
+        -p "58%,50%" \
         --exact \
         --with-nth=1,2 \
         --ansi \

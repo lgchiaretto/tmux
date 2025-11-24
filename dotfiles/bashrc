@@ -15,10 +15,19 @@ export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.local/bin/
 #export LIBVIRT_DEFAULT_URI=qemu:///system
 export GO111MODULE=off
-export GOVC_USERNAME='administrator@chiaretto.local'
-export GOVC_PASSWORD='VMware1!VMware1!' #dummy-password
-export GOVC_URL=https://chiaretto-vcsa01.chiaret.to
-export GOVC_INSECURE=true
+
+# Load TMux/OCP configuration if available
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+elif [ -f "$HOME/git/tmux/config.sh" ]; then
+    source "$HOME/git/tmux/config.sh"
+fi
+
+# vSphere/govc credentials (use config.sh values or defaults)
+#export GOVC_USERNAME="${VSPHERE_USERNAME:-administrator@vsphere.local}"
+#export GOVC_PASSWORD="${VSPHERE_PASSWORD:-your-password-here}"
+#export GOVC_URL="${GOVC_URL:-https://vcsa.example.com}"
+#export GOVC_INSECURE=true
 
 # -------------------- Shell Options --------------------
 shopt -s checkwinsize
@@ -52,6 +61,13 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # -------------------- FZF Configuration --------------------
+# Load global fzf installation
+if [ -f /usr/local/share/fzf/shell/completion.bash ]; then
+    source /usr/local/share/fzf/shell/completion.bash
+fi
+if [ -f /usr/local/share/fzf/shell/key-bindings.bash ]; then
+    source /usr/local/share/fzf/shell/key-bindings.bash
+fi
 
 # -------------------- Tmux Smart Attach --------------------
 tmux_smart_attach() {
@@ -70,8 +86,6 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 --cycle \
 --exact
 "
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # -------------------- Additional Scripts --------------------
 if [ -f ~/.bash_aliases ]; then
@@ -92,5 +106,12 @@ fi
 umask 022
 eval $(dircolors -b $HOME/.dircolors)
 bind '"\e[A": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
+
+# -------------------- First Login Setup --------------------
+# Auto-install vim plugins on first login
+if [ -f "$HOME/.vim/autoload/plug.vim" ] && [ ! -f "$HOME/.vim/.plugins_installed" ]; then
+    vim -E -s -u "$HOME/.vimrc" +PlugInstall +qall > /dev/null 2>&1
+    touch "$HOME/.vim/.plugins_installed" > /dev/null 2>&1
+fi
 
 

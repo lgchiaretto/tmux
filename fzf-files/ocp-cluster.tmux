@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# Load configuration (global first, then user override)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Set default if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+
 CLUSTER=$(tmux display-message -p '#S')
-KUBECONFIG_PATH="/vms/clusters/${CLUSTER}/auth/kubeconfig"
+KUBECONFIG_PATH="$CLUSTERS_BASE_PATH/${CLUSTER}/auth/kubeconfig"
 
 if [[ -f "$KUBECONFIG_PATH" ]]; then
     OPENSHIFT_VERSION=$(KUBECONFIG=$KUBECONFIG_PATH oc version | grep Server | awk -F' ' '{print $3}')

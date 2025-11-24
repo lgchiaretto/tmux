@@ -12,13 +12,14 @@ COLOR_HIGHLIGHT="\033[1;32m"  # Green bold
 COLOR_CODE="\033[35m"         # Magenta
 
 SLIDES=(
-    "01-intro.sh"
+    "00-intro.sh"
+    "01-productivity.sh"
     "02-what-is-tmux.sh"
     "03-tmux-basics.sh"
     "04-tmux-config.sh"
     "05-project-overview.sh"
-    "06-fzf-integration.sh"
-    "07-bash-customization.sh"
+    "06-bash-customization.sh"
+    "07-fzf-integration.sh"
     "08-resource-browsers.sh"
     "09-live-demo.sh"
     "10-conclusion.sh"

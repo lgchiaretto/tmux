@@ -2,15 +2,18 @@
 
 This repository contains a custom tmux configuration integrated with FZF interactive menus and OpenShift cluster management tools. It provides a complete control plane for Red Hat OpenShift administrators with shell configuration, interactive resource browsers, cluster lifecycle automation, and real-time status monitoring.
 
+**🌍 GLOBAL CONFIGURATION**: This project is designed to provide a unified experience for **all users** on a system. All configurations, scripts, and tools are shared globally. See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for details.
+
 ## Table of Contents
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Executing](#executing)
+- [Executing tmux](#executing)
 - [Key Shortcuts](#key-shortcuts)
 - [OpenShift Integration](#openshift-integration)
 - [FZF Interactive Menus](#fzf-interactive-menus)
 - [Additional Features](#additional-features)
+- [Global Configuration](#global-configuration)
 
 ---
 
@@ -23,40 +26,111 @@ This repository contains a custom tmux configuration integrated with FZF interac
 - **Git**
 - **Python 3** with tmuxp package (`pip3 install tmuxp`)
 - **bat** for syntax highlighting (optional)
-- **VMware govc** for VM operations (optional)
+- **VMware govc** for VM operations on Chiaretto Labs (optional)
 
 ## Installation
 
-Clone this repository and execute the `configure-local.sh` script to set up the complete environment:
+Clone this repository and execute the `configure-local.sh` script to set up the complete environment **globally for all users**:
 
 ```bash
-./configure-local.sh
+sudo ./configure-local.sh
 ```
 
 This will:
-- Install FZF and its dependencies
-- Download and install tmux binary
-- Install OpenShift CLI (oc)
-- Copy dotfiles to your home directory (~/)
-- Install FZF scripts to `~/.tmux/`
-- Copy tmux session templates to `~/tmux-sessions/`
+- **Create user configuration** at `~/.tmux/config.sh` (independent per user)
+- **Install all scripts** to `/usr/local/bin/` (accessible to everyone)
+- **Set up skeleton files** in `/etc/skel/` for new users
+- Install FZF globally
+- Download and install tmux binary (if needed)
+- Install OpenShift CLI (oc) if it doesn't exist
+- Install systemd services for cache updates
 - Configure bash with Gruvbox color scheme and OpenShift helpers
+- **NOTE**: Existing users are NOT updated by default
 
-Or manually copy configuration files:
+### Updating Existing Users
+
+To update existing user home directories with the new configuration:
 
 ```bash
-cp dotfiles/tmux.conf ~/.tmux.conf
-cp dotfiles/bashrc ~/.bashrc
-cp dotfiles/vimrc ~/.vimrc
-cp -r fzf-files ~/.tmux/
-cp -r tmux-sessions ~/tmux-sessions/
+sudo ./configure-local.sh --update-users
 ```
 
-## Executing
+**WARNING**: This will overwrite existing dotfiles for ALL existing users.
 
-- Run `tmux` in your terminal
+### Additional Options
+
+View all available options:
+```bash
+./configure-local.sh --help
+```
+
+Install with all options:
+```bash
+sudo ./configure-local.sh --update-users --download-tmux --download-oc
+```
+
+### For New Users
+
+New users automatically get the correct configuration:
+
+```bash
+sudo useradd -m newuser
+```
+
+All dotfiles and configurations are copied from `/etc/skel/` automatically.
+
+### Configuration
+
+After installation, **each user has their own independent configuration** at `~/.tmux/config.sh`.
+
+**Edit your configuration**:
+```bash
+vim $HOME/.tmux/config.sh
+```
+
+**Note**: Each user's configuration is independent. There is no global shared configuration file.
+
+See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for complete details on the configuration system.
+
+**Available Configuration Options:**
+
+**Paths:**
+- `CLUSTERS_BASE_PATH`: Base directory where OpenShift clusters are stored (default: `/vms/clusters`)
+- `OCP_CACHE_DIR`: Cache directory for OCP clients and other cached data (default: `${CLUSTERS_BASE_PATH}/.cache`)
+- `CLUSTER_VARIABLES_DIR`: Directory for vSphere cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
+- `KVM_VARIABLES_DIR`: Directory for KVM cluster template files in YAML format (default: `${CLUSTERS_BASE_PATH}/variables-files-kvm`)
+- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for KVM cluster management
+
+**Remote Synchronization:**
+- `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional, format: `user@host`)
+
+**VMware/vSphere Credentials:**
+- `VSPHERE_USERNAME`: Username for VMware vSphere/govc operations (default: `administrator@chiaretto.local`)
+- `VSPHERE_PASSWORD`: Password for vSphere user
+- `GOVC_URL`: vSphere vCenter URL (default: `https://chiaretto-vcsa01.chiaret.to`)
+
+**OpenShift Credentials:**
+- `OCP_USERNAME`: Username for OpenShift cluster login (non-kubeadmin) (default: `chiaretto`)
+- `OCP_PASSWORD`: Password for OpenShift admin user
+
+**UI Customization:**
+- `FZF_BORDER_LABEL`: Border label for all FZF interactive menus (default: `chiarettolabs.com.br`)
+- `CHECK_BASTION_HOST`: Enforce bastion host check before cluster operations (default: `false`)
+
+**Security Note:** The `config.sh` file contains sensitive credentials and is excluded from git via `.gitignore`. Keep this file secure with appropriate permissions (600).
+
+The configuration is automatically loaded by:
+- `bash_functions` when you start a new shell
+- All FZF scripts in `fzf-files/`
+- All OCP management scripts in `ocpscripts/`
+
+**Note:** The scripts will look for the configuration file `$HOME/.tmux/config.sh`
+
+## Executing tmux
+
+- Run `tmux` or `t` in your terminal
 - Detach tmux: `prefix + d`
-- Attach an existing tmux session: `tmux a`
+- Attach an existing tmux session: `tmux a` or `t`
 
 ## Key Shortcuts
 
@@ -64,17 +138,16 @@ cp -r tmux-sessions ~/tmux-sessions/
 
 ⚠️ **The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`.** All Tmux commands now use `Ctrl + s` as the prefix.
 
-- Switch to last session (when not in vim): `Ctrl + b`
-
 #### Session Management
 
 - **Create new session**: `prefix + N` (prompts for session name)
 - **Rename session**: `prefix + .` (prompts for new name)
 - **Select session**: `prefix + s` (opens session selector)
 - **Choose tree**: `prefix + w` (opens window/session tree in zoom mode)
-- **Double-click status left**: Opens choose-tree view
+- **click status left (session name)**: Opens choose-tree view
 - **Kill current session**: `prefix + K` (with confirmation; handles last session gracefully)
 - **Kill all sessions**: `prefix + D` (with confirmation prompt)
+- **Switch to last session (when not in vim)**: `Ctrl + b`
 
 #### Window Management
 
@@ -145,36 +218,16 @@ cp -r tmux-sessions ~/tmux-sessions/
 - **File browser**: `Ctrl + x` (opens file/directory with vim using FZF)
 - **URL launcher**: `prefix + Tab` (opens URL from terminal using FZF)
 
-## OpenShift Integration
-
-This configuration includes specialized tools for OpenShift cluster management:
-
-### Cluster Lifecycle Commands
-
-- `ocpcreatecluster` - Create a new OpenShift cluster with interactive setup
-- `ocpdestroycluster <cluster-name>` - Destroy an existing cluster
-- `ocprecreatecluster <cluster-name>` - Recreate a cluster from scratch
-- `ocpupgradecluster <cluster-name>` - Upgrade cluster to a new version
-- `ocplifecycle` - View cluster lifecycle and version information
-
-### Utility Commands
-
-- `ocpgetclient` - Download OpenShift client tools
-- `ocpgetreleases.py` - Fetch available OpenShift releases
-- `ocpvariablesfiles` - Manage cluster variable files
-- `ocpdocumentation` - Access OpenShift documentation
-- `ocpreleasenotes` - View release notes for specific versions
-
 ### Dynamic Status Bar
 
 The tmux status bar automatically detects your current cluster connection and displays:
 
-- **Cluster version** (e.g., `4.16.21`)
+- **Cluster version** (e.g., `4.19.19`)
 - **Current user** (kubeconfig mode shown with `(k)`)
 - **Active project** (namespace)
 - **Status indicators**: Red for errors/disconnected, green for active connections
 
-Example: `4.16.21:(k):openshift-config`
+Example: `4.19.19:(k):openshift-config`
 
 ## FZF Interactive Menus
 
@@ -210,10 +263,14 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 
 ### Cluster Directory Structure
 
-Clusters are stored in `/vms/clusters/$CLUSTERNAME/`:
+If you are using the repo https://github.com/lgchiaretto/ocp4_setup_upi_kvm_ansible
+
+Clusters are stored in `${CLUSTERS_BASE_PATH}/$CLUSTERNAME/`:
 - `auth/kubeconfig` - Cluster authentication
 - `$CLUSTERNAME.json` - Cluster metadata
 - `started` - Empty marker file (VMs are running)
+
+The base path is configurable via the `CLUSTERS_BASE_PATH` variable in `~/.tmux/config.sh`.
 
 ## Additional Features
 
@@ -242,16 +299,5 @@ The installation configures two systemd timers for automated maintenance:
    - Enables fast file searching with `locate` command
 
 Both timers are automatically enabled and started during installation.
-
-### Color Scheme
-
-All components use the **Gruvbox** color palette:
-- Dark background (`#1d2021`)
-- Light foreground (`#ffffff`)
-- Yellow highlights (`#d8a657`)
-- Orange for versions
-- Red for errors/warnings
-- Green for active states
-- Cyan (colour30) for projects
 
 ---
