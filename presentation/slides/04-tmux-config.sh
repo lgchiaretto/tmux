@@ -45,7 +45,7 @@ echo -e "    │      1. Check \$CLUSTERS_BASE_PATH/\$SESSION_NAME/auth/kubeconf
 echo -e "    │      2. Fallback to 'oc whoami' for active context                        │"
 echo -e "    │                                                                           │"
 echo -e "    │    Display format:                                                        │"
-echo -e "    │      4.16.21:(k):openshift-config                                         │"
+echo -e "    │      4.19.19:(k):openshift-config                                         │"
 echo -e "    │      └─ version ─┘└ user ┘└── project ──┘                                 │"
 echo -e "    │                                                                           │"
 echo -e "    │    Error states: N/A | <no-project> | <deleted>                           │"

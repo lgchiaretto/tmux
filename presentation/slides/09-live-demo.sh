@@ -35,7 +35,7 @@ echo -e "    │    \033[38;5;208m3. FZF Pod Browser\033[38;5;223m              
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-s p Manage pods                                                    │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-s n Manage nodes                                                   │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m C-s r Manage routes                                                  │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m Ctrl-l to tail logs in new window                                    │"
+echo -e "    │    \033[38;5;208m•\033[38;5;223m C-s l to tail logs in new window                                     │"
 echo -e "    │                                                                           │"
 echo -e "    │    \033[38;5;208m4. Dynamic Status Bar\033[38;5;223m                                                  │"
 echo -e "    │    \033[38;5;208m•\033[38;5;223m Show cluster version/user/project                                    │"

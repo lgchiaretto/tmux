@@ -6,7 +6,7 @@ This repository contains a custom tmux configuration integrated with FZF interac
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Executing](#executing)
+- [Executing tmux](#executing)
 - [Key Shortcuts](#key-shortcuts)
 - [OpenShift Integration](#openshift-integration)
 - [FZF Interactive Menus](#fzf-interactive-menus)
@@ -23,7 +23,7 @@ This repository contains a custom tmux configuration integrated with FZF interac
 - **Git**
 - **Python 3** with tmuxp package (`pip3 install tmuxp`)
 - **bat** for syntax highlighting (optional)
-- **VMware govc** for VM operations (optional)
+- **VMware govc** for VM operations on Chiaretto Labs (optional)
 
 ## Installation
 
@@ -36,7 +36,7 @@ Clone this repository and execute the `configure-local.sh` script to set up the 
 This will:
 - Install FZF and its dependencies
 - Download and install tmux binary
-- Install OpenShift CLI (oc)
+- Install OpenShift CLI (oc) if it not exists
 - Copy dotfiles to your home directory (~/)
 - Install FZF scripts to `~/.tmux/`
 - Copy tmux session templates to `~/tmux-sessions/`
@@ -55,17 +55,6 @@ cp -r tmux-sessions ~/tmux-sessions/
 ### Configuration
 
 After installation, you can customize the base paths, credentials, and settings used by the OpenShift cluster management tools.
-
-**During Installation:**
-
-The `configure-local.sh` script will prompt you interactively to customize:
-- Cluster base path
-- KVM variables directory
-- FZF border label
-- vSphere credentials (username and password)
-- OpenShift admin credentials (username and password)
-
-If you skip any prompt, the defaults from `config.sh.example` will be used.
 
 **After Installation:**
 
@@ -88,27 +77,17 @@ vim ~/.tmux/config.sh
 - `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional, format: `user@host`)
 
 **VMware/vSphere Credentials:**
-- `VSPHERE_USERNAME`: Username for VMware vSphere/govc operations (default: `administrator@vsphere.local`)
+- `VSPHERE_USERNAME`: Username for VMware vSphere/govc operations (default: `administrator@chiaretto.local`)
 - `VSPHERE_PASSWORD`: Password for vSphere user
-- `GOVC_URL`: vSphere vCenter URL (default: `https://vcsa.example.com`)
+- `GOVC_URL`: vSphere vCenter URL (default: `https://chiaretto-vcsa01.chiaret.to`)
 
 **OpenShift Credentials:**
-- `OCP_USERNAME`: Username for OpenShift cluster login (non-kubeadmin) (default: `admin`)
+- `OCP_USERNAME`: Username for OpenShift cluster login (non-kubeadmin) (default: `chiaretto`)
 - `OCP_PASSWORD`: Password for OpenShift admin user
 
 **UI Customization:**
 - `FZF_BORDER_LABEL`: Border label for all FZF interactive menus (default: `chiarettolabs.com.br`)
 - `CHECK_BASTION_HOST`: Enforce bastion host check before cluster operations (default: `false`)
-
-**Example:**
-
-```bash
-export CLUSTERS_BASE_PATH="/data/openshift/clusters"
-export VSPHERE_USERNAME="admin@myvcenter.local"
-export VSPHERE_PASSWORD="MySecurePassword123"
-export OCP_USERNAME="myadmin"
-export FZF_BORDER_LABEL="mylab.example.com"
-```
 
 **Security Note:** The `config.sh` file contains sensitive credentials and is excluded from git via `.gitignore`. Keep this file secure with appropriate permissions (600).
 
@@ -117,18 +96,13 @@ The configuration is automatically loaded by:
 - All FZF scripts in `fzf-files/`
 - All OCP management scripts in `ocpscripts/`
 
-**Note:** The scripts will look for the configuration file in the following order:
-1. `$HOME/git/tmux/config.sh` (development location)
-2. `$HOME/.tmux/config.sh` (installed location)
-3. `/usr/local/etc/tmux-ocp/config.sh` (system-wide location)
+**Note:** The scripts will look for the configuration file `$HOME/.tmux/config.sh`
 
-For detailed configuration information, see [CONFIGURATION.md](CONFIGURATION.md).
+## Executing tmux
 
-## Executing
-
-- Run `tmux` in your terminal
+- Run `tmux` or `t` in your terminal
 - Detach tmux: `prefix + d`
-- Attach an existing tmux session: `tmux a`
+- Attach an existing tmux session: `tmux a` or `t`
 
 ## Key Shortcuts
 
@@ -136,17 +110,16 @@ For detailed configuration information, see [CONFIGURATION.md](CONFIGURATION.md)
 
 ⚠️ **The default Tmux prefix has been changed from `Ctrl + b` to `Ctrl + s`.** All Tmux commands now use `Ctrl + s` as the prefix.
 
-- Switch to last session (when not in vim): `Ctrl + b`
-
 #### Session Management
 
 - **Create new session**: `prefix + N` (prompts for session name)
 - **Rename session**: `prefix + .` (prompts for new name)
 - **Select session**: `prefix + s` (opens session selector)
 - **Choose tree**: `prefix + w` (opens window/session tree in zoom mode)
-- **Double-click status left**: Opens choose-tree view
+- **click status left (session name)**: Opens choose-tree view
 - **Kill current session**: `prefix + K` (with confirmation; handles last session gracefully)
 - **Kill all sessions**: `prefix + D` (with confirmation prompt)
+- **Switch to last session (when not in vim)**: `Ctrl + b`
 
 #### Window Management
 
@@ -221,12 +194,12 @@ For detailed configuration information, see [CONFIGURATION.md](CONFIGURATION.md)
 
 The tmux status bar automatically detects your current cluster connection and displays:
 
-- **Cluster version** (e.g., `4.16.21`)
+- **Cluster version** (e.g., `4.19.19`)
 - **Current user** (kubeconfig mode shown with `(k)`)
 - **Active project** (namespace)
 - **Status indicators**: Red for errors/disconnected, green for active connections
 
-Example: `4.16.21:(k):openshift-config`
+Example: `4.19.19:(k):openshift-config`
 
 ## FZF Interactive Menus
 
@@ -261,6 +234,8 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 - `fzf-tmuxp.sh` - Load tmuxp session templates
 
 ### Cluster Directory Structure
+
+If you are using the repo https://github.com/lgchiaretto/ocp4_setup_upi_kvm_ansible
 
 Clusters are stored in `${CLUSTERS_BASE_PATH}/$CLUSTERNAME/`:
 - `auth/kubeconfig` - Cluster authentication
