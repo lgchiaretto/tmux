@@ -179,6 +179,10 @@ sudo cp $TMUX_DIR/dotfiles/inputrc /etc/skel/.inputrc > /dev/null 2>&1
 sudo cp $TMUX_DIR/dotfiles/bash_functions /etc/skel/.bash_functions > /dev/null 2>&1
 sudo cp $TMUX_DIR/dotfiles/ansible.cfg /etc/skel/.ansible.cfg > /dev/null 2>&1
 
+log "Installing vim-plug for new users"
+sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
+sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
+
 if [ "$UPDATE_USERS" = true ]; then
     log "Updating existing user home directories (--update-users flag enabled)"
     for user_home in /home/*; do
