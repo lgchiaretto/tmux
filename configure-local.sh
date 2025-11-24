@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Exit immediately if a command exits with a non-zero status
-set -e
+# set -e
 
 # Color Definitions
 RED='\033[0;31m'
