@@ -114,10 +114,8 @@ bind '"\e[A": " \C-e\C-u\C-y\ey\C-u`__fzf_history__`\e\C-e\er\e^"'
 # -------------------- First Login Setup --------------------
 # Auto-install vim plugins on first login
 if [ -f "$HOME/.vim/autoload/plug.vim" ] && [ ! -f "$HOME/.vim/.plugins_installed" ]; then
-    echo "First login detected. Installing Vim plugins..."
     vim -E -s -u "$HOME/.vimrc" +PlugInstall +qall > /dev/null 2>&1
-    touch "$HOME/.vim/.plugins_installed"
-    echo "Vim plugins installed successfully!"
+    touch "$HOME/.vim/.plugins_installed" > /dev/null 2>&1
 fi
 
 
