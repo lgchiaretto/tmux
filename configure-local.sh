@@ -16,18 +16,17 @@ BIN_DIR="/usr/local/bin"
 CALLER_PATH="${BASH_SOURCE[0]}"
 TMUX_DIR="$(dirname "$(readlink -f "$CALLER_PATH")")"
 
-# Helper Functions
+### Helper Functions
 log() {
-    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] - $1${NC}"
-}
-
-warn() {
-    echo -e "${YELLOW}[WARN] $1${NC}"
+    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] SUCCESS:${NC} $1"
 }
 
 error() {
-    echo -e "${RED}[ERROR] $1${NC}"
-    exit 1
+    echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERROR:${NC} $1"
+}
+
+warn() {
+    echo -e "${YELLOW}[$(date '+%Y-%m-%d %H:%M:%S')] WARNING:${NC} $1"
 }
 
 # Basic Dependency Check
@@ -152,7 +151,7 @@ if [ ! -d "/usr/local/share/fzf" ]; then
     sudo /usr/local/share/fzf/install --bin --no-update-rc --no-bash --no-zsh --no-fish
 else
     log "FZF already installed. Updating repository..."
-    (cd /usr/local/share/fzf && sudo git pull)
+    (cd /usr/local/share/fzf && sudo git pull > /dev/null 2>&1)
 fi
 # Link FZF binaries
 sudo install -m 755 /usr/local/share/fzf/bin/fzf "$BIN_DIR/fzf"

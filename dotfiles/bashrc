@@ -29,6 +29,15 @@ fi
 #export GOVC_URL="${GOVC_URL:-https://vcsa.example.com}"
 #export GOVC_INSECURE=true
 
+# GOVC insecure flag
+export GOVC_INSECURE="${GOVC_INSECURE:-true}"
+
+# GOVC username
+export GOVC_USERNAME=$VSPHERE_USERNAME
+
+#GOVC password
+export GOVC_PASSWORD=$VSPHERE_PASSWORD
+
 # -------------------- Shell Options --------------------
 shopt -s checkwinsize
 shopt -s histappend

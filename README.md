@@ -47,15 +47,13 @@ This will:
 - Install OpenShift CLI (oc) if it doesn't exist
 - Install systemd services for cache updates
 - Configure bash with Gruvbox color scheme and OpenShift helpers
-- **Other users are NOT affected**
-- **/etc/skel/ is NOT modified**
 
 ### System-Wide Installation (All Users)
 
 To install for ALL users (including new users):
 
 ```bash
-sudo ./configure-local.sh --update-users
+./configure-local.sh --update-users
 ```
 
 This will:
