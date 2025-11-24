@@ -73,15 +73,17 @@ copy_dotfiles_to_user() {
         sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/.vim/autoload/plug.vim" "$target_home/.vim/autoload/plug.vim"
     fi
     
-    # Tmux Configuration (config.sh) - Do not overwrite if exists
+    # Tmux Configuration (config.sh) - NEVER overwrite if exists
     sudo install -d -m 755 -o "$target_user" -g "$target_user" "$target_home/.tmux"
-    if [ ! -f "$target_home/.tmux/config.sh" ]; then
-        if [ -f "/etc/skel/.tmux/config.sh" ]; then
-            sudo install -m 600 -o "$target_user" -g "$target_user" "/etc/skel/.tmux/config.sh" "$target_home/.tmux/config.sh"
-            log "Configuration created at $target_home/.tmux/config.sh"
-        fi
+    if [ -f "$target_home/.tmux/config.sh" ]; then
+        warn "Configuration already exists at $target_home/.tmux/config.sh (preserving user's settings)"
     else
-        warn "Configuration already exists at $target_home/.tmux/config.sh (kept as is)"
+        if [ -f "$TMUX_DIR/config.sh.example" ]; then
+            sudo install -m 600 -o "$target_user" -g "$target_user" "$TMUX_DIR/config.sh.example" "$target_home/.tmux/config.sh"
+            log "Configuration created at $target_home/.tmux/config.sh"
+        else
+            warn "config.sh.example not found, skipping config.sh creation for $target_user"
+        fi
     fi
 }
 
@@ -174,8 +176,9 @@ sudo install -m 644 "$TMUX_DIR/dotfiles/ansible.cfg" /etc/skel/.ansible.cfg
 sudo install -d -m 755 /etc/skel/.vim/autoload
 sudo install -m 644 "$TMUX_DIR/dotfiles/plug.vim" /etc/skel/.vim/autoload/plug.vim
 
-sudo install -d -m 755 /etc/skel/.tmux
-sudo install -m 600 "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh
+# Note: /etc/skel/.tmux/config.sh is intentionally NOT created here
+# This ensures that copy_dotfiles_to_user always uses config.sh.example from the repo
+# and never overwrites existing user configurations
 
 if [ "$UPDATE_USERS" = true ]; then
     log "Updating ALL system users..."
