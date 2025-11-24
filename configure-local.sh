@@ -103,13 +103,6 @@ INSTALLATION LOCATIONS:
     /etc/skel/                           Template for new users
     /etc/systemd/system/                 System services
 
-REQUIREMENTS:
-    
-    • Root privileges (use sudo)
-    • Internet connection (for downloading dependencies)
-    • Git, wget, curl installed
-    • Python 3 and pip
-
 EXAMPLES:
     
     Basic installation (recommended for first-time setup):
