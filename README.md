@@ -2,7 +2,7 @@
 
 This repository contains a custom tmux configuration integrated with FZF interactive menus and OpenShift cluster management tools. It provides a complete control plane for Red Hat OpenShift administrators with shell configuration, interactive resource browsers, cluster lifecycle automation, and real-time status monitoring.
 
-**🌍 GLOBAL CONFIGURATION**: This project is designed to provide a unified experience for **all users** on a system. All configurations, scripts, and tools are shared globally. See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for details.
+**🌍 GLOBAL CONFIGURATION**: This project is designed to provide a unified experience for **all users** on a system. All configurations, scripts, and tools are shared globally.
 
 ## Table of Contents
 
