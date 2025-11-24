@@ -1,42 +1,89 @@
 #!/usr/bin/env bash
 
+# Exit immediately if a command exits with a non-zero status
+# set -e
+
+# Color Definitions
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Paths and Constants
+TMUX_SHARE_DIR="/usr/local/share/tmux-ocp"
+BIN_DIR="/usr/local/bin"
+# Resolve absolute path to the directory containing this script
+CALLER_PATH="${BASH_SOURCE[0]}"
+TMUX_DIR="$(dirname "$(readlink -f "$CALLER_PATH")")"
+
+# Helper Functions
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] - $1"
+    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] - $1${NC}"
 }
 
-# Function to copy dotfiles to a user home directory
+warn() {
+    echo -e "${YELLOW}[WARN] $1${NC}"
+}
+
+error() {
+    echo -e "${RED}[ERROR] $1${NC}"
+    exit 1
+}
+
+# Basic Dependency Check
+check_dependencies() {
+    local deps=(git wget tar python3)
+    for cmd in "${deps[@]}"; do
+        if ! command -v "$cmd" &> /dev/null; then
+            warn "Dependency '$cmd' not found. Attempting to install..."
+            if command -v dnf &> /dev/null; then
+                sudo dnf install -y "$cmd"
+            elif command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y "$cmd"
+            else
+                error "Could not install '$cmd'. Please install it manually."
+            fi
+        fi
+    done
+    
+    # pip3 is optional - only warn if not present
+    if ! command -v pip3 &> /dev/null; then
+        warn "pip3 not found. Will try to use system packages only."
+    fi
+}
+
+# Function to copy dotfiles to a user's home directory
 copy_dotfiles_to_user() {
     local target_home="$1"
     local target_user="$2"
     
     log "Updating configuration for user: $target_user"
     
-    # Copy dotfiles from /etc/skel (which is our source of truth)
-    sudo cp /etc/skel/.bashrc "$target_home/.bashrc" > /dev/null 2>&1
-    sudo cp /etc/skel/.tmux.conf "$target_home/.tmux.conf" > /dev/null 2>&1
-    sudo cp /etc/skel/.vimrc "$target_home/.vimrc" > /dev/null 2>&1
-    sudo cp /etc/skel/.dircolors "$target_home/.dircolors" > /dev/null 2>&1
-    sudo cp /etc/skel/.inputrc "$target_home/.inputrc" > /dev/null 2>&1
-    sudo cp /etc/skel/.bash_functions "$target_home/.bash_functions" > /dev/null 2>&1
-    sudo cp /etc/skel/.ansible.cfg "$target_home/.ansible.cfg" > /dev/null 2>&1
+    # List of files to copy from /etc/skel (source of truth)
+    local files=(.bashrc .tmux.conf .vimrc .dircolors .inputrc .bash_functions .ansible.cfg)
     
-    # Copy vim-plug
-    sudo mkdir -p "$target_home/.vim/autoload" > /dev/null 2>&1
-    sudo cp /etc/skel/.vim/autoload/plug.vim "$target_home/.vim/autoload/plug.vim" > /dev/null 2>&1
+    for file in "${files[@]}"; do
+        if [ -f "/etc/skel/$file" ]; then
+            sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/$file" "$target_home/$file"
+        fi
+    done
     
-    # Create .tmux directory and copy config.sh if it doesn't exist
-    sudo mkdir -p "$target_home/.tmux" > /dev/null 2>&1
-    if [ ! -f "$target_home/.tmux/config.sh" ]; then
-        sudo cp /etc/skel/.tmux/config.sh "$target_home/.tmux/config.sh" > /dev/null 2>&1
-        sudo chmod 600 "$target_home/.tmux/config.sh" > /dev/null 2>&1
-        log "Created config at $target_home/.tmux/config.sh"
+    # Install vim-plug
+    sudo install -d -m 755 -o "$target_user" -g "$target_user" "$target_home/.vim/autoload"
+    if [ -f "/etc/skel/.vim/autoload/plug.vim" ]; then
+        sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/.vim/autoload/plug.vim" "$target_home/.vim/autoload/plug.vim"
     fi
     
-    # Fix ownership
-    sudo chown -R "$target_user:$target_user" "$target_home/.bashrc" "$target_home/.tmux.conf" \
-        "$target_home/.vimrc" "$target_home/.dircolors" "$target_home/.inputrc" \
-        "$target_home/.bash_functions" "$target_home/.ansible.cfg" \
-        "$target_home/.vim" "$target_home/.tmux" > /dev/null 2>&1
+    # Tmux Configuration (config.sh) - Do not overwrite if exists
+    sudo install -d -m 755 -o "$target_user" -g "$target_user" "$target_home/.tmux"
+    if [ ! -f "$target_home/.tmux/config.sh" ]; then
+        if [ -f "/etc/skel/.tmux/config.sh" ]; then
+            sudo install -m 600 -o "$target_user" -g "$target_user" "/etc/skel/.tmux/config.sh" "$target_home/.tmux/config.sh"
+            log "Configuration created at $target_home/.tmux/config.sh"
+        fi
+    else
+        warn "Configuration already exists at $target_home/.tmux/config.sh (kept as is)"
+    fi
 }
 
 show_help() {
@@ -44,289 +91,239 @@ show_help() {
 Tmux OpenShift Tools - Global Configuration Installer
 ======================================================
 
-This script installs and configures the Tmux OpenShift environment globally
-for all users on the system. It creates a shared configuration that provides
-a consistent experience across all user accounts.
-
 USAGE:
     sudo ./configure-local.sh [OPTIONS]
 
 OPTIONS:
-    -h, --help              Show this help message and exit
-    
-    --download-tmux         Download and install the Tmux binary to /usr/local/bin/
-                           (automatically enabled if tmux is not found)
-    
-    --download-oc           Download and install the OpenShift CLI (oc) to /usr/local/bin/
-                           (automatically enabled if oc is not found)
-    
-    --update-users          Update existing user home directories with new dotfiles
-                           WARNING: This will overwrite existing .bashrc, .tmux.conf,
-                           .vimrc, and other dotfiles for ALL existing users
-                           (by default, existing users are NOT modified)
-
-WHAT THIS SCRIPT DOES:
-    
-    Global Installation (always performed):
-    ---------------------------------------
-    • Creates /etc/tmux-ocp/ directory for global scripts
-    • Installs all scripts to /usr/local/bin/ (ocpcreatecluster, fzf-*, etc.)
-    • Installs shared resources to /usr/local/share/tmux-ocp/
-    • Sets up /etc/skel/ with dotfiles and config.sh template for NEW users
-    • Installs fzf globally
-    • Installs Python packages globally (tmuxp, yq, bat)
-    • Installs and enables systemd services (update-ocp-cache, updatedb, generate-graph)
-    • Creates ~/.tmux/config.sh for current user
-    
-    User Updates (only with --update-users):
-    ----------------------------------------
-    • Updates all existing user home directories with new dotfiles
-    • Installs fzf per-user if not already installed
-    • Installs vim-plug per-user if not already installed
-    • Updates root user configuration
-
-INSTALLATION LOCATIONS:
-    
-    ~/.tmux/config.sh                    User configuration (independent per user)
-    /usr/local/bin/                      Executable scripts (global)
-    /usr/local/share/tmux-ocp/           Shared resources (fzf-files, tmux-sessions)
-    /etc/skel/                           Template for new users
-    /etc/systemd/system/                 System services
-
-EXAMPLES:
-    
-    Basic installation (recommended for first-time setup):
-        ./configure-local.sh
-    
-    Install and update all existing users:
-        ./configure-local.sh --update-users
-    
-    Install with tmux and oc downloads:
-        ./configure-local.sh --download-tmux --download-oc
-    
-    Full installation updating everything:
-        ./configure-local.sh --update-users --download-tmux --download-oc
+    -h, --help              Show this help message
+    --download-tmux         Force download and install Tmux binary
+    --download-oc           Force download and install OpenShift CLI (oc)
+    --update-users          Install dotfiles in /etc/skel/ and update ALL users
+                            (Default: updates current user only)
 
 EOF
     exit 0
 }
 
-# Parse command line arguments
+# Argument Parsing
 UPDATE_USERS=false
 DOWNLOAD_TMUX=false
 DOWNLOAD_OC=false
 
 for arg in "$@"; do
     case "$arg" in
-        --help|-h)
-            show_help
-            ;;
-        --download-tmux)
-            DOWNLOAD_TMUX=true
-            ;;
-        --download-oc)
-            DOWNLOAD_OC=true
-            ;;
-        --update-users)
-            UPDATE_USERS=true
-            ;;
-        *)
-            echo "Error: Invalid option '$arg'"
-            echo "Use './configure-local.sh --help' to see available options."
-            exit 1
-            ;;
+        --help|-h) show_help ;;
+        --download-tmux) DOWNLOAD_TMUX=true ;;
+        --download-oc) DOWNLOAD_OC=true ;;
+        --update-users) UPDATE_USERS=true ;;
+        *) error "Invalid option '$arg'. Use --help." ;;
     esac
 done
 
-# 1. Obtém o caminho do script que chamou
-CALLER_PATH="${BASH_SOURCE[1]}"
+# Start Installation
+log "Starting Tmux environment configuration..."
+check_dependencies
 
-# 2. Extrai o diretório (dirname) do caminho
-# Use 'dirname' para remover o nome do arquivo, deixando apenas o diretório.
-TMUX_DIR="$(dirname "$CALLER_PATH")"
+# Create global directory structure
+log "Creating directories in $TMUX_SHARE_DIR"
+sudo install -d -m 755 "$TMUX_SHARE_DIR"/{fzf-files,tmux-sessions,common}
 
-log "Configuring Tmux environment for all users"
-
-# Create directory for global fzf scripts and tmux sessions
-log "Creating /usr/local/share/tmux-ocp directory"
-sudo mkdir -p /usr/local/share/tmux-ocp/{fzf-files,tmux-sessions,common} > /dev/null 2>&1
-
-# Install common scripts
-log "Installing common scripts"
-sudo cp $TMUX_DIR/common/* /usr/local/share/tmux-ocp/common/ > /dev/null 2>&1
-sudo chmod +x /usr/local/share/tmux-ocp/common/*.sh > /dev/null 2>&1
-
-# Create directory for global fzf scripts and tmux sessions
-log "Creating /usr/local/share/tmux-ocp directory"
-sudo mkdir -p /usr/local/share/tmux-ocp/{fzf-files,tmux-sessions} > /dev/null 2>&1
-
-log "Installing fzf globally for all users"
-if [ ! -d "/usr/local/share/fzf" ]; then
-    log "Cloning fzf repository"
-    sudo git clone https://github.com/junegunn/fzf.git /usr/local/share/fzf > /dev/null 2>&1
-    log "Installing fzf binary and shell integration"
-    cd /usr/local/share/fzf > /dev/null 2>&1
-    sudo ./install --bin --no-update-rc --no-bash --no-zsh --no-fish > /dev/null 2>&1
-    cd - > /dev/null 2>&1
-    sudo cp /usr/local/share/fzf/bin/fzf /usr/local/bin/ > /dev/null 2>&1
-    sudo cp /usr/local/share/fzf/bin/fzf-tmux /usr/local/bin/ > /dev/null 2>&1
-    sudo chmod +x /usr/local/bin/fzf > /dev/null 2>&1
-    sudo chmod +x /usr/local/bin/fzf-tmux > /dev/null 2>&1
-    log "fzf and fzf-tmux installed globally at /usr/local/bin/"
-else
-    log "fzf already installed globally"
+# Install shared scripts and FZF Files
+log "Installing shared scripts..."
+if [ -d "$TMUX_DIR/common" ]; then
+    sudo install -m 755 "$TMUX_DIR/common/"* "$TMUX_SHARE_DIR/common/"
+fi
+if [ -d "$TMUX_DIR/fzf-files" ]; then
+    sudo install -m 755 "$TMUX_DIR/fzf-files/"* "$TMUX_SHARE_DIR/fzf-files/"
 fi
 
-log "Setting up skeleton files for new users"
-log "Copying dotfiles to /etc/skel"
-sudo cp $TMUX_DIR/dotfiles/bashrc /etc/skel/.bashrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/tmux.conf /etc/skel/.tmux.conf > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/vimrc /etc/skel/.vimrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/dircolors /etc/skel/.dircolors > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/inputrc /etc/skel/.inputrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/bash_functions /etc/skel/.bash_functions > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/ansible.cfg /etc/skel/.ansible.cfg > /dev/null 2>&1
+# Install Tmux Sessions
+log "Installing tmux sessions..."
+if [ -d "$TMUX_DIR/tmux-sessions" ]; then
+    sudo cp -R "$TMUX_DIR/tmux-sessions/"* "$TMUX_SHARE_DIR/tmux-sessions/"
+    sudo chmod -R 644 "$TMUX_SHARE_DIR/tmux-sessions/"* # YAML files don't need exec permissions
+fi
 
-log "Installing vim-plug for new users"
-sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
+# Global FZF Installation
+if [ ! -d "/usr/local/share/fzf" ]; then
+    log "Cloning fzf repository..."
+    sudo git clone --depth 1 https://github.com/junegunn/fzf.git /usr/local/share/fzf
+    log "Running fzf installer..."
+    sudo /usr/local/share/fzf/install --bin --no-update-rc --no-bash --no-zsh --no-fish
+else
+    log "FZF already installed. Updating repository..."
+    (cd /usr/local/share/fzf && sudo git pull)
+fi
+# Link FZF binaries
+sudo install -m 755 /usr/local/share/fzf/bin/fzf "$BIN_DIR/fzf"
+sudo install -m 755 /usr/local/share/fzf/bin/fzf-tmux "$BIN_DIR/fzf-tmux"
 
-log "Setting up .tmux/config.sh for new users in /etc/skel"
-sudo mkdir -p /etc/skel/.tmux > /dev/null 2>&1
-sudo cp "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh > /dev/null 2>&1
-sudo chmod 600 /etc/skel/.tmux/config.sh > /dev/null 2>&1
-log "Created config template for new users at /etc/skel/.tmux/config.sh"
-
+# User Configuration
 CURRENT_USER="${SUDO_USER:-$USER}"
 CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
 
-# Always update current user
-log "Updating current user: $CURRENT_USER"
-copy_dotfiles_to_user "$CURRENT_USER_HOME" "$CURRENT_USER"
+# Prepare source files (using /etc/skel as template)
+# First, copy files from repo to /etc/skel
+sudo install -m 644 "$TMUX_DIR/dotfiles/bashrc" /etc/skel/.bashrc
+sudo install -m 644 "$TMUX_DIR/dotfiles/tmux.conf" /etc/skel/.tmux.conf
+sudo install -m 644 "$TMUX_DIR/dotfiles/vimrc" /etc/skel/.vimrc
+sudo install -m 644 "$TMUX_DIR/dotfiles/dircolors" /etc/skel/.dircolors
+sudo install -m 644 "$TMUX_DIR/dotfiles/inputrc" /etc/skel/.inputrc
+sudo install -m 644 "$TMUX_DIR/dotfiles/bash_functions" /etc/skel/.bash_functions
+sudo install -m 644 "$TMUX_DIR/dotfiles/ansible.cfg" /etc/skel/.ansible.cfg
+
+sudo install -d -m 755 /etc/skel/.vim/autoload
+sudo install -m 644 "$TMUX_DIR/dotfiles/plug.vim" /etc/skel/.vim/autoload/plug.vim
+
+sudo install -d -m 755 /etc/skel/.tmux
+sudo install -m 600 "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh
 
 if [ "$UPDATE_USERS" = true ]; then
-    log "Updating other existing users (--update-users flag enabled)"
-    
-    # Update all users in /home
+    log "Updating ALL system users..."
     for user_home in /home/*; do
         if [ -d "$user_home" ]; then
             username=$(basename "$user_home")
-            # Skip current user (already updated above)
-            if [ "$username" = "$CURRENT_USER" ]; then
-                continue
-            fi
             copy_dotfiles_to_user "$user_home" "$username"
         fi
     done
+    # Update root
+    copy_dotfiles_to_user "/root" "root"
+else
+    log "Updating only current user: $CURRENT_USER"
+    copy_dotfiles_to_user "$CURRENT_USER_HOME" "$CURRENT_USER"
+fi
 
-    # Also update root user if current user is not root
-    if [ -d "/root" ] && [ "$CURRENT_USER" != "root" ]; then
-        copy_dotfiles_to_user "/root" "root"
+# Binary Installation (Tmux and OC)
+if [ "$DOWNLOAD_TMUX" = true ] || [ ! -f "$BIN_DIR/tmux" ]; then
+    log "Downloading tmux binary..."
+    sudo wget -q --show-progress --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O "$BIN_DIR/tmux"
+    sudo chmod +x "$BIN_DIR/tmux"
+fi
+
+if [ "$DOWNLOAD_OC" = true ] || [ ! -f "$BIN_DIR/oc" ]; then
+    log "Downloading OpenShift CLI..."
+    TEMP_DIR=$(mktemp -d)
+    wget -q --show-progress https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux.tar.gz -P "$TEMP_DIR"
+    tar xzf "$TEMP_DIR/openshift-client-linux.tar.gz" -C "$TEMP_DIR"
+    sudo install -m 755 "$TEMP_DIR/oc" "$BIN_DIR/oc"
+    # Optional: install kubectl if included
+    if [ -f "$TEMP_DIR/kubectl" ]; then
+        sudo install -m 755 "$TEMP_DIR/kubectl" "$BIN_DIR/kubectl"
     fi
+    rm -rf "$TEMP_DIR"
+fi
+
+# Utility Scripts Installation
+log "Installing utility scripts to $BIN_DIR..."
+sudo install -m 755 "$TMUX_DIR/fzf-files/oc-logs-fzf.sh" "$BIN_DIR/"
+if [ -d "$TMUX_DIR/ocpscripts" ]; then
+    sudo install -m 755 "$TMUX_DIR/ocpscripts/"* "$BIN_DIR/"
+fi
+
+# Python Packages Installation
+# Prefer system packages over pip to avoid breaking system Python
+log "Installing Python packages..."
+
+if command -v dnf &> /dev/null; then
+    # Fedora/RHEL with DNF
+    log "Installing packages via DNF (Fedora/RHEL)..."
+    
+    # Try to install tmuxp from system packages (Fedora)
+    if dnf list available python3-tmuxp &> /dev/null; then
+        sudo dnf install -y python3-tmuxp python3-magic > /dev/null 2>&1
+        log "Installed python3-tmuxp and python3-magic from system packages"
+    else
+        # RHEL/CentOS may need EPEL or pip fallback
+        warn "python3-tmuxp not available in system repos, using pip in user space"
+        # Install to user site-packages, not system
+        pip3 install --user tmuxp python-magic -q 2> /dev/null || warn "Failed to install some Python packages"
+    fi
+    
+    # yq and bat are not Python packages, handle separately
+    if ! command -v yq &> /dev/null; then
+        # yq (go-based tool) needs to be installed via binary or snap
+        if ! command -v snap &> /dev/null || ! sudo snap install yq &> /dev/null; then
+            warn "yq not available via snap, will try pip as fallback"
+            pip3 install --user yq -q 2> /dev/null || warn "yq installation failed"
+        fi
+    fi
+    
+    if ! command -v bat &> /dev/null; then
+        # Try batcat package on Fedora/RHEL
+        sudo dnf install -y bat > /dev/null 2>&1 || {
+            warn "bat not available in repos, trying pip fallback"
+            pip3 install --user bat -q 2> /dev/null || warn "bat installation failed"
+        }
+    fi
+    
+elif command -v apt-get &> /dev/null; then
+    # Debian/Ubuntu
+    log "Installing packages via APT (Debian/Ubuntu)..."
+    sudo apt-get update -qq
+    sudo apt-get install -y python3-magic bat > /dev/null 2>&1
+    pip3 install --user tmuxp yq -q 2> /dev/null || warn "Failed to install some Python packages"
 else
-    log "Skipping other user updates (use --update-users to update all other existing users)"
+    # Fallback to pip (user install to avoid breaking system)
+    warn "No package manager detected, using pip with --user flag"
+    pip3 install --user tmuxp yq bat python-magic -q 2> /dev/null || warn "Some packages may have failed to install"
 fi
 
-log "Copying fzf-files to global location"
-sudo cp $TMUX_DIR/fzf-files/* /usr/local/share/tmux-ocp/fzf-files/ > /dev/null 2>&1
-sudo chmod +x /usr/local/share/tmux-ocp/fzf-files/*.sh > /dev/null 2>&1
+# Systemd Services Configuration
+install_systemd_service() {
+    local name=$1
+    local path=$2
+    local script=$3
+    
+    log "Configuring systemd service: $name"
+    
+    if [ -n "$script" ] && [ -f "$script" ]; then
+        sudo install -m 755 "$script" "$BIN_DIR/"
+    fi
+    
+    if [ -f "$path/$name.service" ]; then
+        sudo install -m 644 "$path/$name.service" /etc/systemd/system/
+        sudo install -m 644 "$path/$name.timer" /etc/systemd/system/
+        sudo systemctl enable "$name.timer" > /dev/null
+        sudo systemctl start "$name.timer" > /dev/null
+    else
+        warn "Service definition for $name not found at $path"
+    fi
+}
 
-log "Copying tmux-sessions to global location"
-sudo cp -R $TMUX_DIR/tmux-sessions/* /usr/local/share/tmux-ocp/tmux-sessions/ > /dev/null 2>&1
+sudo systemctl daemon-reload
 
-# Check if we should download tmux (flag or binary doesn't exist)
-if [ "$DOWNLOAD_TMUX" = true ] || [ ! -f "/usr/local/bin/tmux" ]; then
-    log "Downloading tmux binary"
-    wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O tmux > /dev/null 2>&1
-    log "Copying tmux binary to /usr/local/bin"
-    sudo cp tmux /usr/local/bin/ > /dev/null 2>&1
-    sudo chmod +x /usr/local/bin/tmux > /dev/null 2>&1
-    rm -f tmux > /dev/null 2>&1
-fi
+# Update OCP Cache Service
+install_systemd_service "update-ocp-cache" \
+    "$TMUX_DIR/update-ocp-cache/systemd" \
+    "$TMUX_DIR/update-ocp-cache/scripts/update_ocp_cache.py"
 
-# Check if we should download oc (flag or binary doesn't exist)
-if [ "$DOWNLOAD_OC" = true ] || [ ! -f "/usr/local/bin/oc" ]; then
-    log "Downloading OpenShift CLI client"
-    wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux.tar.gz > /dev/null 2>&1
-    log "Extracting OpenShift CLI client"
-    tar xzf openshift-client-linux.tar.gz > /dev/null 2>&1
-    log "Copying oc binary to /usr/local/bin"
-    sudo cp oc /usr/local/bin/ > /dev/null 2>&1
-    log "Setting executable permissions for oc"
-    sudo chmod +x /usr/local/bin/oc > /dev/null 2>&1
-    rm -f oc kubectl openshift-client-linux.tar.gz > /dev/null 2>&1
-fi
+# Update DB Service
+install_systemd_service "updatedb" \
+    "$TMUX_DIR/updatedb/systemd" \
+    "" # updatedb uses system binary
 
-log "Creating oc-logs-fzf.sh script"
-sudo cp oc-logs-fzf.sh /usr/local/bin/ > /dev/null 2>&1
+# Generate Graph Service
+install_systemd_service "generate-graph" \
+    "$TMUX_DIR/generate-ocp-graph/systemd" \
+    "$TMUX_DIR/generate-ocp-graph/scripts/ocpgenerate-graph.py"
 
-log "Creating OCP scripts to /usr/local/bin"
-sudo cp ocpscripts/* /usr/local/bin/ > /dev/null 2>&1
-
-log "Setting executable permissions for oc-logs-fzf.sh"
-sudo chmod +x /usr/local/bin/oc-logs-fzf.sh > /dev/null 2>&1
-
-log "Installing tmuxp, bat and yq"
-sudo dnf install -y python3-pip -q > /dev/null 2>&1
-sudo pip3 install tmuxp yq bat -q > /dev/null 2>&1
-
-log "Installing update-ocp-cache systemd configuration"
-sudo cp update-ocp-cache/systemd/update-ocp-cache.service /etc/systemd/system/ > /dev/null 2>&1
-sudo cp update-ocp-cache/systemd/update-ocp-cache.timer /etc/systemd/system/ > /dev/null 2>&1
-sudo cp update-ocp-cache/scripts/update_ocp_cache.py /usr/local/bin/ > /dev/null 2>&1
-sudo chmod +x /usr/local/bin/update_ocp_cache.py > /dev/null 2>&1
-sudo systemctl daemon-reload > /dev/null 2>&1
-sudo systemctl enable update-ocp-cache.timer > /dev/null 2>&1
-sudo systemctl start update-ocp-cache.timer > /dev/null 2>&1
-
-log "Installing updatedb systemd configuration"
-sudo cp updatedb/systemd/updatedb.service /etc/systemd/system/ > /dev/null 2>&1
-sudo cp updatedb/systemd/updatedb.timer /etc/systemd/system/ > /dev/null 2>&1
-sudo systemctl daemon-reload > /dev/null 2>&1
-sudo systemctl enable updatedb.timer > /dev/null 2>&1
-sudo systemctl start updatedb.timer > /dev/null 2>&1
-
-log "Installing generate-graph systemd configuration"
-sudo cp generate-ocp-graph/systemd/generate-graph.service /etc/systemd/system/ > /dev/null 2>&1
-sudo cp generate-ocp-graph/systemd/generate-graph.timer /etc/systemd/system/ > /dev/null 2>&1
-sudo cp generate-ocp-graph/scripts/ocpgenerate-graph.py /usr/local/bin/ > /dev/null 2>&1
-sudo systemctl daemon-reload > /dev/null 2>&1
-sudo systemctl enable generate-graph.timer > /dev/null 2>&1
-sudo systemctl start generate-graph.timer > /dev/null 2>&1
-
+# Initial Service Run (if needed)
 if [[ ! -e "/opt/.ocpgraph" ]]; then
-    log "Starting initial runs of update-ocp-cache, updatedb, and generate-graph services"
-    sudo systemctl start update-ocp-cache.service > /dev/null 2>&1
-    sudo systemctl start updatedb.service > /dev/null 2>&1
-    sudo systemctl start generate-graph.service > /dev/null 2>&1
-fi  
+    log "Running initial services..."
+    sudo systemctl start update-ocp-cache.service
+    sudo systemctl start updatedb.service
+    sudo systemctl start generate-graph.service
+fi
 
-log "Configuration complete"
 echo ""
-echo "========================================================================"
-echo "  Installation Complete!"
-echo "========================================================================"
+echo -e "${GREEN}========================================================================${NC}"
+echo -e "${GREEN}  Installation Complete!${NC}"
+echo -e "${GREEN}========================================================================${NC}"
 echo ""
-echo "Configuration file: ~/.tmux/config.sh (independent per user)"
-echo "Scripts installed at: /usr/local/bin/"
-echo "Shared resources at: /usr/local/share/tmux-ocp/"
-echo ""
+echo "User config: $CURRENT_USER_HOME/.tmux/config.sh"
 if [ "$UPDATE_USERS" = true ]; then
-    echo "Existing user home directories have been updated"
+    echo "Mode: SYSTEM-WIDE (All users updated and /etc/skel configured)"
 else
-    echo "Existing users were NOT updated (use --update-users to update them)"
+    echo "Mode: LOCAL (Only user $CURRENT_USER updated)"
 fi
 echo ""
-echo "NEW USERS:"
-echo "  Create new users with: sudo useradd -m username"
-echo "  They will automatically get their own ~/.tmux/config.sh"
-echo ""
-echo "CONFIGURATION:"
-echo "  Edit your config: vim \$HOME/.tmux/config.sh"
-echo "  Each user has independent configuration"
-echo ""
-echo "DOCUMENTATION:"
-echo "  See GLOBAL-CONFIGURATION.md for complete documentation"
-echo "  Run: ./configure-local.sh --help for all options"
-echo ""
-echo "========================================================================"
