@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-# Load configuration (global first, then user override)
-if [ -f "/etc/tmux-ocp/config.sh" ]; then
-    source "/etc/tmux-ocp/config.sh"
-fi
+# Load configuration
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi

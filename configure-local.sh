@@ -27,6 +27,13 @@ update_user_dotfiles() {
     $cmd_prefix cp $TMUX_DIR/dotfiles/bash_functions "$target_home/.bash_functions" > /dev/null 2>&1
     $cmd_prefix cp $TMUX_DIR/dotfiles/ansible.cfg "$target_home/.ansible.cfg" > /dev/null 2>&1
     
+    # Create .tmux directory and copy config.sh
+    $cmd_prefix mkdir -p "$target_home/.tmux" > /dev/null 2>&1
+    if [ -f "/etc/tmux-ocp/config.sh" ]; then
+        $cmd_prefix cp /etc/tmux-ocp/config.sh "$target_home/.tmux/config.sh" > /dev/null 2>&1
+        log "Created local config at $target_home/.tmux/config.sh"
+    fi
+    
     # Install vim-plug if not already installed
     if [ ! -f "$target_home/.vim/autoload/plug.vim" ]; then
         log "Installing vim-plug for user: $target_user"
@@ -199,6 +206,22 @@ log "Installing vim-plug for new users"
 sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
 sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
 
+log "Setting up global configuration file"
+if [ ! -f "/etc/tmux-ocp/config.sh" ]; then
+    sudo cp "$TMUX_DIR/config.sh.example" "/etc/tmux-ocp/config.sh" > /dev/null 2>&1
+    sudo chmod 644 /etc/tmux-ocp/config.sh > /dev/null 2>&1
+    log "Created global configuration at /etc/tmux-ocp/config.sh"
+else
+    log "Global configuration file already exists, skipping"
+fi
+
+log "Setting up .tmux/config.sh for new users in /etc/skel"
+sudo mkdir -p /etc/skel/.tmux > /dev/null 2>&1
+if [ -f "/etc/tmux-ocp/config.sh" ]; then
+    sudo cp /etc/tmux-ocp/config.sh /etc/skel/.tmux/config.sh > /dev/null 2>&1
+    log "Created config template for new users at /etc/skel/.tmux/config.sh"
+fi
+
 # Get current user (the one who invoked sudo, or current user if not using sudo)
 CURRENT_USER="${SUDO_USER:-$USER}"
 CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
@@ -230,15 +253,6 @@ if [ "$UPDATE_USERS" = true ]; then
     fi
 else
     log "Skipping other user updates (use --update-users to update all other existing users)"
-fi
-
-log "Setting up global configuration file"
-if [ ! -f "/etc/tmux-ocp/config.sh" ]; then
-    sudo cp "$TMUX_DIR/config.sh.example" "/etc/tmux-ocp/config.sh" > /dev/null 2>&1
-    sudo chmod 644 /etc/tmux-ocp/config.sh > /dev/null 2>&1
-    log "Created global configuration at /etc/tmux-ocp/config.sh"
-else
-    log "Global configuration file already exists, skipping"
 fi
 
 log "Copying fzf-files to global location"
