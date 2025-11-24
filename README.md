@@ -217,26 +217,6 @@ For detailed configuration information, see [CONFIGURATION.md](CONFIGURATION.md)
 - **File browser**: `Ctrl + x` (opens file/directory with vim using FZF)
 - **URL launcher**: `prefix + Tab` (opens URL from terminal using FZF)
 
-## OpenShift Integration
-
-This configuration includes specialized tools for OpenShift cluster management:
-
-### Cluster Lifecycle Commands
-
-- `ocpcreatecluster` - Create a new OpenShift cluster with interactive setup
-- `ocpdestroycluster <cluster-name>` - Destroy an existing cluster
-- `ocprecreatecluster <cluster-name>` - Recreate a cluster from scratch
-- `ocpupgradecluster <cluster-name>` - Upgrade cluster to a new version
-- `ocplifecycle` - View cluster lifecycle and version information
-
-### Utility Commands
-
-- `ocpgetclient` - Download OpenShift client tools
-- `ocpgetreleases.py` - Fetch available OpenShift releases
-- `ocpvariablesfiles` - Manage cluster variable files
-- `ocpdocumentation` - Access OpenShift documentation
-- `ocpreleasenotes` - View release notes for specific versions
-
 ### Dynamic Status Bar
 
 The tmux status bar automatically detects your current cluster connection and displays:
@@ -316,16 +296,5 @@ The installation configures two systemd timers for automated maintenance:
    - Enables fast file searching with `locate` command
 
 Both timers are automatically enabled and started during installation.
-
-### Color Scheme
-
-All components use the **Gruvbox** color palette:
-- Dark background (`#1d2021`)
-- Light foreground (`#ffffff`)
-- Yellow highlights (`#d8a657`)
-- Orange for versions
-- Red for errors/warnings
-- Green for active states
-- Cyan (colour30) for projects
 
 ---
