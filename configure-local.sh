@@ -155,7 +155,12 @@ for arg in "$@"; do
     esac
 done
 
-TMUX_DIR=$(pwd)
+# 1. Obtém o caminho do script que chamou
+CALLER_PATH="${BASH_SOURCE[1]}"
+
+# 2. Extrai o diretório (dirname) do caminho
+# Use 'dirname' para remover o nome do arquivo, deixando apenas o diretório.
+TMUX_DIR="$(dirname "$CALLER_PATH")"
 
 log "Configuring Tmux environment for all users"
 
@@ -327,9 +332,9 @@ echo "Scripts installed at: /usr/local/bin/"
 echo "Shared resources at: /usr/local/share/tmux-ocp/"
 echo ""
 if [ "$UPDATE_USERS" = true ]; then
-    echo "✓ Existing user home directories have been updated"
+    echo "Existing user home directories have been updated"
 else
-    echo "ℹ Existing users were NOT updated (use --update-users to update them)"
+    echo "Existing users were NOT updated (use --update-users to update them)"
 fi
 echo ""
 echo "NEW USERS:"
