@@ -163,8 +163,10 @@ if [ ! -d "/usr/local/share/fzf" ]; then
     sudo ./install --bin --no-update-rc --no-bash --no-zsh --no-fish > /dev/null 2>&1
     cd - > /dev/null 2>&1
     sudo cp /usr/local/share/fzf/bin/fzf /usr/local/bin/ > /dev/null 2>&1
+    sudo cp /usr/local/share/fzf/bin/fzf-tmux /usr/local/bin/ > /dev/null 2>&1
     sudo chmod +x /usr/local/bin/fzf > /dev/null 2>&1
-    log "fzf installed globally at /usr/local/share/fzf"
+    sudo chmod +x /usr/local/bin/fzf-tmux > /dev/null 2>&1
+    log "fzf and fzf-tmux installed globally at /usr/local/bin/"
 else
     log "fzf already installed globally"
 fi
