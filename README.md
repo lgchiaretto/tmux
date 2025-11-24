@@ -53,7 +53,7 @@ This will:
 To install for ALL users (including new users):
 
 ```bash
-./configure-local.sh --update-users
+sudo ./configure-local.sh --update-users
 ```
 
 This will:
@@ -67,7 +67,7 @@ This will:
 
 View all available options:
 ```bash
-./configure-local.sh --help
+sudo ./configure-local.sh --help
 ```
 
 Install with all options:
