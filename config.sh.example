@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
-# Tmux OpenShift Cluster Management Configuration Example
-# Copy this file to config.sh and customize the values for your environment
-# this file is copied using configure-local.sh script
+# Tmux OpenShift Cluster Management Configuration
+#
+# GLOBAL CONFIGURATION:
+# This file is installed globally at /etc/tmux-ocp/config.sh and is shared by ALL users.
+# All users on the system will use these same configurations by default.
+#
+# USER OVERRIDES (OPTIONAL):
+# Individual users can create $HOME/.tmux/config.sh to override specific settings.
+# User overrides are loaded AFTER the global configuration and take precedence.
+#
+# CONFIGURATION LOADING ORDER:
+# 1. /etc/tmux-ocp/config.sh (this file - global for all users)
+# 2. $HOME/.tmux/config.sh (optional user overrides)
+# 3. $HOME/git/tmux/config.sh (optional developer overrides)
+#
+# INSTALLATION:
+# Run configure-local.sh to install this configuration globally.
+# The script will also set up all necessary files for all users.
 
 ##############################################################
 #                                                            #

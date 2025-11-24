@@ -2,6 +2,8 @@
 
 This repository contains a custom tmux configuration integrated with FZF interactive menus and OpenShift cluster management tools. It provides a complete control plane for Red Hat OpenShift administrators with shell configuration, interactive resource browsers, cluster lifecycle automation, and real-time status monitoring.
 
+**🌍 GLOBAL CONFIGURATION**: This project is designed to provide a unified experience for **all users** on a system. All configurations, scripts, and tools are shared globally. See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for details.
+
 ## Table of Contents
 
 - [Requirements](#requirements)
@@ -11,6 +13,7 @@ This repository contains a custom tmux configuration integrated with FZF interac
 - [OpenShift Integration](#openshift-integration)
 - [FZF Interactive Menus](#fzf-interactive-menus)
 - [Additional Features](#additional-features)
+- [Global Configuration](#global-configuration)
 
 ---
 
@@ -27,42 +30,71 @@ This repository contains a custom tmux configuration integrated with FZF interac
 
 ## Installation
 
-Clone this repository and execute the `configure-local.sh` script to set up the complete environment:
+Clone this repository and execute the `configure-local.sh` script to set up the complete environment **globally for all users**:
 
 ```bash
-./configure-local.sh
+sudo ./configure-local.sh
 ```
 
 This will:
-- Install FZF and its dependencies
-- Download and install tmux binary
-- Install OpenShift CLI (oc) if it not exists
-- Copy dotfiles to your home directory (~/)
-- Install FZF scripts to `~/.tmux/`
-- Copy tmux session templates to `~/tmux-sessions/`
+- **Install global configuration** at `/etc/tmux-ocp/config.sh` (shared by all users)
+- **Install all scripts** to `/usr/local/bin/` (accessible to everyone)
+- **Set up skeleton files** in `/etc/skel/` for new users
+- Install FZF globally and per-user
+- Download and install tmux binary (if needed)
+- Install OpenShift CLI (oc) if it doesn't exist
+- Install systemd services for cache updates
 - Configure bash with Gruvbox color scheme and OpenShift helpers
+- **NOTE**: Existing users are NOT updated by default
 
-Or manually copy configuration files:
+### Updating Existing Users
+
+To update existing user home directories with the new configuration:
 
 ```bash
-cp dotfiles/tmux.conf ~/.tmux.conf
-cp dotfiles/bashrc ~/.bashrc
-cp dotfiles/vimrc ~/.vimrc
-cp -r fzf-files ~/.tmux/
-cp -r tmux-sessions ~/tmux-sessions/
+sudo ./configure-local.sh --update-users
 ```
+
+**WARNING**: This will overwrite existing dotfiles for ALL existing users.
+
+### Additional Options
+
+View all available options:
+```bash
+./configure-local.sh --help
+```
+
+Install with all options:
+```bash
+sudo ./configure-local.sh --update-users --download-tmux --download-oc
+```
+
+### For New Users
+
+New users automatically get the correct configuration:
+
+```bash
+sudo useradd -m newuser
+```
+
+All dotfiles and configurations are copied from `/etc/skel/` automatically.
 
 ### Configuration
 
-After installation, you can customize the base paths, credentials, and settings used by the OpenShift cluster management tools.
+After installation, **all users share the configuration** at `/etc/tmux-ocp/config.sh`. To customize:
 
-**After Installation:**
-
-Edit the configuration file at any time:
-
+**For all users (requires sudo)**:
 ```bash
-vim ~/.tmux/config.sh
+sudo vim /etc/tmux-ocp/config.sh
 ```
+
+**For a single user only** (create user override):
+```bash
+cp /etc/tmux-ocp/config.sh $HOME/.tmux/config.sh
+vim $HOME/.tmux/config.sh
+```
+
+See [GLOBAL-CONFIGURATION.md](GLOBAL-CONFIGURATION.md) for complete details on the configuration system.
 
 **Available Configuration Options:**
 
