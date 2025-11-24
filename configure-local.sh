@@ -60,30 +60,37 @@ OPTIONS:
     --download-oc           Download and install the OpenShift CLI (oc) to /usr/local/bin/
                            (automatically enabled if oc is not found)
     
-    --update-users          Update existing user home directories with new dotfiles
-                           WARNING: This will overwrite existing .bashrc, .tmux.conf,
-                           .vimrc, and other dotfiles for ALL existing users
-                           (by default, existing users are NOT modified)
+    --update-users          Install dotfiles in /etc/skel/ for ALL users (system-wide)
+                           This will:
+                           • Copy dotfiles to /etc/skel/ (template for new users)
+                           • Update ALL existing users with dotfiles from /etc/skel/
+                           • New users will automatically get the configuration
+                           (by default, installs ONLY for current user)
 
 WHAT THIS SCRIPT DOES:
     
     Global Installation (always performed):
     ---------------------------------------
-    • Creates /etc/tmux-ocp/ directory for global scripts
+    • Creates /usr/local/share/tmux-ocp/ directory for shared scripts
     • Installs all scripts to /usr/local/bin/ (ocpcreatecluster, fzf-*, etc.)
     • Installs shared resources to /usr/local/share/tmux-ocp/
-    • Sets up /etc/skel/ with dotfiles and config.sh template for NEW users
     • Installs fzf globally
     • Installs Python packages globally (tmuxp, yq, bat)
     • Installs and enables systemd services (update-ocp-cache, updatedb, generate-graph)
-    • Creates ~/.tmux/config.sh for current user
     
-    User Updates (only with --update-users):
-    ----------------------------------------
-    • Updates all existing user home directories with new dotfiles
-    • Installs fzf per-user if not already installed
-    • Installs vim-plug per-user if not already installed
-    • Updates root user configuration
+    Without --update-users (default):
+    ---------------------------------
+    • Installs dotfiles ONLY for current user
+    • Creates ~/.tmux/config.sh for current user
+    • Other users are NOT affected
+    • /etc/skel/ is NOT modified
+    
+    With --update-users:
+    --------------------
+    • Installs dotfiles to /etc/skel/ (system-wide template)
+    • Updates ALL existing users with dotfiles from /etc/skel/
+    • New users automatically inherit the configuration
+    • Root user is also updated
 
 INSTALLATION LOCATIONS:
     
@@ -138,11 +145,7 @@ for arg in "$@"; do
     esac
 done
 
-# 1. Obtém o caminho do script que chamou
 CALLER_PATH="${BASH_SOURCE[1]}"
-
-# 2. Extrai o diretório (dirname) do caminho
-# Use 'dirname' para remover o nome do arquivo, deixando apenas o diretório.
 TMUX_DIR="$(dirname "$CALLER_PATH")"
 
 log "Configuring Tmux environment for all users"
@@ -177,54 +180,77 @@ else
     log "fzf already installed globally"
 fi
 
-log "Setting up skeleton files for new users"
-log "Copying dotfiles to /etc/skel"
-sudo cp $TMUX_DIR/dotfiles/bashrc /etc/skel/.bashrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/tmux.conf /etc/skel/.tmux.conf > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/vimrc /etc/skel/.vimrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/dircolors /etc/skel/.dircolors > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/inputrc /etc/skel/.inputrc > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/bash_functions /etc/skel/.bash_functions > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/ansible.cfg /etc/skel/.ansible.cfg > /dev/null 2>&1
-
-log "Installing vim-plug for new users"
-sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
-sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
-
-log "Setting up .tmux/config.sh for new users in /etc/skel"
-sudo mkdir -p /etc/skel/.tmux > /dev/null 2>&1
-sudo cp "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh > /dev/null 2>&1
-sudo chmod 600 /etc/skel/.tmux/config.sh > /dev/null 2>&1
-log "Created config template for new users at /etc/skel/.tmux/config.sh"
-
 CURRENT_USER="${SUDO_USER:-$USER}"
 CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
 
-# Always update current user
-log "Updating current user: $CURRENT_USER"
-copy_dotfiles_to_user "$CURRENT_USER_HOME" "$CURRENT_USER"
-
 if [ "$UPDATE_USERS" = true ]; then
-    log "Updating other existing users (--update-users flag enabled)"
+    log "Installing dotfiles to /etc/skel/ for all users (--update-users enabled)"
     
+    log "Copying dotfiles to /etc/skel"
+    sudo cp $TMUX_DIR/dotfiles/bashrc /etc/skel/.bashrc > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/tmux.conf /etc/skel/.tmux.conf > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/vimrc /etc/skel/.vimrc > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/dircolors /etc/skel/.dircolors > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/inputrc /etc/skel/.inputrc > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/bash_functions /etc/skel/.bash_functions > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/ansible.cfg /etc/skel/.ansible.cfg > /dev/null 2>&1
+    
+    log "Installing vim-plug for all users"
+    sudo mkdir -p /etc/skel/.vim/autoload > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/plug.vim /etc/skel/.vim/autoload/plug.vim > /dev/null 2>&1
+    
+    log "Setting up .tmux/config.sh template in /etc/skel"
+    sudo mkdir -p /etc/skel/.tmux > /dev/null 2>&1
+    sudo cp "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh > /dev/null 2>&1
+    sudo chmod 600 /etc/skel/.tmux/config.sh > /dev/null 2>&1
+    
+    log "Updating all existing users from /etc/skel/"
     # Update all users in /home
     for user_home in /home/*; do
         if [ -d "$user_home" ]; then
             username=$(basename "$user_home")
-            # Skip current user (already updated above)
-            if [ "$username" = "$CURRENT_USER" ]; then
-                continue
-            fi
             copy_dotfiles_to_user "$user_home" "$username"
         fi
     done
-
-    # Also update root user if current user is not root
-    if [ -d "/root" ] && [ "$CURRENT_USER" != "root" ]; then
+    
+    # Also update root user
+    if [ -d "/root" ]; then
         copy_dotfiles_to_user "/root" "root"
     fi
+    
+    log "All users updated. New users will inherit from /etc/skel/"
 else
-    log "Skipping other user updates (use --update-users to update all other existing users)"
+    log "Installing dotfiles only for current user: $CURRENT_USER"
+    
+    # Copy directly to current user (no /etc/skel/)
+    log "Copying dotfiles to $CURRENT_USER_HOME"
+    sudo cp $TMUX_DIR/dotfiles/bashrc "$CURRENT_USER_HOME/.bashrc" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/tmux.conf "$CURRENT_USER_HOME/.tmux.conf" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/vimrc "$CURRENT_USER_HOME/.vimrc" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/dircolors "$CURRENT_USER_HOME/.dircolors" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/inputrc "$CURRENT_USER_HOME/.inputrc" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/bash_functions "$CURRENT_USER_HOME/.bash_functions" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/ansible.cfg "$CURRENT_USER_HOME/.ansible.cfg" > /dev/null 2>&1
+    
+    log "Installing vim-plug for current user"
+    sudo mkdir -p "$CURRENT_USER_HOME/.vim/autoload" > /dev/null 2>&1
+    sudo cp $TMUX_DIR/dotfiles/plug.vim "$CURRENT_USER_HOME/.vim/autoload/plug.vim" > /dev/null 2>&1
+    
+    log "Creating config file for current user"
+    sudo mkdir -p "$CURRENT_USER_HOME/.tmux" > /dev/null 2>&1
+    if [ ! -f "$CURRENT_USER_HOME/.tmux/config.sh" ]; then
+        sudo cp "$TMUX_DIR/config.sh.example" "$CURRENT_USER_HOME/.tmux/config.sh" > /dev/null 2>&1
+        sudo chmod 600 "$CURRENT_USER_HOME/.tmux/config.sh" > /dev/null 2>&1
+        log "Created config at $CURRENT_USER_HOME/.tmux/config.sh"
+    fi
+    
+    # Fix ownership
+    sudo chown -R "$CURRENT_USER:$CURRENT_USER" "$CURRENT_USER_HOME/.bashrc" "$CURRENT_USER_HOME/.tmux.conf" \
+        "$CURRENT_USER_HOME/.vimrc" "$CURRENT_USER_HOME/.dircolors" "$CURRENT_USER_HOME/.inputrc" \
+        "$CURRENT_USER_HOME/.bash_functions" "$CURRENT_USER_HOME/.ansible.cfg" \
+        "$CURRENT_USER_HOME/.vim" "$CURRENT_USER_HOME/.tmux" > /dev/null 2>&1
+    
+    log "Current user updated. Other users NOT affected (use --update-users to install for all)"
 fi
 
 log "Copying fzf-files to global location"
@@ -312,18 +338,20 @@ echo "Scripts installed at: /usr/local/bin/"
 echo "Shared resources at: /usr/local/share/tmux-ocp/"
 echo ""
 if [ "$UPDATE_USERS" = true ]; then
-    echo "Existing user home directories have been updated"
+    echo "Installation mode: SYSTEM-WIDE (all users)"
+    echo "  • /etc/skel/ updated (template for new users)"
+    echo "  • All existing users updated"
+    echo "  • New users will automatically inherit configuration"
 else
-    echo "Existing users were NOT updated (use --update-users to update them)"
+    echo "Installation mode: LOCAL (current user only)"
+    echo "  • Only $CURRENT_USER updated"
+    echo "  • Other users NOT affected"
+    echo "  • Use --update-users for system-wide installation"
 fi
 echo ""
-echo "NEW USERS:"
-echo "  Create new users with: sudo useradd -m username"
-echo "  They will automatically get their own ~/.tmux/config.sh"
-echo ""
 echo "CONFIGURATION:"
-echo "  Edit your config: vim \$HOME/.tmux/config.sh"
-echo "  Each user has independent configuration"
+echo "  Current user config: \$HOME/.tmux/config.sh"
+echo "  Edit with: vim \$HOME/.tmux/config.sh"
 echo ""
 echo "DOCUMENTATION:"
 echo "  See GLOBAL-CONFIGURATION.md for complete documentation"
