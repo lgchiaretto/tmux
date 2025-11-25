@@ -50,6 +50,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'Raimondi/delimitMate'                     " Auto-completion for brackets
     Plug 'tomtom/tcomment_vim'                      " Commenting plugin
     Plug 'tpope/vim-surround'                       " Surround text objects
+    Plug 'github/copilot.vim'                       " GitHub Copilot
 call plug#end()
 
 " Gruvbox settings
