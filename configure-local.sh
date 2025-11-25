@@ -35,13 +35,7 @@ check_dependencies() {
     for cmd in "${deps[@]}"; do
         if ! command -v "$cmd" &> /dev/null; then
             warn "Dependency '$cmd' not found. Attempting to install..."
-            if command -v dnf &> /dev/null; then
-                sudo dnf install -y "$cmd"
-            elif command -v apt-get &> /dev/null; then
-                sudo apt-get update && sudo apt-get install -y "$cmd"
-            else
-                error "Could not install '$cmd'. Please install it manually."
-            fi
+            sudo dnf install -y "$cmd"
         fi
     done
     
@@ -226,48 +220,35 @@ fi
 # Prefer system packages over pip to avoid breaking system Python
 log "Installing Python packages..."
 
-if command -v dnf &> /dev/null; then
-    # Fedora/RHEL with DNF
-    log "Installing packages via DNF (Fedora/RHEL)..."
-    
-    # Try to install tmuxp from system packages (Fedora)
-    if dnf list available python3-tmuxp &> /dev/null; then
-        sudo dnf install -y python3-tmuxp python3-magic > /dev/null 2>&1
-        log "Installed python3-tmuxp and python3-magic from system packages"
-    else
-        # RHEL/CentOS may need EPEL or pip fallback
-        warn "python3-tmuxp not available in system repos, using pip in user space"
-        # Install to user site-packages, not system
-        pip3 install --user tmuxp python-magic -q 2> /dev/null || warn "Failed to install some Python packages"
-    fi
-    
-    # yq and bat are not Python packages, handle separately
-    if ! command -v yq &> /dev/null; then
-        # yq (go-based tool) needs to be installed via binary or snap
-        if ! command -v snap &> /dev/null || ! sudo snap install yq &> /dev/null; then
-            warn "yq not available via snap, will try pip as fallback"
-            pip3 install --user yq -q 2> /dev/null || warn "yq installation failed"
-        fi
-    fi
-    
-    if ! command -v bat &> /dev/null; then
-        # Try batcat package on Fedora/RHEL
-        sudo dnf install -y bat > /dev/null 2>&1 || {
-            warn "bat not available in repos, trying pip fallback"
-            pip3 install --user bat -q 2> /dev/null || warn "bat installation failed"
-        }
-    fi
-    
-elif command -v apt-get &> /dev/null; then
-    # Debian/Ubuntu
-    log "Installing packages via APT (Debian/Ubuntu)..."
-    sudo apt-get update -qq
-    sudo apt-get install -y python3-magic bat > /dev/null 2>&1
-    pip3 install --user tmuxp yq -q 2> /dev/null || warn "Failed to install some Python packages"
+# Fedora/RHEL with DNF
+log "Installing packages via DNF (Fedora/RHEL)..."
+
+# Try to install tmuxp from system packages (Fedora)
+if dnf list available python3-tmuxp &> /dev/null; then
+    sudo dnf install -y python3-tmuxp python3-magic > /dev/null 2>&1
+    log "Installed python3-tmuxp and python3-magic from system packages"
 else
-    # Fallback to pip (user install to avoid breaking system)
-    warn "No package manager detected, using pip with --user flag"
-    pip3 install --user tmuxp yq bat python-magic -q 2> /dev/null || warn "Some packages may have failed to install"
+    # RHEL/CentOS may need EPEL or pip fallback
+    warn "python3-tmuxp not available in system repos, using pip in user space"
+    # Install to user site-packages, not system
+    pip3 install --user tmuxp python-magic -q 2> /dev/null || warn "Failed to install some Python packages"
+fi
+
+# yq and bat are not Python packages, handle separately
+if ! command -v yq &> /dev/null; then
+    # yq (go-based tool) needs to be installed via binary or snap
+    if ! command -v snap &> /dev/null || ! sudo snap install yq &> /dev/null; then
+        warn "yq not available via snap, will try pip as fallback"
+        pip3 install --user yq -q 2> /dev/null || warn "yq installation failed"
+    fi
+fi
+
+if ! command -v bat &> /dev/null; then
+    # Try batcat package on Fedora/RHEL
+    sudo dnf install -y bat > /dev/null 2>&1 || {
+        warn "bat not available in repos, trying pip fallback"
+        pip3 install --user bat -q 2> /dev/null || warn "bat installation failed"
+    }
 fi
 
 # Systemd Services Configuration
