@@ -31,11 +31,11 @@ warn() {
 
 # Basic Dependency Check
 check_dependencies() {
-    local deps=(git wget tar python3)
+    local deps=(git wget curl tar python3)
     for cmd in "${deps[@]}"; do
         if ! command -v "$cmd" &> /dev/null; then
             warn "Dependency '$cmd' not found. Attempting to install..."
-            sudo dnf install -y "$cmd"
+            sudo dnf install -y "$cmd" > /dev/null 2>&1
         fi
     done
     
@@ -220,6 +220,12 @@ fi
 # Prefer system packages over pip to avoid breaking system Python
 log "Installing Python packages..."
 
+# Ensure pip3 is installed first
+if ! command -v pip3 &> /dev/null; then
+    log "Installing pip3..."
+    sudo dnf install -y python3-pip > /dev/null 2>&1 || error "Failed to install pip3"
+fi
+
 # Fedora/RHEL with DNF
 log "Installing packages via DNF (Fedora/RHEL)..."
 
@@ -229,26 +235,67 @@ if dnf list available python3-tmuxp &> /dev/null; then
     log "Installed python3-tmuxp and python3-magic from system packages"
 else
     # RHEL/CentOS may need EPEL or pip fallback
-    warn "python3-tmuxp not available in system repos, using pip in user space"
-    # Install to user site-packages, not system
-    pip3 install --user tmuxp python-magic -q 2> /dev/null || warn "Failed to install some Python packages"
+    warn "python3-tmuxp not available in system repos, installing via pip3 to /usr/local"
+    # Install globally to /usr/local so all users can access
+    if command -v pip3 &> /dev/null; then
+        sudo pip3 install --prefix=/usr/local tmuxp python-magic 2>&1 | grep -v "WARNING: Running pip as the 'root' user" || warn "Failed to install some Python packages"
+        log "Installed tmuxp and python-magic to /usr/local"
+    else
+        error "pip3 not available, cannot install Python packages"
+    fi
 fi
 
 # yq and bat are not Python packages, handle separately
 if ! command -v yq &> /dev/null; then
-    # yq (go-based tool) needs to be installed via binary or snap
-    if ! command -v snap &> /dev/null || ! sudo snap install yq &> /dev/null; then
-        warn "yq not available via snap, will try pip as fallback"
-        pip3 install --user yq -q 2> /dev/null || warn "yq installation failed"
+    log "Installing yq from GitHub releases..."
+    # Detect architecture
+    ARCH=$(uname -m)
+    case $ARCH in
+        x86_64) YQ_ARCH="amd64" ;;
+        aarch64) YQ_ARCH="arm64" ;;
+        *) YQ_ARCH="amd64" ;;
+    esac
+    
+    # Download latest yq binary from GitHub
+    YQ_VERSION=$(curl -s https://api.github.com/repos/mikefarah/yq/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -n "$YQ_VERSION" ]; then
+        sudo wget -q --show-progress "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}" -O "$BIN_DIR/yq" 2>&1 || warn "Failed to download yq"
+        sudo chmod +x "$BIN_DIR/yq"
+        log "Installed yq ${YQ_VERSION}"
+    else
+        warn "Could not determine yq version, skipping installation"
     fi
 fi
 
 if ! command -v bat &> /dev/null; then
-    # Try batcat package on Fedora/RHEL
-    sudo dnf install -y bat > /dev/null 2>&1 || {
-        warn "bat not available in repos, trying pip fallback"
-        pip3 install --user bat -q 2> /dev/null || warn "bat installation failed"
-    }
+    # Try batcat package on Fedora/RHEL first
+    if dnf list available bat &> /dev/null; then
+        sudo dnf install -y bat > /dev/null 2>&1 && log "Installed bat from system packages"
+    else
+        log "Installing bat from GitHub releases..."
+        # Detect architecture
+        ARCH=$(uname -m)
+        case $ARCH in
+            x86_64) BAT_ARCH="x86_64" ;;
+            aarch64) BAT_ARCH="aarch64" ;;
+            *) BAT_ARCH="x86_64" ;;
+        esac
+        
+        # Download latest bat binary from GitHub
+        BAT_VERSION=$(curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ -n "$BAT_VERSION" ]; then
+            TEMP_DIR=$(mktemp -d)
+            wget -q --show-progress "https://github.com/sharkdp/bat/releases/download/${BAT_VERSION}/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" -P "$TEMP_DIR" 2>&1 || warn "Failed to download bat"
+            if [ -f "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" ]; then
+                tar xzf "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" -C "$TEMP_DIR"
+                sudo install -m 755 "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl/bat" "$BIN_DIR/bat"
+                log "Installed bat ${BAT_VERSION}"
+            fi
+            rm -rf "$TEMP_DIR"
+        else
+            warn "Could not determine bat version, skipping installation"
+        fi
+    fi
 fi
 
 # Systemd Services Configuration
