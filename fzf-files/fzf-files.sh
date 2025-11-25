@@ -30,7 +30,7 @@ selected_file=$(
         --bind 'tab:execute-silent(tmux send-keys "code -n " {} C-m)+abort' \
         --bind 'ctrl-a:execute-silent([[ -f {} ]] && tmux send-keys "oc apply -f " {} C-m)+abort' \
         --bind 'ctrl-f:execute-silent([[ -f {} ]] && tmux send-keys "cd $(dirname {})" C-m || tmux send-keys "cd {}" C-m)+abort' \
-        --preview '[[ -f {} && -f /usr/bin/bat ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltr {}' \
+        --preview '[[ -f {} && ( -x /usr/local/bin/bat || -x /usr/bin/bat ) ]] && bat --color=always --theme="gruvbox-dark" {} || ls --color=always -ltr {}' \
         --preview-window=right:60%:wrap \
         --query "" \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
