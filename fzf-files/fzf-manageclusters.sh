@@ -103,9 +103,9 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --multi \
     --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
     --bind 'C:execute-silent(tmux send-keys /usr/local/share/tmux-ocp/fzf-files/fzf-ocpversions.sh C-m)+abort' \
-    --bind 'd:execute-silent(for cluster in {+1}; do /usr/local/bin/ocpdestroycluster "$cluster"; done)+abort' \
-    --bind 's:execute-silent(for cluster in {+1}; do /usr/local/bin/ocpstartcluster "$cluster"; done)+abort' \
-    --bind 'S:execute-silent(for cluster in {+1}; do /usr/local/bin/ocpstopcluster "$cluster"; done)+abort' \
+    --bind 'd:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpdestroycluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
+    --bind 's:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpstartcluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
+    --bind 'S:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpstopcluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
     --bind 'k:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster -e KUBECONFIG="'$CLUSTERS_BASE_PATH'/$cluster/auth/kubeconfig"; tmux send-keys -t $cluster "cd '$CLUSTERS_BASE_PATH'/$cluster" C-m; done; tmux switch-client -t {1})+abort' \
     --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
     --bind 'E:execute-silent(tmux send-keys "vim '$CLUSTERS_BASE_PATH'/"{1}"/{1}.json" C-m)+abort' \
