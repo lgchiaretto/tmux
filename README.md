@@ -243,10 +243,10 @@ All FZF menus use the Gruvbox color scheme and support multi-select operations:
 
 - `fzf-manageclusters.sh` - Manage OpenShift clusters:
   - `TAB`: Select multiple clusters for batch operations
-  - `s`: Start cluster(s) - supports multi-select
-  - `S`: Stop cluster(s) - supports multi-select
-  - `d`: Destroy cluster(s) - supports multi-select
-  - `k`: Open kubeconfig session(s) - supports multi-select
+  - `s`: Start cluster(s) - **supports multi-select**
+  - `S`: Stop cluster(s) - **supports multi-select**
+  - `d`: Destroy cluster(s) immediately - **supports multi-select** (no confirmation)
+  - `k`: Open kubeconfig session(s) - **supports multi-select**
   - `c`: Create new cluster
   - `e`: Edit cluster install config files
   - `U`: Upgrade cluster
