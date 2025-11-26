@@ -4,12 +4,26 @@ USER=$(id -un)
 GROUP=$(id -gn)
 
 echo "Configuring .bashrc, vimrc and .tmux.conf files"
-cp {.bashrc,.tmux.conf,.vimrc} /home/$USER
+if [ $USER == "root]" ]; then
+    cp {.bashrc,.tmux.conf,.vimrc} /root
+    mkdir -p /root/.tmux/
+    cp ocp-project.tmux ocp-cluster.tmux fzf-url.sh /root.tmux/
+    chown root:root /root/{.bashrc,.tmux.conf,.vimrc}
+    chown -R root:root /root/.tmux/
+    echo "Copying tmux-sessions dir to root home"
+    cp -R tmux-sessions /root/
+    chown -R root:root /root/tmux-sessions
+else
+    cp {.bashrc,.tmux.conf,.vimrc} /home/$USER
+    mkdir -p /home/$USER/.tmux/
+    cp ocp-project.tmux ocp-cluster.tmux fzf-url.sh /home/$USER/.tmux/
+    chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc}
+    echo "Copying tmux-sessions dir to '$USER' home"
+    cp -R tmux-sessions /home/$USER/
+    chown -R $USER:$GROUP /home/$USER/tmux-sessions
+    chown -R $USER:$GROUP /home/$USER/.tmux/
+fi
 sudo cp .tmux.conf /etc/tmux.conf
-mkdir -p /home/$USER/.tmux/
-cp ocp-project.tmux ocp-cluster.tmux fzf-url.sh /home/$USER/.tmux/
-chown $USER:$GROUP /home/$USER/{.bashrc,.tmux.conf,.vimrc}
-chown -R $USER:$GROUP /home/$USER/.tmux/
 echo Downloading tmux
 wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O tmux
 echo Downloading oc client
@@ -22,6 +36,4 @@ sudo chmod +x /usr/local/bin/oc
 echo "Installing tmuxp"
 sudo dnf install -y python3-pip -q
 pip3 install tmuxp -q
-echo "Copying tmux-sessions dir to '$USER' home"
-cp -R tmux-sessions ~/
 echo "Done"
