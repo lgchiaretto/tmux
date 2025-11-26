@@ -101,12 +101,12 @@ vim $HOME/.tmux/config.sh
 **Available Configuration Options:**
 
 **Paths:**
-- `CLUSTERS_BASE_PATH`: Base directory where OpenShift clusters are stored (default: `/vms/clusters`)
+- `CLUSTERS_BASE_PATH`: Base directory where OpenShift clusters are stored (default: `/labs`)
 - `OCP_CACHE_DIR`: Cache directory for OCP clients and other cached data (default: `${CLUSTERS_BASE_PATH}/.cache`)
 - `CLUSTER_VARIABLES_DIR`: Directory for vSphere cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
 - `KVM_VARIABLES_DIR`: Directory for KVM cluster template files in YAML format (default: `${CLUSTERS_BASE_PATH}/variables-files-kvm`)
-- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for KVM cluster management
-
+- `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for KVM cluster management (https://github.com/lgchiaretto/ocp4_setup_upi_kvm_ansible)
+ 
 **Remote Synchronization:**
 - `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional, format: `user@host`)
 
