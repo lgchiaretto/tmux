@@ -27,33 +27,6 @@ elif [[ -f "${config_base_path}.yaml" ]]; then
 fi
 # -----------------------------------------------------
 
-temp_file=$(mktemp)
-
-tmux new-window -n "destroy: $cluster_name" "bash -c 'read -p \"Are you sure you want to destroy the cluster \\\"$cluster_name\\\"? (y/N): \" confirm; echo \$confirm > $temp_file;'"
-
-while [ ! -s "$temp_file" ]; do
-  sleep 1
-done
-
-confirm=$(cat "$temp_file")
-rm -f "$temp_file"
-
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  exit 0
-fi
-
-## MUDANÇA: Seção comentada atualizada para usar 'yq' e a variável '$config_file'
-#clear
-#read -p "Do you also want to remove DNS and certs for cluster \"$cluster_name\"? (y/N): " confirm2
-#if [[ "$confirm2" == "y" || "$confirm2" == "Y" ]]; then
-#  # 'yq -i' edita o arquivo no local (in-place), muito mais limpo que criar .tmp
-#  yq -i '.deleteiffailed = "true"' "$config_file"
-#else
-#  yq -i '.deleteiffailed = "false"' "$config_file"
-#fi
-# -----------------------------------------------------
-
-
 infra=$(yq -r '.infra' "$config_file" || true)
 
 if [[ "$infra" == "vsphere" ]]; then

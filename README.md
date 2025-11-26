@@ -53,7 +53,7 @@ This will:
 To install for ALL users (including new users):
 
 ```bash
-./configure-local.sh --update-users
+sudo ./configure-local.sh --update-users
 ```
 
 This will:
@@ -67,7 +67,7 @@ This will:
 
 View all available options:
 ```bash
-./configure-local.sh --help
+sudo ./configure-local.sh --help
 ```
 
 Install with all options:
@@ -240,6 +240,17 @@ Example: `4.19.19:(k):openshift-config`
 All FZF menus use the Gruvbox color scheme and support multi-select operations:
 
 ### Resource Browsers
+
+- `fzf-manageclusters.sh` - Manage OpenShift clusters:
+  - `TAB`: Select multiple clusters for batch operations
+  - `s`: Start cluster(s) - **supports multi-select**
+  - `S`: Stop cluster(s) - **supports multi-select**
+  - `d`: Destroy cluster(s) immediately - **supports multi-select** (no confirmation)
+  - `k`: Open kubeconfig session(s) - **supports multi-select**
+  - `c`: Create new cluster
+  - `e`: Edit cluster install config files
+  - `U`: Upgrade cluster
+  - `Enter`: Login with kubeadmin user
 
 - `fzf-pods.sh` - Browse pods with actions:
   - `Ctrl-l`: View logs in new window

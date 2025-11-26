@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Exit immediately if a command exits with a non-zero status
-# set -e
-
 # Color Definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -12,76 +9,44 @@ NC='\033[0m' # No Color
 # Paths and Constants
 TMUX_SHARE_DIR="/usr/local/share/tmux-ocp"
 BIN_DIR="/usr/local/bin"
-# Resolve absolute path to the directory containing this script
-CALLER_PATH="${BASH_SOURCE[0]}"
-TMUX_DIR="$(dirname "$(readlink -f "$CALLER_PATH")")"
+TMUX_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
 ### Helper Functions
-log() {
-    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] SUCCESS:${NC} $1"
-}
+log() { echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] SUCCESS:${NC} $1"; }
+error() { echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERROR:${NC} $1"; }
+warn() { echo -e "${YELLOW}[$(date '+%Y-%m-%d %H:%M:%S')] WARNING:${NC} $1"; }
 
-error() {
-    echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] ERROR:${NC} $1"
-}
-
-warn() {
-    echo -e "${YELLOW}[$(date '+%Y-%m-%d %H:%M:%S')] WARNING:${NC} $1"
-}
-
-# Basic Dependency Check
+# Install dependencies silently
 check_dependencies() {
-    local deps=(git wget tar python3)
-    for cmd in "${deps[@]}"; do
-        if ! command -v "$cmd" &> /dev/null; then
-            warn "Dependency '$cmd' not found. Attempting to install..."
-            if command -v dnf &> /dev/null; then
-                sudo dnf install -y "$cmd"
-            elif command -v apt-get &> /dev/null; then
-                sudo apt-get update && sudo apt-get install -y "$cmd"
-            else
-                error "Could not install '$cmd'. Please install it manually."
-            fi
-        fi
+    for cmd in git wget curl tar python3; do
+        command -v "$cmd" &>/dev/null || sudo dnf install -y "$cmd" &>/dev/null
     done
-    
-    # pip3 is optional - only warn if not present
-    if ! command -v pip3 &> /dev/null; then
-        warn "pip3 not found. Will try to use system packages only."
-    fi
+    command -v pip3 &>/dev/null || warn "pip3 not found. Will try to use system packages only."
 }
 
-# Function to copy dotfiles to a user's home directory
+# Copy dotfiles to user's home directory
 copy_dotfiles_to_user() {
     local target_home="$1"
     local target_user="$2"
     
     log "Updating configuration for user: $target_user"
     
-    # List of files to copy from /etc/skel (source of truth)
-    local files=(.bashrc .tmux.conf .vimrc .dircolors .inputrc .bash_functions .ansible.cfg)
-    
-    for file in "${files[@]}"; do
-        if [ -f "/etc/skel/$file" ]; then
-            sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/$file" "$target_home/$file"
-        fi
+    # Copy dotfiles from /etc/skel
+    for file in .bashrc .tmux.conf .vimrc .dircolors .inputrc .bash_functions .ansible.cfg; do
+        [ -f "/etc/skel/$file" ] && sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/$file" "$target_home/$file"
     done
     
     # Install vim-plug
     sudo install -d -m 755 -o "$target_user" -g "$target_user" "$target_home/.vim/autoload"
-    if [ -f "/etc/skel/.vim/autoload/plug.vim" ]; then
-        sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/.vim/autoload/plug.vim" "$target_home/.vim/autoload/plug.vim"
-    fi
+    [ -f "/etc/skel/.vim/autoload/plug.vim" ] && sudo install -m 644 -o "$target_user" -g "$target_user" "/etc/skel/.vim/autoload/plug.vim" "$target_home/.vim/autoload/plug.vim"
     
-    # Tmux Configuration (config.sh) - Do not overwrite if exists
+    # Create config.sh if it doesn't exist (NEVER overwrite)
     sudo install -d -m 755 -o "$target_user" -g "$target_user" "$target_home/.tmux"
-    if [ ! -f "$target_home/.tmux/config.sh" ]; then
-        if [ -f "/etc/skel/.tmux/config.sh" ]; then
-            sudo install -m 600 -o "$target_user" -g "$target_user" "/etc/skel/.tmux/config.sh" "$target_home/.tmux/config.sh"
-            log "Configuration created at $target_home/.tmux/config.sh"
-        fi
-    else
-        warn "Configuration already exists at $target_home/.tmux/config.sh (kept as is)"
+    if [ -f "$target_home/.tmux/config.sh" ]; then
+        warn "Configuration already exists at $target_home/.tmux/config.sh (preserving)"
+    elif [ -f "$TMUX_DIR/config.sh.example" ]; then
+        sudo install -m 600 -o "$target_user" -g "$target_user" "$TMUX_DIR/config.sh.example" "$target_home/.tmux/config.sh"
+        log "Configuration created at $target_home/.tmux/config.sh"
     fi
 }
 
@@ -146,14 +111,12 @@ fi
 # Global FZF Installation
 if [ ! -d "/usr/local/share/fzf" ]; then
     log "Cloning fzf repository..."
-    sudo git clone --depth 1 https://github.com/junegunn/fzf.git /usr/local/share/fzf
-    log "Running fzf installer..."
-    sudo /usr/local/share/fzf/install --bin --no-update-rc --no-bash --no-zsh --no-fish
+    sudo git clone --depth 1 -q https://github.com/junegunn/fzf.git /usr/local/share/fzf &>/dev/null
+    sudo /usr/local/share/fzf/install --bin --no-update-rc --no-bash --no-zsh --no-fish &>/dev/null
 else
-    log "FZF already installed. Updating repository..."
-    (cd /usr/local/share/fzf && sudo git pull > /dev/null 2>&1)
+    log "Updating fzf repository..."
+    (cd /usr/local/share/fzf && sudo git pull -q &>/dev/null)
 fi
-# Link FZF binaries
 sudo install -m 755 /usr/local/share/fzf/bin/fzf "$BIN_DIR/fzf"
 sudo install -m 755 /usr/local/share/fzf/bin/fzf-tmux "$BIN_DIR/fzf-tmux"
 
@@ -161,157 +124,121 @@ sudo install -m 755 /usr/local/share/fzf/bin/fzf-tmux "$BIN_DIR/fzf-tmux"
 CURRENT_USER="${SUDO_USER:-$USER}"
 CURRENT_USER_HOME=$(eval echo ~$CURRENT_USER)
 
-# Prepare source files (using /etc/skel as template)
-# First, copy files from repo to /etc/skel
-sudo install -m 644 "$TMUX_DIR/dotfiles/bashrc" /etc/skel/.bashrc
-sudo install -m 644 "$TMUX_DIR/dotfiles/tmux.conf" /etc/skel/.tmux.conf
-sudo install -m 644 "$TMUX_DIR/dotfiles/vimrc" /etc/skel/.vimrc
-sudo install -m 644 "$TMUX_DIR/dotfiles/dircolors" /etc/skel/.dircolors
-sudo install -m 644 "$TMUX_DIR/dotfiles/inputrc" /etc/skel/.inputrc
-sudo install -m 644 "$TMUX_DIR/dotfiles/bash_functions" /etc/skel/.bash_functions
-sudo install -m 644 "$TMUX_DIR/dotfiles/ansible.cfg" /etc/skel/.ansible.cfg
-
+# Prepare dotfiles in /etc/skel
+for file in bashrc::.bashrc tmux.conf::.tmux.conf vimrc::.vimrc dircolors::.dircolors inputrc::.inputrc bash_functions::.bash_functions ansible.cfg::.ansible.cfg; do
+    src="${file%%::*}"
+    dst="${file##*::}"
+    sudo install -m 644 "$TMUX_DIR/dotfiles/$src" "/etc/skel/$dst"
+done
 sudo install -d -m 755 /etc/skel/.vim/autoload
 sudo install -m 644 "$TMUX_DIR/dotfiles/plug.vim" /etc/skel/.vim/autoload/plug.vim
 
-sudo install -d -m 755 /etc/skel/.tmux
-sudo install -m 600 "$TMUX_DIR/config.sh.example" /etc/skel/.tmux/config.sh
-
+# Update users
 if [ "$UPDATE_USERS" = true ]; then
     log "Updating ALL system users..."
-    for user_home in /home/*; do
-        if [ -d "$user_home" ]; then
-            username=$(basename "$user_home")
-            copy_dotfiles_to_user "$user_home" "$username"
-        fi
+    for user_home in /home/* /root; do
+        [ -d "$user_home" ] && copy_dotfiles_to_user "$user_home" "$(basename "$user_home")"
     done
-    # Update root
-    copy_dotfiles_to_user "/root" "root"
 else
     log "Updating only current user: $CURRENT_USER"
     copy_dotfiles_to_user "$CURRENT_USER_HOME" "$CURRENT_USER"
 fi
 
-# Binary Installation (Tmux and OC)
+# Download binaries if needed
 if [ "$DOWNLOAD_TMUX" = true ] || [ ! -f "$BIN_DIR/tmux" ]; then
     log "Downloading tmux binary..."
-    sudo wget -q --show-progress --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O "$BIN_DIR/tmux"
+    sudo wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O "$BIN_DIR/tmux" &>/dev/null
     sudo chmod +x "$BIN_DIR/tmux"
 fi
 
 if [ "$DOWNLOAD_OC" = true ] || [ ! -f "$BIN_DIR/oc" ]; then
     log "Downloading OpenShift CLI..."
     TEMP_DIR=$(mktemp -d)
-    wget -q --show-progress https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux.tar.gz -P "$TEMP_DIR"
-    tar xzf "$TEMP_DIR/openshift-client-linux.tar.gz" -C "$TEMP_DIR"
+    wget -q https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.19.13/openshift-client-linux.tar.gz -P "$TEMP_DIR" &>/dev/null
+    tar xzf "$TEMP_DIR/openshift-client-linux.tar.gz" -C "$TEMP_DIR" &>/dev/null
     sudo install -m 755 "$TEMP_DIR/oc" "$BIN_DIR/oc"
-    # Optional: install kubectl if included
-    if [ -f "$TEMP_DIR/kubectl" ]; then
-        sudo install -m 755 "$TEMP_DIR/kubectl" "$BIN_DIR/kubectl"
-    fi
+    [ -f "$TEMP_DIR/kubectl" ] && sudo install -m 755 "$TEMP_DIR/kubectl" "$BIN_DIR/kubectl"
     rm -rf "$TEMP_DIR"
 fi
 
-# Utility Scripts Installation
+# Install utility scripts
 log "Installing utility scripts to $BIN_DIR..."
 sudo install -m 755 "$TMUX_DIR/fzf-files/oc-logs-fzf.sh" "$BIN_DIR/"
-if [ -d "$TMUX_DIR/ocpscripts" ]; then
-    sudo install -m 755 "$TMUX_DIR/ocpscripts/"* "$BIN_DIR/"
+[ -d "$TMUX_DIR/ocpscripts" ] && sudo install -m 755 "$TMUX_DIR/ocpscripts/"* "$BIN_DIR/"
+
+# Install Python packages
+log "Installing Python packages..."
+command -v pip3 &>/dev/null || sudo dnf install -y python3-pip &>/dev/null
+
+if dnf list available python3-tmuxp &>/dev/null; then
+    sudo dnf install -y python3-tmuxp python3-magic &>/dev/null
+    log "Installed python3-tmuxp and python3-magic from system packages"
+else
+    warn "python3-tmuxp not available in system repos, installing via pip3"
+    sudo pip3 install --prefix=/usr/local tmuxp python-magic &>/dev/null && log "Installed tmuxp and python-magic to /usr/local"
 fi
 
-# Python Packages Installation
-# Prefer system packages over pip to avoid breaking system Python
-log "Installing Python packages..."
-
-if command -v dnf &> /dev/null; then
-    # Fedora/RHEL with DNF
-    log "Installing packages via DNF (Fedora/RHEL)..."
-    
-    # Try to install tmuxp from system packages (Fedora)
-    if dnf list available python3-tmuxp &> /dev/null; then
-        sudo dnf install -y python3-tmuxp python3-magic > /dev/null 2>&1
-        log "Installed python3-tmuxp and python3-magic from system packages"
+# Install yq
+if ! command -v yq &>/dev/null; then
+    log "Installing yq from GitHub releases..."
+    ARCH=$(uname -m)
+    YQ_ARCH="${ARCH/x86_64/amd64}"; YQ_ARCH="${YQ_ARCH/aarch64/arm64}"
+    YQ_VERSION=$(curl -s https://api.github.com/repos/mikefarah/yq/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -n "$YQ_VERSION" ]; then
+        sudo wget -q "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${YQ_ARCH}" -O "$BIN_DIR/yq" &>/dev/null && sudo chmod +x "$BIN_DIR/yq"
+        log "Installed yq ${YQ_VERSION}"
     else
-        # RHEL/CentOS may need EPEL or pip fallback
-        warn "python3-tmuxp not available in system repos, using pip in user space"
-        # Install to user site-packages, not system
-        pip3 install --user tmuxp python-magic -q 2> /dev/null || warn "Failed to install some Python packages"
+        warn "Could not determine yq version"
     fi
-    
-    # yq and bat are not Python packages, handle separately
-    if ! command -v yq &> /dev/null; then
-        # yq (go-based tool) needs to be installed via binary or snap
-        if ! command -v snap &> /dev/null || ! sudo snap install yq &> /dev/null; then
-            warn "yq not available via snap, will try pip as fallback"
-            pip3 install --user yq -q 2> /dev/null || warn "yq installation failed"
+fi
+
+# Install bat
+if ! command -v bat &>/dev/null; then
+    if dnf list available bat &>/dev/null; then
+        sudo dnf install -y bat &>/dev/null && log "Installed bat from system packages"
+    else
+        log "Installing bat from GitHub releases..."
+        ARCH=$(uname -m)
+        BAT_ARCH="${ARCH/aarch64/aarch64}"; BAT_ARCH="${ARCH/x86_64/x86_64}"
+        BAT_VERSION=$(curl -s https://api.github.com/repos/sharkdp/bat/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        if [ -n "$BAT_VERSION" ]; then
+            TEMP_DIR=$(mktemp -d)
+            wget -q "https://github.com/sharkdp/bat/releases/download/${BAT_VERSION}/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" -P "$TEMP_DIR" &>/dev/null
+            [ -f "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" ] && {
+                tar xzf "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl.tar.gz" -C "$TEMP_DIR" &>/dev/null
+                sudo install -m 755 "$TEMP_DIR/bat-${BAT_VERSION}-${BAT_ARCH}-unknown-linux-musl/bat" "$BIN_DIR/bat"
+                log "Installed bat ${BAT_VERSION}"
+            }
+            rm -rf "$TEMP_DIR"
+        else
+            warn "Could not determine bat version"
         fi
     fi
-    
-    if ! command -v bat &> /dev/null; then
-        # Try batcat package on Fedora/RHEL
-        sudo dnf install -y bat > /dev/null 2>&1 || {
-            warn "bat not available in repos, trying pip fallback"
-            pip3 install --user bat -q 2> /dev/null || warn "bat installation failed"
-        }
-    fi
-    
-elif command -v apt-get &> /dev/null; then
-    # Debian/Ubuntu
-    log "Installing packages via APT (Debian/Ubuntu)..."
-    sudo apt-get update -qq
-    sudo apt-get install -y python3-magic bat > /dev/null 2>&1
-    pip3 install --user tmuxp yq -q 2> /dev/null || warn "Failed to install some Python packages"
-else
-    # Fallback to pip (user install to avoid breaking system)
-    warn "No package manager detected, using pip with --user flag"
-    pip3 install --user tmuxp yq bat python-magic -q 2> /dev/null || warn "Some packages may have failed to install"
 fi
 
-# Systemd Services Configuration
+# Configure systemd services
 install_systemd_service() {
-    local name=$1
-    local path=$2
-    local script=$3
-    
+    local name=$1 path=$2 script=$3
     log "Configuring systemd service: $name"
-    
-    if [ -n "$script" ] && [ -f "$script" ]; then
-        sudo install -m 755 "$script" "$BIN_DIR/"
-    fi
-    
+    [ -n "$script" ] && [ -f "$script" ] && sudo install -m 755 "$script" "$BIN_DIR/"
     if [ -f "$path/$name.service" ]; then
-        sudo install -m 644 "$path/$name.service" /etc/systemd/system/
-        sudo install -m 644 "$path/$name.timer" /etc/systemd/system/
-        sudo systemctl enable "$name.timer" > /dev/null
-        sudo systemctl start "$name.timer" > /dev/null
+        sudo install -m 644 "$path/$name.service" "$path/$name.timer" /etc/systemd/system/
+        sudo systemctl enable --now "$name.timer" &>/dev/null
     else
-        warn "Service definition for $name not found at $path"
+        warn "Service definition for $name not found"
     fi
 }
 
-sudo systemctl daemon-reload
+sudo systemctl daemon-reload &>/dev/null
 
-# Update OCP Cache Service
-install_systemd_service "update-ocp-cache" \
-    "$TMUX_DIR/update-ocp-cache/systemd" \
-    "$TMUX_DIR/update-ocp-cache/scripts/update_ocp_cache.py"
+install_systemd_service "update-ocp-cache" "$TMUX_DIR/update-ocp-cache/systemd" "$TMUX_DIR/update-ocp-cache/scripts/update_ocp_cache.py"
+install_systemd_service "updatedb" "$TMUX_DIR/updatedb/systemd" ""
+install_systemd_service "generate-graph" "$TMUX_DIR/generate-ocp-graph/systemd" "$TMUX_DIR/generate-ocp-graph/scripts/ocpgenerate-graph.py"
 
-# Update DB Service
-install_systemd_service "updatedb" \
-    "$TMUX_DIR/updatedb/systemd" \
-    "" # updatedb uses system binary
-
-# Generate Graph Service
-install_systemd_service "generate-graph" \
-    "$TMUX_DIR/generate-ocp-graph/systemd" \
-    "$TMUX_DIR/generate-ocp-graph/scripts/ocpgenerate-graph.py"
-
-# Initial Service Run (if needed)
-if [[ ! -e "/opt/.ocpgraph" ]]; then
+# Run initial services if needed
+if [ ! -e "/opt/.ocpgraph" ]; then
     log "Running initial services..."
-    sudo systemctl start update-ocp-cache.service
-    sudo systemctl start updatedb.service
-    sudo systemctl start generate-graph.service
+    sudo systemctl start update-ocp-cache.service updatedb.service generate-graph.service &>/dev/null
 fi
 
 echo ""
