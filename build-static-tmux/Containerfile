@@ -1,0 +1,53 @@
+# Build Static tmux with Podman/Docker
+#
+# Usage with Podman:
+#   podman build -t tmux-static-builder -f Containerfile .
+#   podman run --rm -v $(pwd)/output:/output:Z tmux-static-builder
+#
+# Usage with Docker:
+#   docker build -t tmux-static-builder -f Containerfile .
+#   docker run --rm -v $(pwd)/output:/output tmux-static-builder
+#
+# Build with specific tmux version:
+#   podman run --rm -e TMUX_VERSION=3.4 -v $(pwd)/output:/output:Z tmux-static-builder
+#
+# Build with UPX compression:
+#   podman run --rm -e USE_UPX=1 -v $(pwd)/output:/output:Z tmux-static-builder
+
+FROM registry.fedoraproject.org/fedora:latest
+
+LABEL maintainer="TMux OpenShift Tools Project"
+LABEL description="Build static tmux binary for Linux"
+
+# Install build dependencies
+RUN dnf install -y \
+    gcc \
+    make \
+    wget \
+    tar \
+    gzip \
+    xz \
+    bison \
+    byacc \
+    binutils \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
+
+# Set build directory
+ENV TMUX_STATIC_HOME=/tmp/tmux-static
+ENV DUMP_LOG_ON_ERROR=1
+
+# Create working directory
+WORKDIR /build
+
+# Copy build script
+COPY build-static-tmux.sh /build/
+
+# Make script executable
+RUN chmod +x /build/build-static-tmux.sh
+
+# Create output directory
+RUN mkdir -p /output
+
+# Build and copy results to output
+CMD ["/bin/bash", "-c", "/build/build-static-tmux.sh && cp /tmp/tmux-static/bin/tmux.*.gz /output/ && echo 'Build artifacts copied to /output'"]

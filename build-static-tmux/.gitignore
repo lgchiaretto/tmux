@@ -1,0 +1,6 @@
+# Build output
+output/
+
+# Temporary files
+*.log
+*.tmp

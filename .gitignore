@@ -1,3 +1,5 @@
-.github/
-
+# User-specific configuration
 config.sh
+
+# Copilot instructions (development only)
+# .github/copilot-instructions.md
