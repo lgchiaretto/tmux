@@ -20,7 +20,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1. Setup
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -44,15 +43,9 @@ jobs:
             echo "use_upx=0" >> $GITHUB_OUTPUT
           fi
 
-  # 2. Native Build
-  build-native:
+  build:
     needs: setup
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            arch: amd64
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
@@ -72,99 +65,33 @@ jobs:
           DUMP_LOG_ON_ERROR=1 \
           ./build-static-tmux.sh
       
-      # NOVO: Descompacta os arquivos antes do upload
-      - name: Decompress binaries
+      # Decompress to ensure we upload a binary, not a .gz
+      - name: Decompress binary
         run: |
           cd /tmp/tmux-static/bin
-          # Descompacta tudo que termina em .gz
           gunzip -f *.gz
-          # Lista para confirmar
           ls -la
 
-      - name: Test binary
-        run: |
-          cd /tmp/tmux-static/bin
-          # Ajuste: chama o binário direto (sem .gz)
-          chmod +x tmux.linux-amd64.stripped
-          ./tmux.linux-amd64.stripped -V
-      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux-native-${{ needs.setup.outputs.tmux_version }}-linux-${{ matrix.arch }}
+          name: tmux
           path: /tmp/tmux-static/bin/tmux*
-          retention-days: 30
+          retention-days: 1
 
-  # 3. Container Build
-  build-container:
-    needs: setup
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Build container image
-        run: |
-          cd build-static-tmux
-          docker build -t tmux-static-builder -f Containerfile .
-      
-      - name: Build static tmux in container
-        run: |
-          cd build-static-tmux
-          mkdir -p output
-          docker run --rm \
-            -e TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
-            -e USE_UPX="${{ needs.setup.outputs.use_upx }}" \
-            -v "$(pwd)/output:/output" \
-            tmux-static-builder
-      
-      - name: Decompress binaries
-        run: |
-          cd build-static-tmux/output
-          # Sudo é necessário pois arquivos criados pelo docker pertencem ao root
-          sudo gunzip -f *.gz
-          ls -la
-      
-      - name: Upload container build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: tmux-container-${{ needs.setup.outputs.tmux_version }}
-          path: build-static-tmux/output/tmux*
-          retention-days: 30
-
-  # 4. Release
   release:
-    needs: [setup, build-native, build-container]
+    needs: [setup, build]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Download all artifacts
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-
-      - name: Prepare Assets
-        run: |
-          mkdir assets_to_upload
-          
-          # Native: Procura arquivos que NÃO terminam em .gz (binários puros)
-          find artifacts/tmux-native-* -type f -name "tmux*" ! -name "*.gz" | while read file; do
-            filename=$(basename "$file")
-            cp "$file" "assets_to_upload/native-$filename"
-          done
-
-          # Container: Mesma lógica
-          find artifacts/tmux-container-* -type f -name "tmux*" ! -name "*.gz" | while read file; do
-            filename=$(basename "$file")
-            cp "$file" "assets_to_upload/container-$filename"
-          done
-          
-          echo "Files prepared for upload:"
-          ls -la assets_to_upload/
+          name: tmux
+          path: assets
 
       - name: Create Release / Upload Assets
         uses: softprops/action-gh-release@v2
@@ -173,6 +100,7 @@ jobs:
           name: tmux v${{ needs.setup.outputs.tmux_version }}
           draft: false
           prerelease: false
-          files: assets_to_upload/*
+          # Uploads whatever is in the assets folder directly
+          files: assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
