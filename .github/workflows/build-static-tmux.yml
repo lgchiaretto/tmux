@@ -25,10 +25,7 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: amd64
-          # Add arm64 when GitHub provides runners
-          # - os: ubuntu-latest
-          #   arch: arm64
-    
+
     runs-on: ${{ matrix.os }}
     
     steps:
