@@ -5,8 +5,7 @@ on:
     branches: [ "master" ]
   release:
     types: [published]
-#  workflow_dispatch:
-#    # Sem inputs: apenas um botão "Run workflow"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,13 +20,11 @@ jobs:
       - name: Determine Version
         id: version
         run: |
-          # Se for um evento de release oficial, pega a versão da tag (ex: v3.7 -> 3.7)
           if [ "${{ github.event_name }}" = "release" ]; then
             VERSION="${{ github.event.release.tag_name }}"
             VERSION="${VERSION#v}"
             echo "tmux_version=${VERSION}" >> $GITHUB_OUTPUT
           else
-            # Para Push ou Manual, a versão é fixa: 3.6
             echo "tmux_version=3.6" >> $GITHUB_OUTPUT
           fi
 
@@ -48,7 +45,6 @@ jobs:
         run: |
           cd build-static-tmux
           chmod +x build-static-tmux.sh
-          # UPX desativado (0) e versão vindo do setup
           TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
           USE_UPX="0" \
           DUMP_LOG_ON_ERROR=1 \
@@ -69,34 +65,44 @@ jobs:
 
   release:
     needs: [setup, build]
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: tmux-binary
           path: assets
-
-      - name: Delete existing release (if manual dispatch or push)
+      - name: Force Delete Old Release and Tag
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_NAME: v${{ needs.setup.outputs.tmux_version }}
         run: |
-          echo "Checking for existing release: $TAG_NAME"
-          gh release delete "$TAG_NAME" --cleanup-tag --yes || true
-          echo "Cleanup complete or release did not exist."
+          echo "Target Tag: $TAG_NAME"
+          
+          gh release delete "$TAG_NAME" --cleanup-tag --yes || echo "Release not found (ok)"
+
+          git push --delete origin "$TAG_NAME" || echo "Git tag not found (ok)"
+          
+          echo "Waiting 10s for API consistency..."
+          sleep 10
 
       - name: Create Release / Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || format('v{0}', needs.setup.outputs.tmux_version) }}
+          tag_name: v${{ needs.setup.outputs.tmux_version }}
           name: tmux v${{ needs.setup.outputs.tmux_version }}
           draft: false
           prerelease: false
           files: assets/*
+          # Força o overwrite caso algo tenha sobrado
+          fail_on_unmatched_files: true 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
