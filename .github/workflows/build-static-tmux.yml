@@ -5,17 +5,8 @@ on:
     branches: [ "master" ]
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      tmux_version:
-        description: 'tmux version to build'
-        required: false
-        default: '3.6'
-      use_upx:
-        description: 'Compress with UPX'
-        required: false
-        default: false
-        type: boolean
+#  workflow_dispatch:
+#    # Sem inputs: apenas um botão "Run workflow"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,23 +17,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tmux_version: ${{ steps.version.outputs.tmux_version }}
-      use_upx: ${{ steps.version.outputs.use_upx }}
     steps:
-      - name: Determine Version and Flags
+      - name: Determine Version
         id: version
         run: |
+          # Se for um evento de release oficial, pega a versão da tag (ex: v3.7 -> 3.7)
           if [ "${{ github.event_name }}" = "release" ]; then
             VERSION="${{ github.event.release.tag_name }}"
             VERSION="${VERSION#v}"
             echo "tmux_version=${VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "tmux_version=${{ github.event.inputs.tmux_version || '3.6' }}" >> $GITHUB_OUTPUT
-          fi
-          
-          if [ "${{ github.event.inputs.use_upx }}" = "true" ]; then
-            echo "use_upx=1" >> $GITHUB_OUTPUT
-          else
-            echo "use_upx=0" >> $GITHUB_OUTPUT
+            # Para Push ou Manual, a versão é fixa: 3.6
+            echo "tmux_version=3.6" >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -62,8 +48,9 @@ jobs:
         run: |
           cd build-static-tmux
           chmod +x build-static-tmux.sh
+          # UPX desativado (0) e versão vindo do setup
           TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
-          USE_UPX="${{ needs.setup.outputs.use_upx }}" \
+          USE_UPX="0" \
           DUMP_LOG_ON_ERROR=1 \
           ./build-static-tmux.sh
       
@@ -82,10 +69,9 @@ jobs:
 
   release:
     needs: [setup, build]
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Necessário para deletar e criar releases
+      contents: write
 
     steps:
       - name: Download artifact
@@ -94,14 +80,13 @@ jobs:
           name: tmux-binary
           path: assets
 
-      - name: Delete existing release (if manual dispatch)
-        if: github.event_name == 'workflow_dispatch'
+      - name: Delete existing release (if manual dispatch or push)
+        if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_NAME: v${{ needs.setup.outputs.tmux_version }}
         run: |
           echo "Checking for existing release: $TAG_NAME"
-          # Tenta deletar a release e a tag. O '|| true' impede que o workflow falhe se a release não existir.
           gh release delete "$TAG_NAME" --cleanup-tag --yes || true
           echo "Cleanup complete or release did not exist."
 
