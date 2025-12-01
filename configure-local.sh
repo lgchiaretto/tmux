@@ -146,9 +146,29 @@ fi
 
 # Download binaries if needed
 if [ "$DOWNLOAD_TMUX" = true ] || [ ! -f "$BIN_DIR/tmux" ]; then
-    log "Downloading tmux binary..."
-    sudo wget -q --no-check-certificate 'https://gpte-public-documents.s3.us-east-1.amazonaws.com/rh1_2025_lab17/rh1-lab17-tmux-binary' -O "$BIN_DIR/tmux" &>/dev/null
-    sudo chmod +x "$BIN_DIR/tmux"
+    log "Downloading tmux binary from GitHub releases..."
+    ARCH=$(uname -m)
+    TMUX_ARCH="${ARCH/x86_64/amd64}"; TMUX_ARCH="${TMUX_ARCH/aarch64/arm64}"
+    TMUX_RELEASE_URL="https://github.com/lgchiaretto/build-static-tmux/releases/latest/download/tmux.linux-${TMUX_ARCH}.stripped.gz"
+    TEMP_DIR=$(mktemp -d)
+    if wget -q "$TMUX_RELEASE_URL" -O "$TEMP_DIR/tmux.gz" &>/dev/null; then
+        gunzip "$TEMP_DIR/tmux.gz"
+        sudo install -m 755 "$TEMP_DIR/tmux" "$BIN_DIR/tmux"
+        log "Installed tmux from GitHub release"
+    else
+        warn "Failed to download tmux from GitHub releases, trying alternative URL..."
+        # Fallback to artifact download via gh CLI if available
+        if command -v gh &>/dev/null; then
+            gh release download --repo lgchiaretto/build-static-tmux -p "tmux.linux-${TMUX_ARCH}.stripped.gz" -D "$TEMP_DIR" &>/dev/null && {
+                gunzip "$TEMP_DIR/tmux.linux-${TMUX_ARCH}.stripped.gz"
+                sudo install -m 755 "$TEMP_DIR/tmux.linux-${TMUX_ARCH}.stripped" "$BIN_DIR/tmux"
+                log "Installed tmux via gh CLI"
+            }
+        else
+            error "Could not download tmux binary. Install 'gh' CLI or check network connectivity."
+        fi
+    fi
+    rm -rf "$TEMP_DIR"
 fi
 
 if [ "$DOWNLOAD_OC" = true ] || [ ! -f "$BIN_DIR/oc" ]; then
