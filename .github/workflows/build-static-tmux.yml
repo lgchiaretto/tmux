@@ -1,5 +1,8 @@
 name: Build Static tmux
 
+env:
+  TMUX_VERSION: "3.6"
+
 on:
   push:
     branches: [ "master" ]
@@ -29,13 +32,12 @@ jobs:
             VERSION="${VERSION#v}"
             echo "tmux_version=${VERSION}" >> $GITHUB_OUTPUT
           else
-            echo "tmux_version=3.6" >> $GITHUB_OUTPUT
+            echo "tmux_version=${{ env.TMUX_VERSION }}" >> $GITHUB_OUTPUT
           fi
 
   build:
     needs: setup
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,10 +51,9 @@ jobs:
         run: |
           cd build-static-tmux
           chmod +x build-static-tmux.sh
-          TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
-          USE_UPX="0" \
-          DUMP_LOG_ON_ERROR=1 \
-          ./build-static-tmux.sh
+          export USE_UPX="0"
+          export DUMP_LOG_ON_ERROR=1
+          ./build-static-tmux.sh -v "${{ needs.setup.outputs.tmux_version }}"
       
       - name: Decompress binary
         run: |
@@ -71,7 +72,6 @@ jobs:
     needs: [setup, build]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -87,28 +87,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_NAME: v${{ needs.setup.outputs.tmux_version }}
         run: |
-          echo "Target Tag: $TAG_NAME"
-          
           RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/$TAG_NAME --jq '.id' 2>/dev/null || echo "")
-          
           if [ -n "$RELEASE_ID" ]; then
-            echo "Found release ID: $RELEASE_ID"
-            
+
             echo "Deleting all release assets..."
             gh api repos/${{ github.repository }}/releases/$RELEASE_ID/assets --jq '.[].id' | while read ASSET_ID; do
+
               echo "Deleting asset ID: $ASSET_ID"
               gh api -X DELETE repos/${{ github.repository }}/releases/assets/$ASSET_ID
             done
-            
+
             echo "Deleting release..."
             gh api -X DELETE repos/${{ github.repository }}/releases/$RELEASE_ID
-          else
-            echo "No existing release found for $TAG_NAME"
           fi
-          
+
           echo "Deleting git tag if exists..."
-          git push --delete origin "$TAG_NAME" 2>/dev/null || echo "Git tag not found (ok)"
-          
+          git push --delete origin "$TAG_NAME" 2>/dev/null || echo "Git tag not found"
+
           echo "Waiting 15s for API consistency..."
           sleep 15
 
