@@ -1,6 +1,8 @@
 name: Build Static tmux
 
 on:
+  push:
+    branches: [ "master" ]
   release:
     types: [published]
   workflow_dispatch:
@@ -65,7 +67,6 @@ jobs:
           DUMP_LOG_ON_ERROR=1 \
           ./build-static-tmux.sh
       
-      # Decompress to ensure we upload a binary, not a .gz
       - name: Decompress binary
         run: |
           cd /tmp/tmux-static/bin
@@ -75,23 +76,34 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux
+          name: tmux-binary
           path: /tmp/tmux-static/bin/tmux*
-          retention-days: 1
+          retention-days: 5
 
   release:
     needs: [setup, build]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Necessário para deletar e criar releases
 
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: tmux
+          name: tmux-binary
           path: assets
+
+      - name: Delete existing release (if manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: v${{ needs.setup.outputs.tmux_version }}
+        run: |
+          echo "Checking for existing release: $TAG_NAME"
+          # Tenta deletar a release e a tag. O '|| true' impede que o workflow falhe se a release não existir.
+          gh release delete "$TAG_NAME" --cleanup-tag --yes || true
+          echo "Cleanup complete or release did not exist."
 
       - name: Create Release / Upload Assets
         uses: softprops/action-gh-release@v2
@@ -100,7 +112,6 @@ jobs:
           name: tmux v${{ needs.setup.outputs.tmux_version }}
           draft: false
           prerelease: false
-          # Uploads whatever is in the assets folder directly
           files: assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
