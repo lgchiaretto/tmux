@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1. Setup: Define version and flags once
+  # 1. Setup
   setup:
     runs-on: ubuntu-latest
     outputs:
@@ -72,21 +72,30 @@ jobs:
           DUMP_LOG_ON_ERROR=1 \
           ./build-static-tmux.sh
       
+      # NOVO: Descompacta os arquivos antes do upload
+      - name: Decompress binaries
+        run: |
+          cd /tmp/tmux-static/bin
+          # Descompacta tudo que termina em .gz
+          gunzip -f *.gz
+          # Lista para confirmar
+          ls -la
+
       - name: Test binary
         run: |
           cd /tmp/tmux-static/bin
-          gunzip -k tmux.linux-amd64.stripped.gz
+          # Ajuste: chama o binário direto (sem .gz)
           chmod +x tmux.linux-amd64.stripped
           ./tmux.linux-amd64.stripped -V
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux-static-${{ needs.setup.outputs.tmux_version }}-linux-${{ matrix.arch }}
-          path: /tmp/tmux-static/bin/tmux.*.gz
+          name: tmux-native-${{ needs.setup.outputs.tmux_version }}-linux-${{ matrix.arch }}
+          path: /tmp/tmux-static/bin/tmux*
           retention-days: 30
 
-  # 3. Container Build (Simplified: No Cache)
+  # 3. Container Build
   build-container:
     needs: setup
     runs-on: ubuntu-latest
@@ -104,18 +113,24 @@ jobs:
         run: |
           cd build-static-tmux
           mkdir -p output
-          # Added USE_UPX variable to ensure consistency
           docker run --rm \
             -e TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
             -e USE_UPX="${{ needs.setup.outputs.use_upx }}" \
             -v "$(pwd)/output:/output" \
             tmux-static-builder
       
+      - name: Decompress binaries
+        run: |
+          cd build-static-tmux/output
+          # Sudo é necessário pois arquivos criados pelo docker pertencem ao root
+          sudo gunzip -f *.gz
+          ls -la
+      
       - name: Upload container build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux-static-container-${{ needs.setup.outputs.tmux_version }}
-          path: build-static-tmux/output/tmux.*.gz
+          name: tmux-container-${{ needs.setup.outputs.tmux_version }}
+          path: build-static-tmux/output/tmux*
           retention-days: 30
 
   # 4. Release
@@ -132,6 +147,25 @@ jobs:
         with:
           path: artifacts
 
+      - name: Prepare Assets
+        run: |
+          mkdir assets_to_upload
+          
+          # Native: Procura arquivos que NÃO terminam em .gz (binários puros)
+          find artifacts/tmux-native-* -type f -name "tmux*" ! -name "*.gz" | while read file; do
+            filename=$(basename "$file")
+            cp "$file" "assets_to_upload/native-$filename"
+          done
+
+          # Container: Mesma lógica
+          find artifacts/tmux-container-* -type f -name "tmux*" ! -name "*.gz" | while read file; do
+            filename=$(basename "$file")
+            cp "$file" "assets_to_upload/container-$filename"
+          done
+          
+          echo "Files prepared for upload:"
+          ls -la assets_to_upload/
+
       - name: Create Release / Upload Assets
         uses: softprops/action-gh-release@v2
         with:
@@ -139,6 +173,6 @@ jobs:
           name: tmux v${{ needs.setup.outputs.tmux_version }}
           draft: false
           prerelease: false
-          files: artifacts/**/*.gz
+          files: assets_to_upload/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
