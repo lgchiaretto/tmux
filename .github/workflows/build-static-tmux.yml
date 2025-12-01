@@ -1,11 +1,8 @@
 name: Build Static tmux
 
 on:
-  # Trigger on published releases
   release:
     types: [published]
-  
-  # Allow manual trigger
   workflow_dispatch:
     inputs:
       tmux_version:
@@ -18,25 +15,22 @@ on:
         default: false
         type: boolean
 
-jobs:
-  build:
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            arch: amd64
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-    runs-on: ${{ matrix.os }}
-    
+jobs:
+  # 1. Setup: Define version and flags once
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      tmux_version: ${{ steps.version.outputs.tmux_version }}
+      use_upx: ${{ steps.version.outputs.use_upx }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Set tmux version
+      - name: Determine Version and Flags
         id: version
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
-            # Extract version from release tag (e.g., v3.6 -> 3.6)
             VERSION="${{ github.event.release.tag_name }}"
             VERSION="${VERSION#v}"
             echo "tmux_version=${VERSION}" >> $GITHUB_OUTPUT
@@ -49,18 +43,32 @@ jobs:
           else
             echo "use_upx=0" >> $GITHUB_OUTPUT
           fi
+
+  # 2. Native Build
+  build-native:
+    needs: setup
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: amd64
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc make wget tar gzip xz-utils bison
-      
+
       - name: Build static tmux
         run: |
           cd build-static-tmux
           chmod +x build-static-tmux.sh
-          TMUX_VERSION="${{ steps.version.outputs.tmux_version }}" \
-          USE_UPX="${{ steps.version.outputs.use_upx }}" \
+          TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
+          USE_UPX="${{ needs.setup.outputs.use_upx }}" \
           DUMP_LOG_ON_ERROR=1 \
           ./build-static-tmux.sh
       
@@ -70,52 +78,22 @@ jobs:
           gunzip -k tmux.linux-amd64.stripped.gz
           chmod +x tmux.linux-amd64.stripped
           ./tmux.linux-amd64.stripped -V
-          file ./tmux.linux-amd64.stripped
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux-static-${{ steps.version.outputs.tmux_version }}-linux-${{ matrix.arch }}
+          name: tmux-static-${{ needs.setup.outputs.tmux_version }}-linux-${{ matrix.arch }}
           path: /tmp/tmux-static/bin/tmux.*.gz
           retention-days: 30
-      
-      - name: Create Release (when not triggered by GitHub "release" event)
-        if: ${{ github.event_name != 'release' }}
-        uses: actions/create-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.tmux_version }}
-          release_name: tmux v${{ steps.version.outputs.tmux_version }}
-          body: Automated build for tmux v${{ steps.version.outputs.tmux_version }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload to Release
-        if: ${{ github.event_name == 'release' || github.event_name == 'workflow_dispatch' }}
-        uses: softprops/action-gh-release@v1
-        with:
-          files: /tmp/tmux-static/bin/tmux.*.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-with-container:
+  # 3. Container Build (Simplified: No Cache)
+  build-container:
+    needs: setup
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
-      - name: Set tmux version
-        id: version
-        run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-            VERSION="${VERSION#v}"
-            echo "tmux_version=${VERSION}" >> $GITHUB_OUTPUT
-          else
-            echo "tmux_version=${{ github.event.inputs.tmux_version || '3.6' }}" >> $GITHUB_OUTPUT
-          fi
       
       - name: Build container image
         run: |
@@ -126,18 +104,41 @@ jobs:
         run: |
           cd build-static-tmux
           mkdir -p output
+          # Added USE_UPX variable to ensure consistency
           docker run --rm \
-            -e TMUX_VERSION="${{ steps.version.outputs.tmux_version }}" \
+            -e TMUX_VERSION="${{ needs.setup.outputs.tmux_version }}" \
+            -e USE_UPX="${{ needs.setup.outputs.use_upx }}" \
             -v "$(pwd)/output:/output" \
             tmux-static-builder
-      
-      - name: List output files
-        run: |
-          ls -la build-static-tmux/output/
       
       - name: Upload container build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: tmux-static-container-${{ steps.version.outputs.tmux_version }}
+          name: tmux-static-container-${{ needs.setup.outputs.tmux_version }}
           path: build-static-tmux/output/tmux.*.gz
           retention-days: 30
+
+  # 4. Release
+  release:
+    needs: [setup, build-native, build-container]
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release / Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'release' && github.event.release.tag_name || format('v{0}', needs.setup.outputs.tmux_version) }}
+          name: tmux v${{ needs.setup.outputs.tmux_version }}
+          draft: false
+          prerelease: false
+          files: artifacts/**/*.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
