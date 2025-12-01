@@ -24,6 +24,16 @@ check_dependencies() {
     command -v pip3 &>/dev/null || warn "pip3 not found. Will try to use system packages only."
 }
 
+# Remove existing tmux if installed via dnf
+remove_tmux_if_installed() {
+    if rpm -q tmux &>/dev/null; then
+        log "Removing existing tmux installation via dnf..."
+        sudo dnf remove -y tmux &>/dev/null
+    elif command -v tmux &>/dev/null; then
+        warn "Tmux is in PATH but not installed via dnf. Skipping removal."
+    fi
+}
+
 # Copy dotfiles to user's home directory
 copy_dotfiles_to_user() {
     local target_home="$1"
@@ -87,6 +97,12 @@ done
 # Start Installation
 log "Starting Tmux environment configuration..."
 check_dependencies
+remove_tmux_if_installed() {
+    if command -v tmux &>/dev/null; then
+        log "Removing existing tmux installation..."
+        sudo dnf remove -y tmux &>/dev/null
+    fi
+}
 
 # Create global directory structure
 log "Creating directories in $TMUX_SHARE_DIR"
@@ -149,24 +165,13 @@ if [ "$DOWNLOAD_TMUX" = true ] || [ ! -f "$BIN_DIR/tmux" ]; then
     log "Downloading tmux binary from GitHub releases..."
     ARCH=$(uname -m)
     TMUX_ARCH="${ARCH/x86_64/amd64}"; TMUX_ARCH="${TMUX_ARCH/aarch64/arm64}"
-    TMUX_RELEASE_URL="https://github.com/lgchiaretto/build-static-tmux/releases/latest/download/tmux.linux-${TMUX_ARCH}.stripped.gz"
+    TMUX_RELEASE_URL="https://github.com/lgchiaretto/tmux/releases/download/v3.6/tmux"
     TEMP_DIR=$(mktemp -d)
-    if wget -q "$TMUX_RELEASE_URL" -O "$TEMP_DIR/tmux.gz" &>/dev/null; then
-        gunzip "$TEMP_DIR/tmux.gz"
+    if wget -q "$TMUX_RELEASE_URL" -O "$TEMP_DIR/tmux" &>/dev/null; then
         sudo install -m 755 "$TEMP_DIR/tmux" "$BIN_DIR/tmux"
         log "Installed tmux from GitHub release"
     else
-        warn "Failed to download tmux from GitHub releases, trying alternative URL..."
-        # Fallback to artifact download via gh CLI if available
-        if command -v gh &>/dev/null; then
-            gh release download --repo lgchiaretto/build-static-tmux -p "tmux.linux-${TMUX_ARCH}.stripped.gz" -D "$TEMP_DIR" &>/dev/null && {
-                gunzip "$TEMP_DIR/tmux.linux-${TMUX_ARCH}.stripped.gz"
-                sudo install -m 755 "$TEMP_DIR/tmux.linux-${TMUX_ARCH}.stripped" "$BIN_DIR/tmux"
-                log "Installed tmux via gh CLI"
-            }
-        else
-            error "Could not download tmux binary. Install 'gh' CLI or check network connectivity."
-        fi
+        error "Could not download tmux binary."
     fi
     rm -rf "$TEMP_DIR"
 fi
@@ -191,8 +196,8 @@ log "Installing Python packages..."
 command -v pip3 &>/dev/null || sudo dnf install -y python3-pip &>/dev/null
 
 if dnf list available python3-tmuxp &>/dev/null; then
-    sudo dnf install -y python3-tmuxp python3-magic &>/dev/null
-    log "Installed python3-tmuxp and python3-magic from system packages"
+    sudo dnf install -y python3-tmuxp &>/dev/null
+    log "Installed python3-tmuxp from system packages"
 else
     warn "python3-tmuxp not available in system repos, installing via pip3"
     sudo pip3 install --prefix=/usr/local tmuxp python-magic &>/dev/null && log "Installed tmuxp and python-magic to /usr/local"
