@@ -11,6 +11,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Permissões globais atualizadas
+permissions:
+  contents: write # Para criar/deletar releases
+  actions: write  # Para deletar workflows antigos (logs)
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -67,8 +72,6 @@ jobs:
     needs: [setup, build]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
@@ -79,6 +82,7 @@ jobs:
         with:
           name: tmux-binary
           path: assets
+
       - name: Force Delete Old Release and Tag
         if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
         env:
@@ -86,11 +90,8 @@ jobs:
           TAG_NAME: v${{ needs.setup.outputs.tmux_version }}
         run: |
           echo "Target Tag: $TAG_NAME"
-          
           gh release delete "$TAG_NAME" --cleanup-tag --yes || echo "Release not found (ok)"
-
           git push --delete origin "$TAG_NAME" || echo "Git tag not found (ok)"
-          
           echo "Waiting 10s for API consistency..."
           sleep 10
 
@@ -102,7 +103,19 @@ jobs:
           draft: false
           prerelease: false
           files: assets/*
-          # Força o overwrite caso algo tenha sobrado
           fail_on_unmatched_files: true 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup-history:
+    runs-on: ubuntu-latest
+    needs: [release]
+    if: always() # Roda mesmo se o build ou release falharem (para manter limpo)
+    steps:
+      - name: Delete older workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 0
+          keep_minimum_runs: 4
