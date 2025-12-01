@@ -132,11 +132,17 @@ sudo mv tmux.linux-amd64.stripped /usr/local/bin/tmux
 
 The workflow in `.github/workflows/build-static-tmux.yml` automatically:
 
-1. Builds on releases - when a new release is published
-2. Supports manual trigger with version selection
-3. Tests the built binary
+1. Builds on push to master, releases, or manual trigger
+2. Determines tmux version from release tag or uses default (3.6)
+3. Builds static tmux binary
 4. Uploads artifacts
-5. Attaches binaries to releases
+5. Deletes existing release with same tag (including all assets)
+6. Creates new release with updated binaries
+
+The workflow properly handles release updates by:
+- Deleting all existing release assets via GitHub API
+- Removing the release and git tag
+- Creating a fresh release with new binaries
 
 ### Triggering Manual Build
 
