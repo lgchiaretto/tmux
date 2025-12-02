@@ -81,10 +81,6 @@ endif
 
 " --- GitHub Copilot ---
 
-" Enable tab for accepting suggestions
-let g:copilot_no_tab_map = v:true
-imap <silent> <Tab> <Plug>(copilot-accept)
-
 " Ctrl+L to next suggestion
 imap <silent> <C-L> <Plug>(copilot-next)
 
