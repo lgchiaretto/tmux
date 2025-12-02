@@ -29,6 +29,7 @@ function createVphereCluster() {
 - None UPI 3-node cluster with 'ODF'
 - vSphere IPI 3-node cluster
 - vSphere UPI 3-node cluster
+- vSphere UPI 3-node cluster with RHBK
 - Assisted Installer"
 
     selected_file=$(echo -e "$actions" | sort | fzf-tmux \
@@ -125,6 +126,11 @@ function createVphereCluster() {
                 ;;
             "- vSphere UPI 3-node cluster")
                 file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-vsphere.json"
+                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+                tmux wait-for vim-done
+                ;;
+            "- vSphere UPI 3-node cluster with RHBK")
+                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-vsphere-rhbk.json"
                 tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
                 tmux wait-for vim-done
                 ;;
