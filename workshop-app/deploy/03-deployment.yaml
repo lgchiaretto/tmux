@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tmux-workshop
+  namespace: workshop-tmux
+  labels:
+    app: tmux-workshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tmux-workshop
+  template:
+    metadata:
+      labels:
+        app: tmux-workshop
+    spec:
+      serviceAccountName: tmux-workshop-sa
+      containers:
+        - name: workshop
+          image: quay.io/chiaretto/tmux-workshop:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: USE_TMUX
+              value: "true"
+            - name: DEFAULT_LANG
+              value: "pt"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL

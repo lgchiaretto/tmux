@@ -1,0 +1,73 @@
+" Vim configuration for tmux workshop
+
+" Basic Settings
+set nocompatible
+set encoding=utf-8
+set fileencoding=utf-8
+set number
+set relativenumber
+set cursorline
+set showmatch
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set autoindent
+set smartindent
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set mouse=a
+set clipboard=unnamedplus
+set backspace=indent,eol,start
+set laststatus=2
+set ruler
+set showcmd
+set wildmenu
+set wildmode=list:longest,full
+set scrolloff=5
+set sidescrolloff=5
+set wrap
+set linebreak
+set hidden
+set confirm
+set autoread
+set history=1000
+set undolevels=1000
+
+" Enable syntax highlighting
+syntax on
+filetype plugin indent on
+
+" Color scheme (terminal colors)
+set background=dark
+set t_Co=256
+
+" Status line
+set statusline=%F%m%r%h%w\ [%{&ff}]\ [%Y]\ [%l,%v]\ [%p%%]
+
+" Key mappings
+let mapleader = " "
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+nnoremap <leader>x :x<CR>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Clear search highlighting
+nnoremap <leader>/ :nohlsearch<CR>
+
+" Better navigation
+nnoremap j gj
+nnoremap k gk
+
+" Keep visual selection when indenting
+vnoremap < <gv
+vnoremap > >gv
+
+" Plugin manager (vim-plug) - uncomment to add plugins
+" call plug#begin('~/.vim/plugged')
+" Plug 'tpope/vim-sensible'
+" call plug#end()

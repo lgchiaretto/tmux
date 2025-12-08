@@ -1,5 +1,13 @@
 .github/copilot-instructions.md
 config.sh
 
+# Workshop app build artifacts
+workshop-app/node_modules/
+workshop-app/dist/
+workshop-app/dist-ssr/
+workshop-app/server/node_modules/
+workshop-app/.cache/
+workshop-app/*.log
+
 # Copilot instructions (development only)
 # .github/copilot-instructions.md

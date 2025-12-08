@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Bash functions for tmux workshop
+
+# Function to display help
+tmux_help() {
+    echo "Atalhos do tmux Workshop / tmux Workshop Shortcuts"
+    echo "=================================================="
+    echo ""
+    echo "Prefix: Ctrl + s"
+    echo ""
+    echo "Sessoes / Sessions:"
+    echo "  Prefix + N    - Nova sessao / New session"
+    echo "  Prefix + .    - Renomear sessao / Rename session"
+    echo "  Prefix + w    - Lista sessoes / List sessions"
+    echo "  Prefix + K    - Encerrar sessao / Kill session"
+    echo ""
+    echo "Janelas / Windows:"
+    echo "  Ctrl + t      - Nova janela / New window"
+    echo "  Shift + setas - Navegar janelas / Navigate windows"
+    echo "  Prefix + ,    - Renomear janela / Rename window"
+    echo "  Prefix + k    - Encerrar janela / Kill window"
+    echo ""
+    echo "Paineis / Panes:"
+    echo "  Ctrl + \\      - Dividir horizontal / Split horizontal"
+    echo "  Prefix + -    - Dividir vertical / Split vertical"
+    echo "  Ctrl + setas  - Navegar paineis / Navigate panes"
+    echo "  Prefix + a    - Sincronizar / Synchronize"
+    echo ""
+    echo "FZF:"
+    echo "  Ctrl + x      - Buscar arquivos / Find files"
+    echo "  Ctrl + r      - Historico / History"
+    echo "  Prefix + Tab  - Buscar URLs / Find URLs"
+    echo "  Prefix + b    - Buffers"
+}
+
+alias th='tmux_help'

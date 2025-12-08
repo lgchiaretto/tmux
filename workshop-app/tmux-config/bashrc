@@ -1,0 +1,111 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+
+# Interactive Shell Check
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# Environment Variables
+export TERM=xterm-256color
+export EDITOR=vim
+export PATH=$PATH:~/.local/bin/
+
+# Shell Options
+shopt -s checkwinsize
+shopt -s histappend
+
+# History Configuration
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoredups:erasedups
+export PROMPT_COMMAND='history -a; history -c; history -r'
+
+# Prompt Configuration
+color_prompt=yes
+parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+}
+if [ "$color_prompt" = yes ]; then
+  PS1="\[\e[38;5;142m\]\u\[\e[0m\]@\[\e[38;5;214m\]\h\[\e[0m\]:\[\e[38;5;109m\]\w\[\e[0m\]\[\e[38;5;175m\]\$(parse_git_branch)\[\e[0m\]\$ "
+else
+  PS1="\[\e[0m\]\u@\h:\w\$ "
+fi
+unset color_prompt
+
+# Aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# FZF Configuration
+if [ -f /usr/local/share/fzf/shell/completion.bash ]; then
+    source /usr/local/share/fzf/shell/completion.bash
+fi
+if [ -f /usr/local/share/fzf/shell/key-bindings.bash ]; then
+    source /usr/local/share/fzf/shell/key-bindings.bash
+fi
+
+# Tmux Smart Attach
+tmux_smart_attach() {
+  if tmux has-session 2>/dev/null; then
+    tmux attach
+  else
+    tmux new
+  fi
+}
+alias t='tmux_smart_attach'
+
+# FZF Theme (Gruvbox-inspired)
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+--color=bg+:#000000,spinner:#fe8019,hl:#928374,fg:#ffffff,header:#928374,info:#fabd2f,pointer:#fe8019,marker:#fe8019,fg+:#458588,prompt:#fe8019,hl+:#fe8019 \
+--height 100% \
+--info=inline \
+--cycle \
+--exact
+"
+
+# Additional Scripts
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+if [ -f ~/.bash_functions ]; then
+    . ~/.bash_functions
+fi
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+# Miscellaneous
+umask 022
+if [ -f "$HOME/.dircolors" ]; then
+    eval $(dircolors -b $HOME/.dircolors)
+fi
+
+# Load tmux config
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Welcome message for workshop
+echo ""
+echo "  ╔═══════════════════════════════════════════════════════════════╗"
+echo "  ║           Bem-vindo ao Workshop de tmux!                      ║"
+echo "  ║           Welcome to the tmux Workshop!                       ║"
+echo "  ╠═══════════════════════════════════════════════════════════════╣"
+echo "  ║  Prefix Key: Ctrl+s                                           ║"
+echo "  ║  Nova janela / New window: Clique em [+] na barra             ║"
+echo "  ║  Dividir horizontal / Split horizontal: Ctrl+\\               ║"
+echo "  ║  Dividir vertical / Split vertical: Prefix + -                ║"
+echo "  ║  Navegacao paineis / Navigate panes: Ctrl + setas             ║"
+echo "  ║  Navegacao janelas / Navigate windows: Shift + setas          ║"
+echo "  ╚═══════════════════════════════════════════════════════════════╝"
+echo ""

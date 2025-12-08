@@ -1,0 +1,41 @@
+# /etc/inputrc - global inputrc for libreadline
+
+# Include system-wide inputrc
+$include /etc/inputrc
+
+# Use Vi mode
+set editing-mode vi
+
+# Show vi mode in prompt
+set show-mode-in-prompt on
+set vi-ins-mode-string \1\e[5 q\2
+set vi-cmd-mode-string \1\e[2 q\2
+
+# Case-insensitive completion
+set completion-ignore-case on
+
+# Show all matches if ambiguous
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
+
+# Colored completion based on file type
+set colored-stats on
+set colored-completion-prefix on
+
+# Mark symlinked directories
+set mark-symlinked-directories on
+
+# Immediately show completion without double-tab
+set show-all-if-ambiguous on
+
+# Better history search
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# Ctrl+Left/Right for word movement
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+"\e[5C": forward-word
+"\e[5D": backward-word
+"\e\e[C": forward-word
+"\e\e[D": backward-word

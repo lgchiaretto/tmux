@@ -1,0 +1,18 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: tmux-workshop
+  namespace: workshop-tmux
+  labels:
+    app: tmux-workshop
+spec:
+  to:
+    kind: Service
+    name: tmux-workshop
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
