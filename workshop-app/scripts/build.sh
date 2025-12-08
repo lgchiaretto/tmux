@@ -12,16 +12,16 @@ TMUX_ROOT="$(dirname "$PROJECT_DIR")"
 IMAGE_NAME="${IMAGE_NAME:-quay.io/chiaretto/tmux-workshop}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 
-cd "$TMUX_ROOT"
+cd "$PROJECT_DIR"
 
 echo "=== Building tmux workshop application ==="
 echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
-echo "Build context: $TMUX_ROOT"
+echo "Build context: $PROJECT_DIR"
 echo ""
 
-# Build the container image from the tmux root directory
+# Build the container image from workshop-app directory using unified Dockerfile
 echo "Building container image..."
-podman build -t "${IMAGE_NAME}:${IMAGE_TAG}" -f workshop-app/Dockerfile .
+podman build -t "${IMAGE_NAME}:${IMAGE_TAG}" -f Dockerfile.unified .
 
 echo ""
 echo "=== Build completed successfully ==="

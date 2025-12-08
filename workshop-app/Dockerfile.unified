@@ -14,7 +14,6 @@ FROM quay.io/fedora/fedora:43 AS frontend-builder
 
 USER 0
 
-# Install Node.js and npm
 RUN dnf install -y nodejs npm && dnf clean all
 
 WORKDIR /frontend
@@ -30,74 +29,49 @@ FROM quay.io/fedora/fedora:43
 
 USER 0
 
-# Install system dependencies
+# Install all system dependencies and tools in a single layer
 RUN dnf install -y \
-    bash \
-    curl \
-    git \
-    vim-enhanced \
-    python3 \
-    python3-pip \
-    make \
-    gcc-c++ \
-    ncurses \
-    libevent \
-    findutils \
-    procps-ng \
-    nodejs \
-    npm \
-    xclip \
-    && dnf clean all
-
-# Install FZF from GitHub (latest release)
-RUN FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4) && \
-    curl -L "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION#v}-linux_amd64.tar.gz" | tar xz -C /usr/local/bin && \
-    chmod +x /usr/local/bin/fzf
-
-# Install fzf-tmux script and shell integration
-RUN curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux" -o /usr/local/bin/fzf-tmux && \
-    chmod +x /usr/local/bin/fzf-tmux && \
-    mkdir -p /usr/local/share/fzf/shell && \
-    curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash" -o /usr/local/share/fzf/shell/completion.bash && \
-    curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash" -o /usr/local/share/fzf/shell/key-bindings.bash
-
-# Install tmuxp (Python tmux session manager)
-RUN pip3 install --no-cache-dir tmuxp
+    bash curl git vim-enhanced python3 python3-pip \
+    make gcc-c++ ncurses libevent findutils procps-ng \
+    nodejs npm xclip \
+    && dnf clean all \
+    && pip3 install --no-cache-dir tmuxp \
+    && FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4) \
+    && curl -L "https://github.com/junegunn/fzf/releases/download/${FZF_VERSION}/fzf-${FZF_VERSION#v}-linux_amd64.tar.gz" | tar xz -C /usr/local/bin \
+    && chmod +x /usr/local/bin/fzf \
+    && curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/bin/fzf-tmux" -o /usr/local/bin/fzf-tmux \
+    && chmod +x /usr/local/bin/fzf-tmux \
+    && mkdir -p /usr/local/share/fzf/shell \
+    && curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash" -o /usr/local/share/fzf/shell/completion.bash \
+    && curl -L "https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash" -o /usr/local/share/fzf/shell/key-bindings.bash
 
 WORKDIR /app
 
-# Install Node.js backend dependencies
+# Install Node.js backend and copy application files
 COPY server/package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 COPY server/server.js ./
 COPY --from=frontend-builder /frontend/dist ./dist
 
-# Create guides directory structure (supports i18n)
-RUN mkdir -p /app/guides/pt /app/guides/en
+# Download CLI tools and setup configurations in a single layer
+RUN mkdir -p /app/guides/pt /app/guides/en /etc/skel/.vim/autoload /etc/skel/.tmux \
+    && curl -L -o /usr/local/bin/tmux "https://github.com/lgchiaretto/tmux/releases/download/v3.6/tmux.linux-amd64.stripped" \
+    && chmod +x /usr/local/bin/tmux \
+    && curl -L "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" | tar xz -C /usr/local/bin oc kubectl \
+    && chmod +x /usr/local/bin/oc /usr/local/bin/kubectl \
+    && curl -L -o /usr/local/bin/virtctl "https://github.com/kubevirt/kubevirt/releases/download/v1.5.3/virtctl-v1.5.3-linux-amd64" \
+    && chmod +x /usr/local/bin/virtctl \
+    && git clone --depth 1 https://github.com/tmux-plugins/tpm /opt/tpm \
+    && chmod -R 755 /opt/tpm \
+    && curl -fLo /etc/skel/.vim/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+    && git config --system user.name "Workshop User" \
+    && git config --system user.email "workshop@local" \
+    && git config --system init.defaultBranch main \
+    && git config --system core.editor vim \
+    && git config --system pull.rebase false
 
-# Download and install static tmux binary
-RUN curl -L -o /usr/local/bin/tmux "https://github.com/lgchiaretto/tmux/releases/download/v3.6/tmux.linux-amd64.stripped" && \
-    chmod +x /usr/local/bin/tmux
-
-# Download OpenShift CLI (oc and kubectl)
-RUN curl -L "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" | tar xz -C /usr/local/bin oc kubectl && \
-    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
-
-# Download virtctl CLI (for OpenShift Virtualization)
-RUN curl -L -o /usr/local/bin/virtctl "https://github.com/kubevirt/kubevirt/releases/download/v1.5.3/virtctl-v1.5.3-linux-amd64" && \
-    chmod +x /usr/local/bin/virtctl
-
-# Install tmux plugin manager (TPM)
-RUN git clone https://github.com/tmux-plugins/tpm /opt/tpm && \
-    chmod -R 755 /opt/tpm
-
-# Download vim-plug
-RUN mkdir -p /etc/skel/.vim/autoload /etc/skel/.tmux && \
-    curl -fLo /etc/skel/.vim/autoload/plug.vim \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
-# Copy tmux configuration files (from tmux-config directory)
+# Copy tmux configuration files
 COPY --chown=1001:0 tmux-config/tmux.conf /etc/skel/.tmux.conf
 COPY --chown=1001:0 tmux-config/bashrc /etc/skel/.bashrc
 COPY --chown=1001:0 tmux-config/vimrc /etc/skel/.vimrc
@@ -106,33 +80,22 @@ COPY --chown=1001:0 tmux-config/inputrc /etc/skel/.inputrc
 COPY --chown=1001:0 tmux-config/bash_functions /etc/skel/.bash_functions
 
 # Setup user home with all configurations
-RUN mkdir -p /home/default/.tmux/plugins /home/default/.vim/autoload /home/default/.ssh /home/default/.cache && \
-    cp -r /etc/skel/.* /home/default/ 2>/dev/null || true && \
-    cp -r /opt/tpm /home/default/.tmux/plugins/tpm && \
-    chown -R 1001:0 /home/default && \
-    chmod -R g=u /home/default && \
-    chmod 700 /home/default/.ssh
-
-# Configure Git globally
-RUN git config --system user.name "Workshop User" && \
-    git config --system user.email "workshop@local" && \
-    git config --system init.defaultBranch main && \
-    git config --system core.editor vim && \
-    git config --system pull.rebase false
-
-RUN chown -R 1001:0 /app && \
-    chmod -R g=u /app
+RUN mkdir -p /home/default/.tmux/plugins /home/default/.vim/autoload /home/default/.ssh /home/default/.cache \
+    && cp -r /etc/skel/.* /home/default/ 2>/dev/null || true \
+    && cp -r /opt/tpm /home/default/.tmux/plugins/tpm \
+    && chown -R 1001:0 /home/default /app \
+    && chmod -R g=u /home/default /app \
+    && chmod 700 /home/default/.ssh
 
 USER 1001
 
 EXPOSE 8080
 
-# Environment variables (can be overridden at runtime)
-ENV PORT=8080
-ENV GUIDES_DIR=/app/guides
-ENV DEFAULT_LANG=en
-ENV SHELL=/bin/bash
-ENV HOME=/home/default
-ENV USE_TMUX=true
+ENV PORT=8080 \
+    GUIDES_DIR=/app/guides \
+    DEFAULT_LANG=en \
+    SHELL=/bin/bash \
+    HOME=/home/default \
+    USE_TMUX=true
 
 CMD ["node", "server.js"]

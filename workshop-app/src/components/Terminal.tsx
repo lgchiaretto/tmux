@@ -138,15 +138,34 @@ export function Terminal({ className }: TerminalProps) {
     })
 
     // Helper function to paste from clipboard
-    // Uses navigator.clipboard.readText() which is the modern API
-    const pasteFromClipboard = () => {
-      navigator.clipboard.readText().then((text) => {
+    // Chrome requires clipboard access during user gesture (synchronous context)
+    // Firefox is more permissive and allows async clipboard access
+    const pasteFromClipboard = async () => {
+      try {
+        // Request clipboard permissions explicitly (Chrome requirement)
+        if (navigator.permissions && navigator.permissions.query) {
+          const permissionStatus = await navigator.permissions.query({ 
+            name: 'clipboard-read' as PermissionName 
+          })
+          
+          if (permissionStatus.state === 'denied') {
+            console.warn('Clipboard access denied. Please allow clipboard access in browser settings.')
+            // Fallback: show a notification or use document.execCommand as fallback
+            return
+          }
+        }
+        
+        // Try modern Clipboard API first
+        const text = await navigator.clipboard.readText()
         if (text && wsRef.current?.readyState === WebSocket.OPEN) {
           wsRef.current.send(text)
         }
-      }).catch((err) => {
+      } catch (err) {
         console.error('Failed to read clipboard:', err)
-      })
+        // In Chrome, if clipboard API fails, user needs to grant permission
+        // Show a helpful message
+        console.warn('Tip: Click inside the terminal and try Ctrl+Shift+V again, or use middle-click to paste.')
+      }
     }
 
     // Intercept browser shortcuts at the document level during capture phase
@@ -201,7 +220,24 @@ export function Terminal({ className }: TerminalProps) {
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'v') {
         event.preventDefault()
         event.stopPropagation()
-        pasteFromClipboard()
+        // Call async function immediately in user gesture context
+        pasteFromClipboard().catch(console.error)
+        return
+      }
+
+      // Ctrl+\ - Split pane horizontally (tmux vertical split)
+      // Chrome and Firefox handle backslash differently:
+      // - Firefox: key='\\', code='Backslash', keyCode=220
+      // - Chrome: key='\\', code='Backslash', keyCode=220
+      // Check multiple properties to ensure maximum compatibility
+      if (event.ctrlKey && !event.shiftKey && 
+          (event.key === '\\' || event.code === 'Backslash' || event.keyCode === 220)) {
+        event.preventDefault()
+        event.stopPropagation()
+        // Send Ctrl+\ (0x1c) to terminal for tmux split
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send('\x1c') // Ctrl+\ = ASCII 28 (0x1c)
+        }
         return
       }
     }
@@ -216,7 +252,7 @@ export function Terminal({ className }: TerminalProps) {
       if (event.ctrlKey && event.shiftKey && (event.key === 'v' || event.key === 'V') && event.type === 'keydown') {
         event.preventDefault()
         event.stopPropagation()
-        pasteFromClipboard()
+        pasteFromClipboard().catch(console.error)
         return false // Prevent xterm from handling
       }
       
@@ -251,7 +287,7 @@ export function Terminal({ className }: TerminalProps) {
         event.preventDefault()
         event.stopPropagation()
         // Paste from system clipboard instead of X11 primary selection
-        pasteFromClipboard()
+        pasteFromClipboard().catch(console.error)
         return false
       }
     }
