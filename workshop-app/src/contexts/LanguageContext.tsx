@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { useConfig } from './ConfigContext'
 
 type Language = 'pt' | 'en'
 
@@ -23,14 +24,11 @@ interface Translations {
   error: string
   copied: string
   copy: string
-  
-  // Header
-  headerTitle: string
 }
 
 const translations: Record<Language, Translations> = {
   pt: {
-    workshop: 'Workshop tmux',
+    workshop: 'Workshop',
     selectGuide: 'Selecione um guia',
     noGuides: 'Nenhum guia disponivel',
     terminal: 'Terminal',
@@ -45,10 +43,9 @@ const translations: Record<Language, Translations> = {
     error: 'Erro ao carregar',
     copied: 'Copiado',
     copy: 'Copiar',
-    headerTitle: 'Workshop tmux - Produtividade no Terminal',
   },
   en: {
-    workshop: 'tmux Workshop',
+    workshop: 'Workshop',
     selectGuide: 'Select a guide',
     noGuides: 'No guides available',
     terminal: 'Terminal',
@@ -63,7 +60,6 @@ const translations: Record<Language, Translations> = {
     error: 'Error loading',
     copied: 'Copied',
     copy: 'Copy',
-    headerTitle: 'tmux Workshop - Terminal Productivity',
   },
 }
 
@@ -77,6 +73,8 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
+  const { config } = useConfig()
+  
   const [language, setLanguage] = useState<Language>(() => {
     const saved = localStorage.getItem('workshop-language')
     if (saved === 'pt' || saved === 'en') return saved
@@ -85,6 +83,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return browserLang.startsWith('pt') ? 'pt' : 'en'
   })
   const [availableLanguages, setAvailableLanguages] = useState<Language[]>(['pt', 'en'])
+
+  // Update language from config default if not saved
+  useEffect(() => {
+    const saved = localStorage.getItem('workshop-language')
+    if (!saved && config.features.defaultLanguage) {
+      const defaultLang = config.features.defaultLanguage as Language
+      if (defaultLang === 'pt' || defaultLang === 'en') {
+        setLanguage(defaultLang)
+      }
+    }
+  }, [config.features.defaultLanguage])
 
   useEffect(() => {
     localStorage.setItem('workshop-language', language)

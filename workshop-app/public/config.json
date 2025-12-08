@@ -1,0 +1,30 @@
+{
+  "branding": {
+    "name": "tmux",
+    "title": "tmux Workshop",
+    "subtitle": "Terminal Productivity",
+    "logo": "tmux",
+    "navTitle": "Workshop"
+  },
+  "features": {
+    "i18n": true,
+    "defaultLanguage": "pt",
+    "useTmux": true,
+    "showOcpTools": false,
+    "showVirtTools": false
+  },
+  "terminal": {
+    "connectedMessage": {
+      "pt": "Conectado ao terminal",
+      "en": "Connected to terminal"
+    },
+    "disconnectedMessage": {
+      "pt": "Conexao perdida com o terminal",
+      "en": "Connection lost to terminal"
+    }
+  },
+  "theme": {
+    "primary": "#41af46",
+    "accent": "#41af46"
+  }
+}

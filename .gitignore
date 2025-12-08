@@ -11,3 +11,4 @@ workshop-app/*.log
 
 # Copilot instructions (development only)
 # .github/copilot-instructions.md
+workshop-app/sync-workshop-app.sh

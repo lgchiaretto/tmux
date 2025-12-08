@@ -3,6 +3,7 @@ import { Component, ReactNode } from 'react'
 
 import App from './App.tsx'
 import { ErrorFallback } from './ErrorFallback.tsx'
+import { ConfigProvider } from './contexts/ConfigContext.tsx'
 import { LanguageProvider } from './contexts/LanguageContext.tsx'
 
 import "./main.css"
@@ -37,8 +38,10 @@ class ErrorBoundary extends Component<
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
+    <ConfigProvider>
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
+    </ConfigProvider>
   </ErrorBoundary>
 )

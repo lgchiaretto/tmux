@@ -3,37 +3,18 @@ import { Navigation } from './components/Navigation'
 import { MarkdownViewer } from './components/MarkdownViewer'
 import { Terminal } from './components/Terminal'
 import { LanguageSelector } from './components/LanguageSelector'
+import { Logo } from './components/Logo'
 import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet'
 import { Button } from './components/ui/button'
 import { List } from '@phosphor-icons/react'
 import { useIsMobile } from './hooks/use-mobile'
 import { useLocalStorage } from './hooks/use-local-storage'
 import { useLanguage } from './contexts/LanguageContext'
-
-// Tmux Logo SVG Component
-function TmuxLogo() {
-  return (
-    <div className="flex items-center gap-3">
-      {/* Terminal Icon */}
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-green-500">
-        <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
-        <line x1="6" y1="8" x2="6" y2="8"/>
-        <line x1="10" y1="8" x2="10" y2="8"/>
-        <line x1="14" y1="8" x2="14" y2="8"/>
-        <path d="M6 12l4 4"/>
-        <path d="M6 16l4-4"/>
-        <line x1="14" y1="16" x2="18" y2="16"/>
-      </svg>
-      {/* tmux Text */}
-      <span className="text-white font-bold text-xl whitespace-nowrap font-mono">
-        tmux
-      </span>
-    </div>
-  )
-}
+import { useConfig } from './contexts/ConfigContext'
 
 function App() {
   const { language, t } = useLanguage()
+  const { config, loading: configLoading } = useConfig()
   const [guides, setGuides] = useState<string[]>([])
   const [currentGuide, setCurrentGuide] = useLocalStorage<string>('current-guide', '')
   const [guideContent, setGuideContent] = useState<string>('')
@@ -127,18 +108,23 @@ function App() {
     ? currentGuide.replace(/\.md$/, '').replace(/^\d+-/, '').replace(/-/g, ' ')
     : t.selectGuide
 
+  // Build header title from config
+  const headerTitle = config.branding.subtitle 
+    ? `${config.branding.title} - ${config.branding.subtitle}`
+    : config.branding.title
+
   return (
     <div className="h-screen w-screen overflow-hidden bg-background flex flex-col">
       {/* Header/Navbar */}
       <header className="h-14 bg-[var(--navbar-bg)] text-[var(--navbar-fg)] flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <TmuxLogo />
+          <Logo />
           <span className="text-[var(--navbar-fg)] font-normal text-base hidden sm:block">
-            {t.headerTitle}
+            {headerTitle}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <LanguageSelector />
+          {config.features.i18n && <LanguageSelector />}
           {isMobile && (
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
