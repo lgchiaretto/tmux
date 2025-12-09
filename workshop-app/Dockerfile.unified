@@ -53,9 +53,10 @@ RUN npm install --omit=dev
 
 COPY server/server.js ./
 COPY --from=frontend-builder /frontend/dist ./dist
+COPY guides /app/guides
 
 # Download CLI tools and setup configurations in a single layer
-RUN mkdir -p /app/guides/pt /app/guides/en /etc/skel/.vim/autoload /etc/skel/.tmux \
+RUN mkdir -p /etc/skel/.vim/autoload /etc/skel/.tmux \
     && curl -L -o /usr/local/bin/tmux "https://github.com/lgchiaretto/tmux/releases/download/v3.6/tmux.linux-amd64.stripped" \
     && chmod +x /usr/local/bin/tmux \
     && curl -L "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" | tar xz -C /usr/local/bin oc kubectl \
