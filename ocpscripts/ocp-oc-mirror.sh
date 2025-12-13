@@ -1,9 +1,16 @@
 #!/bin/bash
 
-# Exit if not running on bastion.chiaret.to
-if [ "$(hostname)" != "bastion.chiaret.to" ]; then
-    echo "This script must be run on bastion.chiaret.to. Exiting."
-    exit 0
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Exit if bastion check is enabled and not on bastion
+if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
+    if [ "$(hostname)" != "${BASTION_HOSTNAME:-bastion.chiaret.to}" ]; then
+        echo "This script must be run on ${BASTION_HOSTNAME:-bastion.chiaret.to}. Exiting."
+        exit 0
+    fi
 fi
 
 read -p "Would you like to proceed with oc-mirror operations? (y/n): " confirm
@@ -14,16 +21,19 @@ fi
 
 set -e
 
+BASE_DIR="${QUAY_FILES_DIR:-$HOME/quay-files}"
+VERSIONS_FILE="$BASE_DIR/versions.txt"
+CONTAINER_AUTH="${CONTAINER_AUTH_FILE:-$HOME/auth.json}"
+
 # Edit the DIRECTORIES variable to include the directories you want to process here
-vim /home/lchiaret/quay-files/versions.txt
+vim "$VERSIONS_FILE"
 
 #Read DIRECTORIES from a file
 PLATFORM_DIRECTORIES=(
-$(cat /home/lchiaret/quay-files/versions.txt | grep -vE '^\s*#' | grep -vE '^\s*$' | grep -vE '^operators/' | sort -u)
+$(cat "$VERSIONS_FILE" | grep -vE '^\s*#' | grep -vE '^\s*$' | grep -vE '^operators/' | sort -u)
 )
 
 TMUX_SESSION="oc-mirror-session"
-BASE_DIR="/home/lchiaret/quay-files"
 
 get_operator_directories() {
     # Find operators directories in versions.txt
@@ -32,7 +42,7 @@ get_operator_directories() {
         if [[ "$line" == operators/* ]]; then
             OPERATOR_DIRS+=("$line")
         fi
-    done < /home/lchiaret/quay-files/versions.txt
+    done < "$VERSIONS_FILE"
 }
 
 display_release_versions() {
@@ -123,10 +133,14 @@ tmux rename-window -t $TMUX_SESSION:$current_window 'script-running'
 auth_window=$((current_window + 1))
 tmux new-window -t $TMUX_SESSION -n 'auth-copy' -c $BASE_DIR
 
-echo "Copying ~/auth.json to /run/user/1000/containers/auth.json in dedicated window"
-tmux send-keys -t $TMUX_SESSION:$auth_window "mkdir -p /run/user/1000/containers" Enter
+# Get user's UID for the containers auth path
+USER_UID=$(id -u)
+CONTAINERS_AUTH_PATH="/run/user/$USER_UID/containers"
+
+echo "Copying $CONTAINER_AUTH to $CONTAINERS_AUTH_PATH/auth.json in dedicated window"
+tmux send-keys -t $TMUX_SESSION:$auth_window "mkdir -p $CONTAINERS_AUTH_PATH" Enter
 sleep 1
-tmux send-keys -t $TMUX_SESSION:$auth_window "cp /home/lchiaret/auth.json /run/user/1000/containers/auth.json" Enter
+tmux send-keys -t $TMUX_SESSION:$auth_window "cp $CONTAINER_AUTH $CONTAINERS_AUTH_PATH/auth.json" Enter
 sleep 1
 tmux send-keys -t $TMUX_SESSION:$auth_window "echo 'Auth copy completed with exit code:'\$?" Enter
 sleep 2

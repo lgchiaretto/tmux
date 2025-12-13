@@ -1,8 +1,16 @@
 #!/bin/bash
 
-if [ "$(hostname)" != "bastion.chiaret.to" ]; then
-    echo "This script must be run on bastion.chiaret.to. Exiting."
-    exit 0
+# Load configuration
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Exit if bastion check is enabled and not on bastion
+if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
+    if [ "$(hostname)" != "${BASTION_HOSTNAME:-bastion.chiaret.to}" ]; then
+        echo "This script must be run on ${BASTION_HOSTNAME:-bastion.chiaret.to}. Exiting."
+        exit 0
+    fi
 fi
 
 set -e
@@ -17,7 +25,7 @@ fi
 
 tmux_ocpversion=$(echo $ocpversion | tr . _)
 TMUX_SESSION="delete-$tmux_ocpversion"
-BASE_DIR="/home/lchiaret/quay-files"
+BASE_DIR="${QUAY_FILES_DIR:-$HOME/quay-files}"
 
 if [ ! -d "$BASE_DIR/$ocpversion" ]; then
     echo "Directory $BASE_DIR/$ocpversion does not exist."

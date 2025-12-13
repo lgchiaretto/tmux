@@ -154,17 +154,17 @@ function createVphereCluster() {
           jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
           if [[ "$assistedinstaller" == "true" ]]; then
-              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom -a" C-m
+              tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom -a" C-m
           else
-              tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -n $cluster_name_custom" C-m
+              tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom" C-m
           fi
         else
           jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
           jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
           if [[ "$assistedinstaller" == "true" ]]; then
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file -a true" C-m
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -a true" C-m
           else
-            tmux send-keys "/home/lchiaret/git/openshift4-automation/createcluster.py -i $file" C-m
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file" C-m
           fi
         fi
     else

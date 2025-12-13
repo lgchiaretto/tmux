@@ -66,6 +66,30 @@ export ANSIBLE_PLAYBOOK_KVM_PATH="${ANSIBLE_PLAYBOOK_KVM_PATH:-$HOME/git/ocp4_se
 
 ##############################################################
 #                                                            #
+#                vSphere Automation Variables                #
+#                                                            #
+##############################################################
+
+# Path to openshift4-automation repository for vSphere cluster management
+# Contains Python scripts for creating, destroying, and recreating clusters
+export OPENSHIFT4_AUTOMATION_PATH="${OPENSHIFT4_AUTOMATION_PATH:-$HOME/git/openshift4-automation}"
+
+##############################################################
+#                                                            #
+#                Quay/OC-Mirror Variables                    #
+#                                                            #
+##############################################################
+
+# Base directory for Quay files and OC-mirror operations
+# Contains imageset configurations, versions.txt, and mirrored content
+export QUAY_FILES_DIR="${QUAY_FILES_DIR:-$HOME/quay-files}"
+
+# Path to container authentication file (pull secret)
+# Used for authenticating to registries during mirror operations
+export CONTAINER_AUTH_FILE="${CONTAINER_AUTH_FILE:-$HOME/auth.json}"
+
+##############################################################
+#                                                            #
 #       Variables used only by Chiaretto Labs scripts        #
 #           and you do not need to modify them               #
 #                                                            #

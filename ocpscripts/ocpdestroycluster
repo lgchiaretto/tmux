@@ -30,7 +30,7 @@ fi
 infra=$(yq -r '.infra' "$config_file" || true)
 
 if [[ "$infra" == "vsphere" ]]; then
-    tmux send-keys "/home/lchiaret/git/openshift4-automation/run-playbooks-destroy.py $cluster_name & 2>&1" C-m
+    tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/run-playbooks-destroy.py $cluster_name & 2>&1" C-m
 elif [[ "$infra" == "kvm" ]]; then
     # Create new tmux session for KVM cluster destruction
     session_name="destroy-kvm-${cluster_name}"

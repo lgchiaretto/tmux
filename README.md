@@ -106,6 +106,13 @@ vim $HOME/.tmux/config.sh
 - `CLUSTER_VARIABLES_DIR`: Directory for vSphere cluster template files (default: `${CLUSTERS_BASE_PATH}/variables-files`)
 - `KVM_VARIABLES_DIR`: Directory for KVM cluster template files in YAML format (default: `${CLUSTERS_BASE_PATH}/variables-files-kvm`)
 - `ANSIBLE_PLAYBOOK_KVM_PATH`: Path to Ansible playbook directory for KVM cluster management (https://github.com/lgchiaretto/ocp4_setup_upi_kvm_ansible)
+
+**vSphere Automation:**
+- `OPENSHIFT4_AUTOMATION_PATH`: Path to openshift4-automation repository for vSphere cluster management (default: `$HOME/git/openshift4-automation`)
+
+**Quay/OC-Mirror:**
+- `QUAY_FILES_DIR`: Base directory for Quay files and OC-mirror operations (default: `$HOME/quay-files`)
+- `CONTAINER_AUTH_FILE`: Path to container authentication file/pull secret (default: `$HOME/auth.json`)
  
 **Remote Synchronization:**
 - `REMOTE_BASTION_HOST`: Remote host for cluster state synchronization (optional, format: `user@host`)
