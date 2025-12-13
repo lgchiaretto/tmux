@@ -1,6 +1,6 @@
 # Copiar e Colar
 
-Neste guia voce vai aprender a usar o modo copy do tmux para copiar texto.
+Neste guia você vai aprender a usar o modo copy do tmux para copiar texto.
 
 ---
 
@@ -23,7 +23,7 @@ Ctrl+s  depois  [
 ```
 
 **O que muda:**
-- Voce pode navegar pelo historico
+- você pode navegar pelo historico
 - O cursor se move livremente
 - Aparece `[0/0]` no canto (posicao no buffer)
 
@@ -226,7 +226,7 @@ tmux save-buffer - | grep "erro"
 
 ---
 
-## Proximo Guia
+## Próximo Guia
 
 [→ 07 - Referencia de Atalhos](07-referencia-atalhos.md)
 

@@ -2,8 +2,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import 'highlight.js/styles/github-dark.css'
-import { Button } from './ui/button'
-import { Check, CopySimple } from '@phosphor-icons/react'
+import { Button } from '@patternfly/react-core'
+import { CheckIcon, CopyIcon } from '@patternfly/react-icons'
 import { useState, ReactNode } from 'react'
 import { copyToClipboard } from '@/lib/clipboard'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -12,7 +12,6 @@ interface MarkdownViewerProps {
   content: string
 }
 
-// Helper function to extract text content from React children
 function extractTextContent(children: ReactNode): string {
   if (typeof children === 'string') {
     return children
@@ -45,25 +44,25 @@ function CodeBlock({ children, className, rawText }: { children: ReactNode; clas
         <code>{children}</code>
       </pre>
       <Button
+        variant={copied ? 'primary' : 'secondary'}
         size="sm"
         onClick={handleCopy}
-        className="copy-button h-7 text-xs"
-        style={copied ? {
-          backgroundColor: 'var(--success)',
-          color: 'var(--success-foreground)',
+        className="copy-button"
+        style={copied ? { 
+          backgroundColor: 'var(--pf-t--global--color--status--success--default)' 
         } : {
-          backgroundColor: 'var(--accent)',
-          color: 'var(--accent-foreground)',
+          backgroundColor: 'var(--workshop-green)',
+          color: 'white'
         }}
       >
         {copied ? (
           <>
-            <Check size={14} weight="bold" className="mr-1.5" />
+            <CheckIcon style={{ marginRight: '0.25rem' }} />
             {t.copied}
           </>
         ) : (
           <>
-            <CopySimple size={14} weight="bold" className="mr-1.5" />
+            <CopyIcon style={{ marginRight: '0.25rem' }} />
             {t.copy}
           </>
         )}
@@ -74,7 +73,7 @@ function CodeBlock({ children, className, rawText }: { children: ReactNode; clas
 
 export function MarkdownViewer({ content }: MarkdownViewerProps) {
   return (
-    <div className="markdown-content prose prose-slate max-w-none">
+    <div className="markdown-content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
@@ -91,7 +90,6 @@ export function MarkdownViewer({ content }: MarkdownViewerProps) {
               )
             }
 
-            // Extract raw text for copy functionality
             const rawText = extractTextContent(children).replace(/\n$/, '')
 
             return (

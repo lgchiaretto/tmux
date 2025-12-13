@@ -1,51 +1,47 @@
-import { cn } from '@/lib/utils'
+import { Nav, NavList, NavItem } from '@patternfly/react-core'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface NavigationProps {
   guides: string[]
   currentGuide: string
   onSelectGuide: (guide: string) => void
-  className?: string
 }
 
-export function Navigation({ guides, currentGuide, onSelectGuide, className }: NavigationProps) {
+export function Navigation({ guides, currentGuide, onSelectGuide }: NavigationProps) {
   const { t } = useLanguage()
   
   return (
-    <div className={cn('flex flex-col h-full bg-[var(--sidebar-bg)] border-r border-border/50', className)}>
-      <div className="flex-1 overflow-y-auto">
-        <nav className="nav-menu">
-          <h3 className="text-[var(--sidebar-fg)] font-medium text-sm mb-2 px-1">
-            {t.workshop}
-          </h3>
-          {guides.length === 0 ? (
-            <div className="px-3 py-8 text-sm text-[var(--sidebar-fg)]/60 text-center">
+    <Nav aria-label={t.workshop}>
+      <NavList>
+        {guides.length === 0 ? (
+          <NavItem isActive={false}>
+            <span style={{ 
+              padding: '0.5rem 1rem', 
+              color: 'var(--workshop-gray-500)',
+              display: 'block'
+            }}>
               {t.noGuides}
-            </div>
-          ) : (
-            <ul className="nav-list ml-0">
-              {guides.map((guide) => {
-                const isActive = guide === currentGuide
-                const displayName = guide.replace(/\.md$/, '').replace(/^\d+-/, '').replace(/-/g, ' ')
-                
-                return (
-                  <li key={guide} className="nav-item">
-                    <button
-                      onClick={() => onSelectGuide(guide)}
-                      className={cn(
-                        'nav-link w-full text-left text-sm transition-colors',
-                        isActive && 'is-active'
-                      )}
-                    >
-                      <span className="capitalize">{displayName}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </nav>
-      </div>
-    </div>
+            </span>
+          </NavItem>
+        ) : (
+          guides.map((guide) => {
+            const isActive = guide === currentGuide
+            const displayName = guide.replace(/\.md$/, '').replace(/^\d+-/, '').replace(/-/g, ' ')
+            
+            return (
+              <NavItem
+                key={guide}
+                itemId={guide}
+                isActive={isActive}
+                onClick={() => onSelectGuide(guide)}
+                style={{ textTransform: 'capitalize' }}
+              >
+                {displayName}
+              </NavItem>
+            )
+          })
+        )}
+      </NavList>
+    </Nav>
   )
 }

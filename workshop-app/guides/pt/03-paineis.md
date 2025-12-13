@@ -1,10 +1,10 @@
 # Paineis
 
-Neste guia voce vai aprender a dividir a tela em paineis e navegar entre eles.
+Neste guia você vai aprender a dividir uma kanela em paineis e navegar entre eles.
 
 ---
 
-## Passo 1: Divida Horizontalmente
+## Passo 1: Divida Verticalmente
 
 Pressione:
 
@@ -16,7 +16,7 @@ Isso divide a janela atual em dois paineis lado a lado.
 
 ---
 
-## Passo 2: Divida Verticalmente
+## Passo 2: Divida Horizontalmente
 
 Pressione:
 
@@ -28,7 +28,7 @@ Isso divide o painel atual em dois, um acima do outro.
 
 ---
 
-## Passo 3: Pratique as Divisoes
+## Passo 3: Pratique as Divisões
 
 Crie uma estrutura assim:
 
@@ -42,9 +42,9 @@ Crie uma estrutura assim:
 ```
 
 **Passos:**
-1. `Ctrl+\` para dividir horizontalmente
+1. `Ctrl+\` para dividir verticalmente
 2. Va para o painel da direita
-3. `Ctrl+s` depois `-` para dividir verticalmente
+3. `Ctrl+s` depois `-` para dividir horizontalmente
 
 ---
 
@@ -59,7 +59,7 @@ Use as setas com Ctrl:
 | Painel acima | `Ctrl ↑` |
 | Painel abaixo | `Ctrl ↓` |
 
-**Pratique:** Navegue entre todos os paineis que voce criou.
+**Pratique:** Navegue entre todos os paineis que você criou.
 
 ---
 
@@ -95,9 +95,9 @@ Para maximizar um painel temporariamente:
 Ctrl+s  depois  z
 ```
 
-Pressione novamente para voltar ao layout original.
+Pressione `Ctrl-s z` novamente para voltar ao layout original. Você pode alternar entre zoom in e zoom out em um panel usando `Ctrl-s z`
 
-**Util para:** Ver logs ou saidas longas em tela cheia.
+**Útil para:** Ver logs ou saídas longas em tela cheia.
 
 ---
 
@@ -121,7 +121,7 @@ Para digitar em todos os paineis ao mesmo tempo:
 Ctrl+s  depois  a
 ```
 
-Isso ativa/desativa o modo sincronizado. Util para executar comandos em varios servidores.
+Isso ativa/desativa o modo sincronizado. Útil para executar comandos em vários servidores.
 
 ---
 
@@ -135,24 +135,7 @@ Ctrl+s  depois  !
 
 ---
 
-## Layout Sugerido para Desenvolvimento
-
-```
-+─────────────────────────────+
-|           Editor            |
-+──────────────+──────────────+
-|    Logs      |   Terminal   |
-+──────────────+──────────────+
-```
-
-**Monte esse layout:**
-1. `Ctrl+s` depois `-` (divide vertical)
-2. Va para o painel de baixo
-3. `Ctrl+\` (divide horizontal)
-
----
-
-## Proximo Guia
+## Próximo Guia
 
 [→ 04 - Integracao com fzf](04-fzf-integracao.md)
 

@@ -2,19 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Terminal as XTerm } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
-import { Button } from './ui/button'
-import { Badge } from './ui/badge'
-import { Trash, ArrowClockwise, Terminal as TerminalIcon } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+import { Button, Label, Flex, FlexItem } from '@patternfly/react-core'
+import { SyncAltIcon, TerminalIcon } from '@patternfly/react-icons'
 import { useLanguage } from '@/contexts/LanguageContext'
-
-interface TerminalProps {
-  className?: string
-}
 
 type ConnectionStatus = 'connected' | 'connecting' | 'disconnected'
 
-export function Terminal({ className }: TerminalProps) {
+export function Terminal() {
   const { t } = useLanguage()
   const terminalRef = useRef<HTMLDivElement>(null)
   const xtermRef = useRef<XTerm | null>(null)
@@ -41,7 +35,6 @@ export function Terminal({ className }: TerminalProps) {
       if (xtermRef.current) {
         xtermRef.current.write('\r\n\x1b[32m✓ ' + t.connectedMessage + '\x1b[0m\r\n')
         
-        // Send terminal size immediately
         if (fitAddonRef.current) {
           fitAddonRef.current.fit()
         }
@@ -87,18 +80,18 @@ export function Terminal({ className }: TerminalProps) {
       lineHeight: 1.4,
       rightClickSelectsWord: false,
       theme: {
-        background: '#191919',
-        foreground: '#f0f0f0',
-        cursor: '#f0f0f0',
-        cursorAccent: '#191919',
+        background: '#1e1e1e',
+        foreground: '#d4d4d4',
+        cursor: '#d4d4d4',
+        cursorAccent: '#1e1e1e',
         selectionBackground: '#424242',
         black: '#000000',
-        red: '#ee0000',
-        green: '#41af46',
-        yellow: '#e18114',
-        blue: '#5c9fd7',
-        magenta: '#a0439c',
-        cyan: '#00a0a2',
+        red: '#c9190b',
+        green: '#3e8635',
+        yellow: '#f0ab00',
+        blue: '#0066cc',
+        magenta: '#a30078',
+        cyan: '#009596',
         white: '#c7c7c7',
         brightBlack: '#5d5d5d',
         brightRed: '#ff6d67',
@@ -115,10 +108,8 @@ export function Terminal({ className }: TerminalProps) {
     term.loadAddon(fitAddon)
     term.open(terminalRef.current)
     
-    // Small delay to ensure DOM is ready
     setTimeout(() => {
       fitAddon.fit()
-      // Send initial size to server
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({
           type: 'resize',
@@ -137,12 +128,8 @@ export function Terminal({ className }: TerminalProps) {
       }
     })
 
-    // Helper function to paste from clipboard
-    // Chrome requires clipboard access during user gesture (synchronous context)
-    // Firefox is more permissive and allows async clipboard access
     const pasteFromClipboard = async () => {
       try {
-        // Request clipboard permissions explicitly (Chrome requirement)
         if (navigator.permissions && navigator.permissions.query) {
           const permissionStatus = await navigator.permissions.query({ 
             name: 'clipboard-read' as PermissionName 
@@ -150,127 +137,99 @@ export function Terminal({ className }: TerminalProps) {
           
           if (permissionStatus.state === 'denied') {
             console.warn('Clipboard access denied. Please allow clipboard access in browser settings.')
-            // Fallback: show a notification or use document.execCommand as fallback
             return
           }
         }
         
-        // Try modern Clipboard API first
         const text = await navigator.clipboard.readText()
         if (text && wsRef.current?.readyState === WebSocket.OPEN) {
           wsRef.current.send(text)
         }
       } catch (err) {
         console.error('Failed to read clipboard:', err)
-        // In Chrome, if clipboard API fails, user needs to grant permission
-        // Show a helpful message
         console.warn('Tip: Click inside the terminal and try Ctrl+Shift+V again, or use middle-click to paste.')
       }
     }
 
-    // Intercept browser shortcuts at the document level during capture phase
-    // This runs BEFORE the browser can handle the shortcut
     const handleKeyDownCapture = (event: KeyboardEvent) => {
-      // Only intercept when terminal has focus
       if (!terminalRef.current?.contains(document.activeElement) && 
           document.activeElement !== terminalRef.current) {
         return
       }
 
-      // Ctrl+T - New tmux window (prevent browser new tab)
       if (event.ctrlKey && !event.shiftKey && event.key.toLowerCase() === 't') {
         event.preventDefault()
         event.stopPropagation()
-        // Send Ctrl+T to terminal
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send('\x14') // Ctrl+T
+          wsRef.current.send('\x14')
         }
         return
       }
 
-      // Ctrl+W - Close tmux pane (prevent browser close tab)
       if (event.ctrlKey && !event.shiftKey && event.key.toLowerCase() === 'w') {
         event.preventDefault()
         event.stopPropagation()
-        // Send Ctrl+W to terminal
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send('\x17') // Ctrl+W
+          wsRef.current.send('\x17')
         }
         return
       }
 
-      // Ctrl+N - (prevent browser new window)
       if (event.ctrlKey && !event.shiftKey && event.key.toLowerCase() === 'n') {
         event.preventDefault()
         event.stopPropagation()
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send('\x0e') // Ctrl+N
+          wsRef.current.send('\x0e')
         }
         return
       }
 
-      // Ctrl+Shift+T - (prevent browser reopen tab)
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 't') {
         event.preventDefault()
         event.stopPropagation()
         return
       }
 
-      // Ctrl+Shift+V - paste from browser clipboard (useful for external content)
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'v') {
         event.preventDefault()
         event.stopPropagation()
-        // Call async function immediately in user gesture context
         pasteFromClipboard().catch(console.error)
         return
       }
 
-      // Ctrl+\ - Split pane horizontally (tmux vertical split)
-      // Chrome and Firefox handle backslash differently:
-      // - Firefox: key='\\', code='Backslash', keyCode=220
-      // - Chrome: key='\\', code='Backslash', keyCode=220
-      // Check multiple properties to ensure maximum compatibility
       if (event.ctrlKey && !event.shiftKey && 
           (event.key === '\\' || event.code === 'Backslash' || event.keyCode === 220)) {
         event.preventDefault()
         event.stopPropagation()
-        // Send Ctrl+\ (0x1c) to terminal for tmux split
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send('\x1c') // Ctrl+\ = ASCII 28 (0x1c)
+          wsRef.current.send('\x1c')
         }
         return
       }
     }
 
-    // Add listener with capture: true to intercept before browser
     document.addEventListener('keydown', handleKeyDownCapture, { capture: true })
 
-    // Handle custom key events for paste
     term.attachCustomKeyEventHandler((event: KeyboardEvent) => {
-      // Handle Ctrl+Shift+V FIRST - paste from browser clipboard
-      // Must check this before Ctrl+V since shiftKey is also set
       if (event.ctrlKey && event.shiftKey && (event.key === 'v' || event.key === 'V') && event.type === 'keydown') {
         event.preventDefault()
         event.stopPropagation()
         pasteFromClipboard().catch(console.error)
-        return false // Prevent xterm from handling
+        return false
       }
       
-      // Handle Ctrl+V - send to tmux so it can paste from its buffer
       if (event.ctrlKey && !event.shiftKey && event.key === 'v' && event.type === 'keydown') {
         event.preventDefault()
         event.stopPropagation()
-        // Send Ctrl+V to terminal/tmux so it can handle paste-buffer
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send('\x16') // Ctrl+V character
+          wsRef.current.send('\x16')
         }
-        return false // Prevent default xterm handling
+        return false
       }
       
-      return true // Let xterm handle other keys normally
+      return true
     })
 
-    // Prevent default paste behavior and handle manually to avoid duplication
     const handlePaste = (event: ClipboardEvent) => {
       event.preventDefault()
       const text = event.clipboardData?.getData('text')
@@ -279,20 +238,15 @@ export function Terminal({ className }: TerminalProps) {
       }
     }
 
-    // Intercept middle mouse button click to prevent X11 primary selection paste
-    // This ensures only the system clipboard is used for paste operations
     const handleMouseDown = (event: MouseEvent) => {
-      // Middle mouse button is button 1
       if (event.button === 1) {
         event.preventDefault()
         event.stopPropagation()
-        // Paste from system clipboard instead of X11 primary selection
         pasteFromClipboard().catch(console.error)
         return false
       }
     }
 
-    // Prevent auxclick (middle click) from triggering any default behavior
     const handleAuxClick = (event: MouseEvent) => {
       if (event.button === 1) {
         event.preventDefault()
@@ -301,7 +255,6 @@ export function Terminal({ className }: TerminalProps) {
       }
     }
 
-    // Also capture mouseup to fully prevent middle-click paste
     const handleMouseUp = (event: MouseEvent) => {
       if (event.button === 1) {
         event.preventDefault()
@@ -315,7 +268,6 @@ export function Terminal({ className }: TerminalProps) {
     terminalRef.current.addEventListener('mouseup', handleMouseUp, { capture: true })
     terminalRef.current.addEventListener('auxclick', handleAuxClick, { capture: true })
 
-    // Connect immediately without delay
     connect()
 
     const handleResize = () => {
@@ -329,7 +281,6 @@ export function Terminal({ className }: TerminalProps) {
       }
     }
 
-    // Observe terminal container size changes
     const resizeObserver = new ResizeObserver(() => {
       handleResize()
     })
@@ -369,68 +320,49 @@ export function Terminal({ className }: TerminalProps) {
     connect()
   }
 
-  const getStatusBadge = () => {
+  const getStatusLabel = () => {
     switch (status) {
       case 'connected':
-        return (
-          <Badge variant="outline" className="border-success/30 bg-success/10 text-success text-xs font-medium">
-            <div className="w-1.5 h-1.5 rounded-full bg-success mr-1.5" />
-            {t.connected}
-          </Badge>
-        )
+        return <Label color="green" isCompact>{t.connected}</Label>
       case 'connecting':
-        return (
-          <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning text-xs font-medium">
-            <div className="w-1.5 h-1.5 rounded-full bg-warning mr-1.5 animate-pulse" />
-            {t.connecting}
-          </Badge>
-        )
+        return <Label color="orange" isCompact>{t.connecting}</Label>
       case 'disconnected':
-        return (
-          <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
-            <div className="w-1.5 h-1.5 rounded-full bg-destructive mr-1.5" />
-            {t.disconnected}
-          </Badge>
-        )
+        return <Label color="red" isCompact>{t.disconnected}</Label>
     }
   }
 
   return (
-    <div className={className}>
-      <div className="h-full flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2 bg-[var(--toolbar-bg)] border-b border-border">
-          <div className="flex items-center gap-2">
-            <TerminalIcon size={16} weight="bold" className="text-[var(--toolbar-fg)]" />
-            <span className="text-sm font-medium text-foreground">{t.terminal}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {getStatusBadge()}
-            <div className="flex items-center gap-1">
-              {status === 'disconnected' && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleReconnect}
-                  className="h-7 px-2 text-xs hover:bg-accent/10 hover:text-accent"
-                  title={t.reconnect}
-                >
-                  <ArrowClockwise size={14} weight="bold" />
-                </Button>
-              )}
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div className="terminal-header">
+        <Flex alignItems={{ default: 'alignItemsCenter' }}>
+          <FlexItem>
+            <span className="terminal-header__title">
+              <TerminalIcon />
+              {t.terminal}
+            </span>
+          </FlexItem>
+        </Flex>
+        <Flex alignItems={{ default: 'alignItemsCenter' }} className="terminal-header__actions">
+          <FlexItem>{getStatusLabel()}</FlexItem>
+          {status === 'disconnected' && (
+            <FlexItem>
               <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleClear}
-                className="h-7 px-2 text-xs hover:bg-accent/10 hover:text-accent"
-                title={t.clearTerminal}
+                variant="plain"
+                onClick={handleReconnect}
+                aria-label={t.reconnect}
+                className="terminal-action-btn"
               >
-                <Trash size={14} weight="bold" />
+                <SyncAltIcon />
               </Button>
-            </div>
-          </div>
-        </div>
-        <div ref={terminalRef} className="flex-1 p-2 overflow-hidden bg-[var(--terminal-bg)]" />
+            </FlexItem>
+          )}
+        </Flex>
       </div>
+      <div 
+        ref={terminalRef} 
+        className="terminal-container"
+        style={{ flex: 1, overflow: 'hidden' }}
+      />
     </div>
   )
 }

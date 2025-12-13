@@ -20,11 +20,11 @@ A maioria dos comandos exige pressionar o prefix primeiro.
 
 | Acao | Atalho |
 |------|--------|
-| Nova sessao | `Ctrl+s N` |
+| Nova sessão | `Ctrl+s N` |
 | Listar sessoes | `Ctrl+s s` |
-| Renomear sessao | `Ctrl+s .` |
+| Renomear sessão | `Ctrl+s .` |
 | Desconectar (detach) | `Ctrl+s d` |
-| Deletar sessao | `Ctrl+s K` |
+| Deletar sessão | `Ctrl+s K` |
 
 ---
 
@@ -127,11 +127,11 @@ A maioria dos comandos exige pressionar o prefix primeiro.
 ## Comandos tmux Uteis
 
 ```bash
-# Criar sessao (se fora do tmux)
+# Criar sessão (se fora do tmux)
 tmux new-session -s nome
 tmux new -s nome
 
-# Anexar a sessao (se fora do tmux)
+# Anexar a sessão (se fora do tmux)
 tmux attach -t nome
 tmux a -t nome
 
@@ -215,4 +215,4 @@ tmux display-popup -E -T "Titulo" "comando"
 
 ---
 
-> **Parabens!** Voce completou o workshop de tmux!
+> **Parabens!** você completou o workshop de tmux!

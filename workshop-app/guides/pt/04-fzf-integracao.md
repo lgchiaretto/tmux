@@ -1,6 +1,6 @@
 # Integracao com fzf
 
-Neste guia voce vai aprender a usar popups fzf dentro do tmux para navegacao rapida.
+Neste guia você vai aprender a usar o fzf e alguns e alguns atalhos do tmux para navegacao rapida.
 
 ---
 
@@ -8,7 +8,7 @@ Neste guia voce vai aprender a usar popups fzf dentro do tmux para navegacao rap
 
 fzf e um fuzzy finder - uma ferramenta de busca interativa que filtra listas rapidamente.
 
-Combinado com tmux, ele abre em popups elegantes sobre sua sessao.
+Combinado com tmux, ele abre em popups elegantes sobre sua sessão.
 
 ---
 
@@ -38,11 +38,11 @@ Ctrl+s  depois  s
 
 **O que acontece:**
 - Lista todas as sessoes
-- Preview da sessao no lado direito
+- Preview da sessão no lado direito
 - Navegue e selecione para trocar
 
 **Pratique:** 
-1. Crie uma nova sessao: `Ctrl+s N` e nomeie como "teste"
+1. Crie uma nova sessão: `Ctrl+s N` e nomeie como "teste"
 2. Use `Ctrl+s s` para ver e alternar
 
 ---
@@ -101,7 +101,7 @@ Ctrl+r
 
 ## Passo 6: Execute um Script Manualmente
 
-Voce pode executar scripts fzf diretamente:
+você pode executar scripts fzf diretamente:
 
 ```bash
 # Listar arquivos
@@ -132,7 +132,7 @@ tmux display-popup -E -w 80% -h 80% "seu-script.sh"
 
 ---
 
-## Proximo Guia
+## Próximo Guia
 
 [→ 05 - Popups e Scripts](05-popups-scripts.md)
 

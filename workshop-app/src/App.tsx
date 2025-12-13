@@ -1,26 +1,36 @@
 import { useEffect, useState } from 'react'
+import {
+  Page,
+  Masthead,
+  MastheadMain,
+  MastheadBrand,
+  MastheadContent,
+  PageSidebar,
+  PageSidebarBody,
+  Breadcrumb,
+  BreadcrumbItem,
+  Spinner,
+  Drawer,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerPanelContent,
+} from '@patternfly/react-core'
 import { Navigation } from './components/Navigation'
 import { MarkdownViewer } from './components/MarkdownViewer'
 import { Terminal } from './components/Terminal'
 import { LanguageSelector } from './components/LanguageSelector'
 import { Logo } from './components/Logo'
-import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet'
-import { Button } from './components/ui/button'
-import { List } from '@phosphor-icons/react'
-import { useIsMobile } from './hooks/use-mobile'
 import { useLocalStorage } from './hooks/use-local-storage'
 import { useLanguage } from './contexts/LanguageContext'
 import { useConfig } from './contexts/ConfigContext'
 
 function App() {
   const { language, t } = useLanguage()
-  const { config, loading: configLoading } = useConfig()
+  const { config } = useConfig()
   const [guides, setGuides] = useState<string[]>([])
   const [currentGuide, setCurrentGuide] = useLocalStorage<string>('current-guide', '')
   const [guideContent, setGuideContent] = useState<string>('')
   const [loading, setLoading] = useState(true)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const isMobile = useIsMobile()
 
   useEffect(() => {
     setLoading(true)
@@ -29,7 +39,6 @@ function App() {
       .then((data: string[]) => {
         setGuides(data)
         if (data.length > 0) {
-          // Always reset to first guide if current doesn't exist or is empty
           if (!currentGuide || !data.includes(currentGuide)) {
             setCurrentGuide(data[0])
           }
@@ -45,7 +54,6 @@ function App() {
   useEffect(() => {
     if (!currentGuide || guides.length === 0) return
     
-    // Skip if guide doesn't exist in current list
     if (!guides.includes(currentGuide)) {
       setCurrentGuide(guides[0])
       return
@@ -60,7 +68,6 @@ function App() {
         return res.text()
       })
       .then((content) => {
-        // Check if content is an error message
         if (content === 'Guide not found' || content.startsWith('<!DOCTYPE')) {
           throw new Error('Guide not found')
         }
@@ -69,7 +76,6 @@ function App() {
       })
       .catch((err) => {
         console.error('Error loading guide content:', err)
-        // Reset to first guide on error
         if (guides.length > 0 && currentGuide !== guides[0]) {
           setCurrentGuide(guides[0])
         } else {
@@ -81,118 +87,122 @@ function App() {
 
   const handleSelectGuide = (guide: string) => {
     setCurrentGuide(guide)
-    setSheetOpen(false)
   }
-
-  if (loading && guides.length === 0) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground font-medium">{t.loading}</p>
-        </div>
-      </div>
-    )
-  }
-
-  const navigationComponent = (
-    <Navigation
-      guides={guides}
-      currentGuide={currentGuide || ''}
-      onSelectGuide={handleSelectGuide}
-      className="h-full"
-    />
-  )
 
   const displayTitle = currentGuide
     ? currentGuide.replace(/\.md$/, '').replace(/^\d+-/, '').replace(/-/g, ' ')
     : t.selectGuide
 
-  // Build header title from config
   const headerTitle = config.branding.subtitle 
     ? `${config.branding.title} - ${config.branding.subtitle}`
     : config.branding.title
 
-  return (
-    <div className="h-screen w-screen overflow-hidden bg-background flex flex-col">
-      {/* Header/Navbar */}
-      <header className="h-14 bg-[var(--navbar-bg)] text-[var(--navbar-fg)] flex items-center justify-between px-4 flex-shrink-0">
-        <div className="flex items-center gap-4">
+  if (loading && guides.length === 0) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        width: '100vw', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '1rem'
+      }}>
+        <Spinner size="xl" />
+        <span>{t.loading}</span>
+      </div>
+    )
+  }
+
+  const masthead = (
+    <Masthead>
+      <MastheadMain>
+        <MastheadBrand>
           <Logo />
-          <span className="text-[var(--navbar-fg)] font-normal text-base hidden sm:block">
+          <span style={{ 
+            color: 'var(--workshop-white)', 
+            fontWeight: 400, 
+            fontSize: '1rem',
+            marginLeft: '0.5rem'
+          }}>
             {headerTitle}
           </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {config.features.i18n && <LanguageSelector />}
-          {isMobile && (
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-              <SheetTrigger asChild>
-                <Button size="sm" variant="ghost" className="h-8 text-[var(--navbar-fg)] hover:bg-white/10">
-                  <List size={20} weight="bold" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] p-0">
-                {navigationComponent}
-              </SheetContent>
-            </Sheet>
-          )}
-        </div>
-      </header>
+        </MastheadBrand>
+      </MastheadMain>
+      {config.features.i18n && (
+        <MastheadContent>
+          <LanguageSelector />
+        </MastheadContent>
+      )}
+    </Masthead>
+  )
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar Navigation */}
-        {!isMobile && (
-          <aside className="w-60 flex-shrink-0">
-            {navigationComponent}
-          </aside>
-        )}
+  const sidebar = (
+    <PageSidebar>
+      <PageSidebarBody>
+        <Navigation
+          guides={guides}
+          currentGuide={currentGuide || ''}
+          onSelectGuide={handleSelectGuide}
+        />
+      </PageSidebarBody>
+    </PageSidebar>
+  )
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-          {/* Guide Content Panel */}
-          <main className="flex-1 flex flex-col overflow-hidden">
-            {/* Toolbar */}
-            <div className="h-10 px-4 bg-[var(--toolbar-bg)] border-b border-border flex items-center text-sm text-[var(--toolbar-fg)]">
-              <nav className="flex items-center gap-2">
-                <span>Workshop</span>
-                <span>/</span>
-                <span className="capitalize font-medium text-foreground">{displayTitle}</span>
-              </nav>
-            </div>
-            
-            {/* Document Content */}
-            <div className="flex-1 overflow-y-auto">
-              <article className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-                {loading ? (
-                  <div className="flex items-center justify-center py-16">
-                    <div className="w-8 h-8 border-4 border-accent/30 border-t-accent rounded-full animate-spin" />
-                  </div>
-                ) : guideContent ? (
-                  <>
-                    <h1 className="text-2xl font-normal text-foreground mb-6 capitalize" style={{ fontFamily: "'Red Hat Display', sans-serif" }}>
-                      {displayTitle}
-                    </h1>
-                    <MarkdownViewer content={guideContent} />
-                  </>
-                ) : (
-                  <div className="text-center py-16">
-                    <p className="text-sm text-muted-foreground">
-                      {t.selectGuide}
-                    </p>
-                  </div>
-                )}
-              </article>
-            </div>
-          </main>
+  const panelContent = (
+    <DrawerPanelContent
+      isResizable
+      defaultSize="50%"
+      minSize="300px"
+    >
+      <Terminal />
+    </DrawerPanelContent>
+  )
 
-          {/* Terminal Panel */}
-          <div className="flex-1 flex flex-col overflow-hidden bg-[var(--terminal-bg)] border-l border-border">
-            <Terminal className="h-full" />
-          </div>
-        </div>
+  return (
+    <Page masthead={masthead} sidebar={sidebar}>
+      <div className="workshop-breadcrumb-bar">
+        <Breadcrumb>
+          <BreadcrumbItem>Workshop</BreadcrumbItem>
+          <BreadcrumbItem isActive style={{ textTransform: 'capitalize' }}>
+            {displayTitle}
+          </BreadcrumbItem>
+        </Breadcrumb>
       </div>
-    </div>
+      
+      <Drawer isExpanded isInline position="end">
+        <DrawerContent panelContent={panelContent}>
+          <DrawerContentBody style={{ overflow: 'auto', padding: 0 }}>
+            <div className="markdown-content">
+              {loading ? (
+                <div className="workshop-loading">
+                  <Spinner size="lg" />
+                </div>
+              ) : guideContent ? (
+                <>
+                  <h1 style={{ 
+                    fontSize: '1.5rem', 
+                    fontWeight: 400, 
+                    marginBottom: '1.5rem',
+                    textTransform: 'capitalize',
+                    fontFamily: "'Red Hat Display', sans-serif"
+                  }}>
+                    {displayTitle}
+                  </h1>
+                  <MarkdownViewer content={guideContent} />
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '4rem' }}>
+                  <p style={{ color: 'var(--workshop-gray-500)' }}>
+                    {t.selectGuide}
+                  </p>
+                </div>
+              )}
+            </div>
+          </DrawerContentBody>
+        </DrawerContent>
+      </Drawer>
+    </Page>
   )
 }
 

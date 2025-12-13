@@ -1,12 +1,12 @@
 # Popups e Scripts
 
-Neste guia voce vai aprender a usar e criar popups customizados no tmux.
+Neste guia você vai aprender a usar e criar popups customizados no tmux.
 
 ---
 
 ## O que sao Popups?
 
-Popups sao janelas flutuantes sobre sua sessao tmux. Eles:
+Popups sao janelas flutuantes sobre sua sessão tmux. Eles:
 
 - Nao atrapalham seu layout
 - Fecham automaticamente apos uso
@@ -210,7 +210,7 @@ tmux display-popup -E -w 60% -h 50% "/tmp/menu.sh"
 
 ---
 
-## Proximo Guia
+## Próximo Guia
 
 [→ 06 - Copiar e Colar](06-copiar-colar.md)
 

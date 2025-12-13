@@ -1,189 +1,153 @@
-@import 'tailwindcss';
-@import "tw-animate-css";
+/* Custom Workshop Styles for PatternFly */
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+/* Red Hat Fonts */
+@font-face {
+  font-family: 'Red Hat Display';
+  src: url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&display=swap');
+}
 
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Red Hat Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.6;
-  }
+@font-face {
+  font-family: 'Red Hat Text';
+  src: url('https://fonts.googleapis.com/css2?family=Red+Hat+Text:wght@400;500;600&display=swap');
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Red Hat Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    line-height: 1.3;
-  }
-
-  code, pre {
-    font-family: 'Red Hat Mono', 'JetBrains Mono', 'Courier New', monospace;
-  }
+@font-face {
+  font-family: 'Red Hat Mono';
+  src: url('https://fonts.googleapis.com/css2?family=Red+Hat+Mono:wght@400;500;600&display=swap');
 }
 
 :root {
-  /* Tmux/Gruvbox-inspired Colors */
-  --tmux-green: #41af46;
-  --tmux-yellow: #fabd2f;
-  --tmux-orange: #fe8019;
-  --tmux-black: #131313;
-  --tmux-gray-100: #f0f0f0;
-  --tmux-gray-200: #e1e1e1;
-  --tmux-gray-300: #ededed;
-  --tmux-gray-400: #c1c1c1;
-  --tmux-gray-500: #8e8e8e;
-  --tmux-gray-600: #5d5d5d;
-  --tmux-gray-700: #424242;
-  --tmux-gray-800: #333;
-  --tmux-gray-900: #191919;
-  --tmux-white: #fff;
+  /* Workshop Custom Colors - Green Theme */
+  --workshop-green: #3e8635;
+  --workshop-green-dark: #2e6929;
+  --workshop-black: #151515;
+  --workshop-white: #ffffff;
+  --workshop-gray-100: #f0f0f0;
+  --workshop-gray-200: #d2d2d2;
+  --workshop-gray-300: #b8bbbe;
+  --workshop-gray-400: #8a8d90;
+  --workshop-gray-500: #6a6e73;
+  --workshop-gray-600: #4f5255;
+  --workshop-gray-700: #3c3f42;
+  --workshop-gray-800: #212427;
+  --workshop-gray-900: #151515;
 
-  --background: var(--tmux-white);
-  --foreground: var(--tmux-gray-800);
-  
-  --card: var(--tmux-white);
-  --card-foreground: var(--tmux-gray-800);
-  
-  --popover: var(--tmux-white);
-  --popover-foreground: var(--tmux-gray-800);
-  
-  --primary: var(--tmux-black);
-  --primary-foreground: var(--tmux-white);
-  
-  --secondary: var(--tmux-gray-300);
-  --secondary-foreground: var(--tmux-gray-800);
-  
-  --muted: var(--tmux-gray-100);
-  --muted-foreground: var(--tmux-gray-600);
-  
-  --accent: var(--tmux-green);
-  --accent-foreground: var(--tmux-white);
-  
-  --destructive: #d32f2f;
-  --destructive-foreground: var(--tmux-white);
-  
-  --success: #41af46;
-  --success-foreground: var(--tmux-white);
-  
-  --warning: #e18114;
-  --warning-foreground: var(--tmux-white);
-
-  --info: #217ee7;
-  --info-foreground: var(--tmux-white);
-  
-  --border: var(--tmux-gray-200);
-  --input: var(--tmux-gray-200);
-  --ring: var(--tmux-green);
-  
-  --radius: 0.25rem;
-  
-  --terminal-bg: var(--tmux-gray-900);
-  --terminal-fg: var(--tmux-gray-100);
-  --terminal-selection: var(--tmux-gray-700);
-  --terminal-cursor: var(--tmux-gray-100);
-  
-  --sidebar-bg: var(--tmux-gray-300);
-  --sidebar-fg: var(--tmux-gray-800);
-  --sidebar-hover: var(--tmux-gray-200);
-  --sidebar-active: var(--tmux-green);
-  
-  --navbar-bg: var(--tmux-black);
-  --navbar-fg: var(--tmux-white);
-
-  --toolbar-bg: var(--tmux-gray-300);
-  --toolbar-fg: var(--tmux-gray-600);
+  /* Terminal Colors */
+  --terminal-bg: #1e1e1e;
+  --terminal-fg: #d4d4d4;
 }
 
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
-  --radius-sm: calc(var(--radius) * 0.5);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) * 1.5);
-  --radius-xl: calc(var(--radius) * 2);
-  --radius-2xl: calc(var(--radius) * 3);
-  --radius-full: 9999px;
-}
-
-/* Navigation Menu Styles */
-.nav-menu {
-  flex-grow: 1;
-  min-height: 0;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  line-height: 1.35;
-  position: relative;
-}
-
-.nav-menu a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.nav-menu a:hover {
-  color: var(--tmux-green);
-}
-
-.nav-list {
-  list-style: none;
-  padding: 0;
+/* Body styles */
+body {
+  font-family: 'Red Hat Text', var(--pf-t--global--font--family--body), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
   margin: 0;
+  padding: 0;
 }
 
-.nav-item {
-  margin-bottom: 0.125rem;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Red Hat Display', var(--pf-t--global--font--family--heading), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.3;
 }
 
-.nav-link {
-  display: block;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
-  color: var(--sidebar-fg);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
+code, pre, .pf-v6-c-code-block {
+  font-family: 'Red Hat Mono', var(--pf-t--global--font--family--mono), 'JetBrains Mono', monospace;
 }
 
-.nav-link:hover {
-  background: var(--sidebar-hover);
-  color: var(--tmux-green);
+/* Custom masthead styling */
+.pf-v6-c-masthead {
+  --pf-v6-c-masthead--BackgroundColor: var(--workshop-black);
+  background-color: var(--workshop-black) !important;
 }
 
-.nav-link.is-active {
-  background: var(--tmux-green);
-  color: white;
+.pf-v6-c-masthead__main {
+  color: var(--workshop-white);
+}
+
+.pf-v6-c-masthead__content {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  z-index: 100;
+}
+
+/* Custom page sidebar */
+.pf-v6-c-page__sidebar {
+  --pf-v6-c-page__sidebar--BackgroundColor: var(--workshop-gray-100);
+  background-color: var(--workshop-gray-100);
+}
+
+/* Navigation styling */
+.pf-v6-c-nav__link.pf-m-current {
+  --pf-v6-c-nav__link--m-current--BackgroundColor: var(--workshop-green);
+  background-color: var(--workshop-green) !important;
+  color: var(--workshop-white) !important;
+}
+
+.pf-v6-c-nav__link:hover {
+  --pf-v6-c-nav__link--hover--BackgroundColor: var(--workshop-gray-200);
+  color: var(--workshop-green-dark);
+}
+
+/* Split panel styling */
+.workshop-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workshop-split__panel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.workshop-split__panel--content {
+  overflow-y: auto;
+  background-color: var(--workshop-white);
+}
+
+.workshop-split__panel--terminal {
+  background-color: var(--terminal-bg);
+  border-left: 1px solid var(--workshop-gray-300);
+}
+
+/* Terminal header */
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--pf-t--global--spacer--sm) var(--pf-t--global--spacer--md);
+  background-color: var(--workshop-gray-800);
+  color: var(--workshop-white);
+  border-bottom: 1px solid var(--workshop-gray-700);
+}
+
+.terminal-header__title {
+  display: flex;
+  align-items: center;
+  gap: var(--pf-t--global--spacer--sm);
   font-weight: 500;
+}
+
+.terminal-header__actions {
+  display: flex;
+  gap: var(--pf-t--global--spacer--xs);
+}
+
+/* Terminal container */
+.terminal-container {
+  flex: 1;
+  padding: var(--pf-t--global--spacer--sm);
+  background-color: var(--terminal-bg);
 }
 
 /* Markdown Content Styles */
 .markdown-content {
-  color: var(--foreground);
+  padding: var(--pf-t--global--spacer--lg);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .markdown-content h1,
@@ -192,31 +156,31 @@
 .markdown-content h4,
 .markdown-content h5,
 .markdown-content h6 {
-  font-family: 'Red Hat Display', sans-serif;
+  font-family: 'Red Hat Display', var(--pf-t--global--font--family--heading), sans-serif;
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
-  color: var(--foreground);
+  color: var(--workshop-gray-900);
 }
 
 .markdown-content h1 {
-  font-size: 1.875rem;
-  border-bottom: 1px solid var(--border);
+  font-size: var(--pf-t--global--font--size--2xl);
+  border-bottom: 1px solid var(--workshop-gray-200);
   padding-bottom: 0.5rem;
 }
 
 .markdown-content h2 {
-  font-size: 1.5rem;
-  border-bottom: 1px solid var(--border);
+  font-size: var(--pf-t--global--font--size--xl);
+  border-bottom: 1px solid var(--workshop-gray-200);
   padding-bottom: 0.25rem;
 }
 
 .markdown-content h3 {
-  font-size: 1.25rem;
+  font-size: var(--pf-t--global--font--size--lg);
 }
 
 .markdown-content h4 {
-  font-size: 1.125rem;
+  font-size: var(--pf-t--global--font--size--md);
 }
 
 .markdown-content p {
@@ -235,18 +199,18 @@
 }
 
 .markdown-content code:not(pre code) {
-  background: var(--muted);
+  background: var(--workshop-gray-100);
   padding: 0.2em 0.4em;
-  border-radius: 3px;
+  border-radius: var(--pf-t--global--border--radius--small);
   font-size: 0.875em;
-  color: var(--tmux-green);
+  color: var(--workshop-green);
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid var(--tmux-green);
+  border-left: 4px solid var(--workshop-green);
   padding-left: 1rem;
   margin: 1rem 0;
-  color: var(--muted-foreground);
+  color: var(--workshop-gray-500);
   font-style: italic;
 }
 
@@ -258,34 +222,34 @@
 
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid var(--border);
+  border: 1px solid var(--workshop-gray-200);
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .markdown-content th {
-  background: var(--muted);
+  background: var(--workshop-gray-100);
   font-weight: 600;
 }
 
 .markdown-content a {
-  color: var(--tmux-green);
+  color: var(--pf-t--global--color--link--default);
   text-decoration: underline;
 }
 
 .markdown-content a:hover {
-  opacity: 0.8;
+  color: var(--pf-t--global--color--link--hover);
 }
 
 .markdown-content img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--radius);
+  border-radius: var(--pf-t--global--border--radius--small);
 }
 
 .markdown-content hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--workshop-gray-200);
   margin: 2rem 0;
 }
 
@@ -297,7 +261,7 @@
 
 .code-block-wrapper pre {
   background: var(--terminal-bg) !important;
-  border-radius: var(--radius);
+  border-radius: var(--pf-t--global--border--radius--small);
   padding: 1rem;
   padding-top: 2.5rem;
   overflow-x: auto;
@@ -321,17 +285,69 @@
 
 /* Keyboard shortcut styling */
 .markdown-content kbd {
-  background: var(--muted);
-  border: 1px solid var(--border);
+  background: var(--workshop-gray-100);
+  border: 1px solid var(--workshop-gray-200);
   border-radius: 3px;
   padding: 0.1em 0.4em;
   font-family: 'Red Hat Mono', monospace;
   font-size: 0.875em;
-  box-shadow: 0 1px 0 var(--tmux-gray-400);
+  box-shadow: 0 1px 0 var(--workshop-gray-300);
 }
 
-/* Strong emphasis for tmux prefix */
+/* Strong emphasis */
 .markdown-content strong {
-  color: var(--tmux-orange);
+  color: var(--pf-t--global--color--status--warning--default);
   font-weight: 600;
 }
+
+/* Loading spinner */
+.workshop-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+/* Page breadcrumb bar */
+.workshop-breadcrumb-bar {
+  background-color: var(--workshop-gray-100);
+  padding: var(--pf-t--global--spacer--sm) var(--pf-t--global--spacer--md);
+  border-bottom: 1px solid var(--workshop-gray-200);
+}
+
+/* Status badge colors */
+.workshop-status--connected {
+  --pf-v6-c-label--BackgroundColor: var(--pf-t--global--color--status--success--default);
+}
+
+.workshop-status--disconnected {
+  --pf-v6-c-label--BackgroundColor: var(--pf-t--global--color--status--danger--default);
+}
+
+.workshop-status--connecting {
+  --pf-v6-c-label--BackgroundColor: var(--pf-t--global--color--status--warning--default);
+}
+
+/* Mobile drawer */
+@media (max-width: 768px) {
+  .workshop-split {
+    flex-direction: column;
+  }
+  
+  .workshop-split__panel {
+    flex: none;
+    height: 50%;
+  }
+  
+  .workshop-split__panel--terminal {
+    border-left: none;
+    border-top: 1px solid var(--workshop-gray-300);
+  }
+}
+
+/* Custom button override for terminal actions */
+.terminal-action-btn {
+  --pf-v6-c-button--m-plain--Color: var(--workshop-white);
+  --pf-v6-c-button--m-plain--hover--Color: var(--workshop-gray-200);
+}
+

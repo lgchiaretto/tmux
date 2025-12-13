@@ -1,31 +1,60 @@
+import { useState } from 'react'
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  MenuToggle,
+  MenuToggleElement,
+} from '@patternfly/react-core'
+import { GlobeIcon } from '@patternfly/react-icons'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Button } from './ui/button'
-import { GlobeSimple } from '@phosphor-icons/react'
 
 export function LanguageSelector() {
   const { language, setLanguage, availableLanguages } = useLanguage()
-
-  const toggleLanguage = () => {
-    const currentIndex = availableLanguages.indexOf(language)
-    const nextIndex = (currentIndex + 1) % availableLanguages.length
-    setLanguage(availableLanguages[nextIndex])
-  }
+  const [isOpen, setIsOpen] = useState(false)
 
   const languageLabels: Record<string, string> = {
-    pt: 'PT',
-    en: 'EN',
+    pt: 'Português',
+    en: 'English',
+  }
+
+  const onToggle = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const onSelect = (lang: string) => {
+    setLanguage(lang)
+    setIsOpen(false)
   }
 
   return (
-    <Button
-      size="sm"
-      variant="ghost"
-      onClick={toggleLanguage}
-      className="h-8 px-2 text-[var(--navbar-fg)] hover:bg-white/10 gap-1"
-      title={language === 'pt' ? 'Mudar para Ingles' : 'Switch to Portuguese'}
+    <Dropdown
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          onClick={onToggle}
+          isExpanded={isOpen}
+          variant="plain"
+          style={{ color: 'var(--workshop-white)' }}
+        >
+          <GlobeIcon style={{ marginRight: '0.5rem' }} />
+          {languageLabels[language] || language.toUpperCase()}
+        </MenuToggle>
+      )}
     >
-      <GlobeSimple size={16} weight="bold" />
-      <span className="text-xs font-medium">{languageLabels[language]}</span>
-    </Button>
+      <DropdownList>
+        {availableLanguages.map((lang) => (
+          <DropdownItem
+            key={lang}
+            onClick={() => onSelect(lang)}
+            isSelected={lang === language}
+          >
+            {languageLabels[lang] || lang.toUpperCase()}
+          </DropdownItem>
+        ))}
+      </DropdownList>
+    </Dropdown>
   )
 }

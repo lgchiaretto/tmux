@@ -33,7 +33,7 @@ USER 0
 RUN dnf install -y \
     bash curl git vim-enhanced python3 python3-pip \
     make gcc-c++ ncurses libevent findutils procps-ng \
-    nodejs npm xclip \
+    nodejs npm xclip plocate \
     && dnf clean all \
     && pip3 install --no-cache-dir tmuxp \
     && FZF_VERSION=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest | grep tag_name | cut -d '"' -f 4) \
@@ -52,6 +52,7 @@ COPY server/package*.json ./
 RUN npm install --omit=dev
 
 COPY server/server.js ./
+COPY entrypoint.sh /app/
 COPY --from=frontend-builder /frontend/dist ./dist
 COPY guides /app/guides
 
@@ -84,9 +85,14 @@ COPY --chown=1001:0 tmux-config/bash_functions /etc/skel/.bash_functions
 RUN mkdir -p /home/default/.tmux/plugins /home/default/.vim/autoload /home/default/.ssh /home/default/.cache \
     && cp -r /etc/skel/.* /home/default/ 2>/dev/null || true \
     && cp -r /opt/tpm /home/default/.tmux/plugins/tpm \
-    && chown -R 1001:0 /home/default /app \
-    && chmod -R g=u /home/default /app \
-    && chmod 700 /home/default/.ssh
+    && mkdir -p /var/lib/plocate \
+    && updatedb 2>/dev/null || true \
+    && chmod 755 /var/lib/plocate \
+    && chmod 644 /var/lib/plocate/plocate.db 2>/dev/null || true \
+    && chown -R 1001:0 /home/default /app /var/lib/plocate \
+    && chmod -R g=u /home/default /app /var/lib/plocate \
+    && chmod 700 /home/default/.ssh \
+    && chmod +x /app/entrypoint.sh
 
 USER 1001
 
@@ -99,4 +105,4 @@ ENV PORT=8080 \
     HOME=/home/default \
     USE_TMUX=true
 
-CMD ["node", "server.js"]
+CMD ["/bin/bash", "/app/entrypoint.sh"]

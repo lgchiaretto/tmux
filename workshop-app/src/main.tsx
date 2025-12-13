@@ -7,8 +7,6 @@ import { ConfigProvider } from './contexts/ConfigContext.tsx'
 import { LanguageProvider } from './contexts/LanguageContext.tsx'
 
 import "./main.css"
-import "./styles/theme.css"
-import "./index.css"
 
 // Simple ErrorBoundary implementation
 class ErrorBoundary extends Component<

@@ -1,20 +1,20 @@
-# Sessoes e Janelas
+# Sessões e Janelas
 
-Neste guia voce vai aprender a gerenciar sessoes e janelas no tmux.
+Neste guia você vai aprender a gerenciar sessões e janelas no tmux.
 
 ---
 
-## O que e uma Sessao?
+## O que e uma Sessão?
 
-Uma sessao e um ambiente completo do tmux contendo:
+Uma sessão e um ambiente completo do tmux contendo:
 
 - Uma ou mais janelas
-- Estado persistente (mesmo se voce desconectar)
-- Seu proprio historico de buffer
+- Estado persistente (mesmo se você desconectar)
+- Seu próprio histórico de buffer
 
 ---
 
-## Passo 1: Liste as Sessoes
+## Passo 1: Liste as Sessões
 
 Pressione:
 
@@ -22,11 +22,11 @@ Pressione:
 Ctrl+s  depois  s
 ```
 
-Voce vera a sessao atual destacada na lista.
+você verá a sessão atual destacada na lista.
 
 ---
 
-## Passo 2: Crie uma Nova Sessao
+## Passo 2: Crie uma Nova Sessão
 
 Pressione:
 
@@ -36,11 +36,11 @@ Ctrl+s  depois  N
 
 Digite "dev" e pressione Enter.
 
-Isso cria uma nova sessao chamada "dev".
+Isso cria uma nova sessão chamada "dev".
 
 ---
 
-## Passo 3: Troque de Sessao
+## Passo 3: Troque de Sessão
 
 Use o atalho:
 
@@ -48,43 +48,41 @@ Use o atalho:
 Ctrl+s  depois  s
 ```
 
-Uma lista de sessoes aparece. Use as setas para selecionar e Enter para trocar.
+Uma lista de sessões aparece. Use as setas para selecionar e Enter para trocar.
 
 ---
 
-## Passo 4: Volte para a Sessao Original
+## Passo 4: Volte para a Sessão Original
 
 Use `Ctrl+s s` novamente e selecione "workshop".
 
 ---
 
-## Passo 5: Volte para a Sessao dev
+## Passo 5: Volte para a Sessão dev
 
 Use `Ctrl+s s` novamente e selecione "dev".
 
 ---
 
-## Passo 6: Delete uma Sessao
-
-Para remover a sessao "dev":
-
-```
-Ctrl+s  depois  K
-```
-
-Verifique se esta usando a sessao "dev" e confirme com `y`.
-
-**Aviso:** Isso fecha todas as janelas e processos dessa sessao!
-
----
-
-## Passo 7: Renomeie a Sessao
+## Passo 6: Renomeie a Sessão
 
 ```
 Ctrl+s  depois  .
 ```
 
-Digite o novo nome e pressione Enter.
+Digite "delete-dev" e pressione Enter.
+
+## Passo 7: Delete uma Sessão
+
+Para remover a sessão "delete-dev":
+
+```
+Ctrl+s  depois  K
+```
+
+Verifique se esta usando a sessão "delete-dev" e confirme com `y`.
+
+**Aviso:** Isso fecha todas as janelas e processos dessa sessão!
 
 ---
 
@@ -104,7 +102,7 @@ Ou use:
 Ctrl+s  depois  k
 ```
 
-Confirme com `y`.
+Confirme com `y`. Esse método é bom quando você executa um comando e trava o terminal.
 
 ---
 
@@ -112,27 +110,35 @@ Confirme com `y`.
 
 Execute esta sequencia:
 
-1. Crie uma sessao:
+1. Crie uma sessão:
    ```
    Ctrl+s  depois  N
    ```
    Digite "teste" e pressione Enter.
 
-2. Liste as sessoes:
+2. Liste as sessões:
    ```
    Ctrl+s  depois  s
    ```
 
-3. Troque para a nova sessao selecionando-a da lista.
+3. Troque para a nova sessão selecionando-a da lista.
 
-4. Crie uma janela usando **[+]**
+4. Crie duas janelas usando **[+]**
 
-5. Renomeie a janela:
+5. Renomeie uma janela:
    ```
    Ctrl+s  depois  ,
    ```
+   Digite "janela-1" e pressione Enter.
 
-6. Delete a sessao de teste:
+5. Use `Shift →` e `Shift ←` para alternar entre janelas e mude o nome da outra janela para `janela-2`
+   ```
+   Ctrl+s  depois  ,
+   ```
+   Digite "janela-2" e pressione Enter.
+
+
+6. Delete a sessão de teste:
    ```
    Ctrl+s  depois  K
    ```
@@ -144,21 +150,21 @@ Execute esta sequencia:
 
 | Acao | Atalho |
 |------|--------|
-| Criar sessao | `Ctrl+s N` |
-| Listar sessoes | `Ctrl+s s` |
-| Trocar sessao | `Ctrl+s s` |
-| Renomear sessao | `Ctrl+s .` |
+| Criar sessão | `Ctrl+s N` |
+| Listar sessões | `Ctrl+s s` |
+| Trocar sessão | `Ctrl+s s` |
+| Renomear sessão | `Ctrl+s .` |
 | Desconectar | `Ctrl+s d` |
-| Deletar sessao | `Ctrl+s K` |
+| Deletar sessão | `Ctrl+s K` |
 
-**Nota:** Se estiver fora do tmux, use `tmux a` para conectar a uma sessao.
+**Nota:** Se estiver fora do tmux, use `tmux a` para conectar a uma sessão.
 
 ---
 
-## Proximo Guia
+## Próximo Guia
 
 [→ 03 - Paineis](03-paineis.md)
 
 ---
 
-> **Dica:** Sessoes sao perfeitas para separar projetos ou contextos!
+> **Dica:** Sessões são perfeitas para separar projetos, contextos ou clusters OpenShift!

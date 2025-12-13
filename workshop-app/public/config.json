@@ -1,8 +1,8 @@
 {
   "branding": {
-    "name": "tmux",
-    "title": "tmux Workshop",
-    "subtitle": "Terminal Productivity",
+    "name": "Workshop",
+    "title": "",
+    "subtitle": "",
     "logo": "tmux",
     "navTitle": "Workshop"
   },
@@ -19,7 +19,7 @@
       "en": "Connected to terminal"
     },
     "disconnectedMessage": {
-      "pt": "Conexao perdida com o terminal",
+      "pt": "Conexão perdida com o terminal",
       "en": "Connection lost to terminal"
     }
   },
