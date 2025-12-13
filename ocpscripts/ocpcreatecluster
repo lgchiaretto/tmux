@@ -185,11 +185,14 @@ fi
 # For vSphere, continue with custom name and certificate logic
 # Only show custom name option on bastion.chiaret.to (chiarettolabs)
 if [ "$(hostname)" == "${BASTION_HOSTNAME:-bastion.chiarettolabs.com.br}" ]; then
-    customname=$(echo -e "Yes\nNo" | fzf-tmux \
+    naming_option=$(echo -e "Auto-generate (Simpsons style)\nCustom name (with certificates)" | fzf-tmux \
         --header=$'
------------------------------------------ Cluster Name -------------------------------------------------------
+----------------------------------------- Cluster Naming -----------------------------------------------------
 |                                                                                                            |
-|  [Enter]....Create Cluster with custom name (must exist certificates)                                      |
+|  Auto-generate: Creates random name like homer-wobbly, bart-zany, lisa-quirky                              |
+|  Custom name: Use pre-configured cluster name with existing certificates                                   |
+|                                                                                                            |
+|  [Enter]....Select naming option                                                                           |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
@@ -203,32 +206,38 @@ if [ "$(hostname)" == "${BASTION_HOSTNAME:-bastion.chiarettolabs.com.br}" ]; the
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
         )
 
-    if [ -z "$customname" ]; then
+    if [ -z "$naming_option" ]; then
         exit 0
     fi
 
-    cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
-        --header=$'
------------------------------------------ Create Certs -------------------------------------------------------
+    if [[ "$naming_option" == "Custom name"* ]]; then
+        customname="Yes"
+        cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
+            --header=$'
+----------------------------------------- Select Certificate -------------------------------------------------
 |                                                                                                            |
-|  [Enter]....Select the available cluster name custom                                                       |
+|  [Enter]....Select the available cluster name with certificate                                             |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------
 cluster name       | VLAN    | SSL Expire
 --------------------------------------------------------------------------------------------------------------'\
-        --layout=reverse \
-        --border-label=" $FZF_BORDER_LABEL " \
-        --border-label-pos=center \
-        -h 40 -p "55%,93%" \
-        --no-input \
-        --no-sort \
-        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
-    )
+            --layout=reverse \
+            --border-label=" $FZF_BORDER_LABEL " \
+            --border-label-pos=center \
+            -h 40 -p "55%,93%" \
+            --no-input \
+            --no-sort \
+            --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+            --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
+        )
 
-    if [ -z "$cluster_name_custom" ]; then
-        exit 0
+        if [ -z "$cluster_name_custom" ]; then
+            exit 0
+        fi
+    else
+        # Auto-generate name - let createcluster.py handle it
+        customname="No"
     fi
 else
     # On non-bastion servers, use automatic cluster naming (no certificates)
