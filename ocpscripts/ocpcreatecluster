@@ -259,30 +259,32 @@ if [ "$selected_infra" == "KVM" ]; then
 fi
 
 # For vSphere, continue with custom name and certificate logic
-customname=$(echo -e "Yes\nNo" | fzf-tmux \
-    --header=$'
+# Only show custom name option on bastion.chiaret.to (chiarettolabs)
+if [ "$(hostname)" == "${BASTION_HOSTNAME:-bastion.chiarettolabs.com.br}" ]; then
+    customname=$(echo -e "Yes\nNo" | fzf-tmux \
+        --header=$'
 ----------------------------------------- Cluster Name -------------------------------------------------------
 |                                                                                                            |
 |  [Enter]....Create Cluster with custom name (must exist certificates)                                      |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
-    --layout=reverse \
-    --border-label=" $FZF_BORDER_LABEL " \
-    --border-label-pos=center \
-    -h 40 -p "55%,46%" \
-    --no-input \
-    --no-sort \
-    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
-    )
+        --layout=reverse \
+        --border-label=" $FZF_BORDER_LABEL " \
+        --border-label-pos=center \
+        -h 40 -p "55%,46%" \
+        --no-input \
+        --no-sort \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
+        )
 
-if [ -z "$customname" ]; then
-    exit 0
-fi
+    if [ -z "$customname" ]; then
+        exit 0
+    fi
 
-cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
-    --header=$'
+    cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
+        --header=$'
 ----------------------------------------- Create Certs -------------------------------------------------------
 |                                                                                                            |
 |  [Enter]....Select the available cluster name custom                                                       |
@@ -291,18 +293,22 @@ cluster_name_custom=$(/usr/local/bin/listcerts | fzf-tmux \
 --------------------------------------------------------------------------------------------------------------
 cluster name       | VLAN    | SSL Expire
 --------------------------------------------------------------------------------------------------------------'\
-    --layout=reverse \
-    --border-label=" $FZF_BORDER_LABEL " \
-    --border-label-pos=center \
-    -h 40 -p "55%,93%" \
-    --no-input \
-    --no-sort \
-    --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-    --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
-)
+        --layout=reverse \
+        --border-label=" $FZF_BORDER_LABEL " \
+        --border-label-pos=center \
+        -h 40 -p "55%,93%" \
+        --no-input \
+        --no-sort \
+        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
+        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 | awk '{print $1}'
+    )
 
-if [ -z "$cluster_name_custom" ]; then
-    exit 0
+    if [ -z "$cluster_name_custom" ]; then
+        exit 0
+    fi
+else
+    # On non-bastion servers, use automatic cluster naming (no certificates)
+    customname="No"
 fi
 
 # Execute vSphere cluster creation
