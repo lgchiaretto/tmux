@@ -17,26 +17,27 @@ fi
 #files=$(find $CLUSTER_VARIABLES_DIR/ -type f -exec basename {} \; | sed 's/^ansible-vars-//' | sed 's/\.json$//')
 
 function createVphereCluster() {
-    actions="- Baremetal IPI 3-node cluster
-- Baremetal IPI 4-node cluster
-- Baremetal IPI 5-node cluster
-- Baremetal UPI Single node OpenShift
-- Baremetal UPI Single node OpenShift with worker nodes
-- Baremetal UPI Single node OpenShift with ODF nodes
-- Baremetal UPI Single node OpenShift with Virt nodes
-- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo
-- None UPI 3-node cluster
-- None UPI 3-node cluster with 'ODF'
-- vSphere IPI 3-node cluster
-- vSphere UPI 3-node cluster
-- vSphere UPI 3-node cluster with RHBK
-- Assisted Installer"
+    # Check if directory exists
+    if [ ! -d "$CLUSTER_VARIABLES_DIR" ]; then
+        echo "Error: vSphere variables directory not found: $CLUSTER_VARIABLES_DIR"
+        echo "Please create the directory and add your cluster variable files."
+        exit 1
+    fi
+    
+    # Find all JSON files in the vSphere variables directory
+    files=$(find "$CLUSTER_VARIABLES_DIR" -maxdepth 1 -type f -name "*.json" -exec basename {} \; 2>/dev/null | sort)
+    
+    if [ -z "$files" ]; then
+        echo "Error: No vSphere variable files found in $CLUSTER_VARIABLES_DIR"
+        echo "Please add JSON variable files for your clusters."
+        exit 0
+    fi
 
-    selected_file=$(echo -e "$actions" | sort | fzf-tmux \
+    selected_file=$(echo "$files" | fzf-tmux \
         --header=$'
 ----------------------------------------- Create cluster -----------------------------------------------------
 |                                                                                                            |
-|  [Enter]....Create the cluster                                                                             |
+|  [Enter]....Select cluster variable file                                                                   |
 |  [Esc]......Exit                                                                                           |
 |                                                                                                            |
 --------------------------------------------------------------------------------------------------------------\n\n' \
@@ -44,132 +45,55 @@ function createVphereCluster() {
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         -h 40 -p "55%,46%" \
-        --no-input \
         --no-sort \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
         )
 
-    variablesfile=$(echo "$selected_file" | tail -n1)
-
-    if [ -n "$selected_file" ]; then
-        case "$variablesfile" in
-            "- Baremetal IPI 3-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-3node-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal IPI 4-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-4node-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal IPI 5-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-5node-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal UPI Single node OpenShift")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal UPI Single node OpenShift with worker nodes")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-worker-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal UPI Single node OpenShift with ODF nodes")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-odf-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal UPI Single node OpenShift with Virt nodes")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-virt-baremetal.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Baremetal UPI Single node OpenShift with Virt nodes - Migration demo")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-sno-virt-baremetal-demo.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- vSphere IPI 3-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-ipi-3node-vsphere.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- None UPI 3-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-none.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- None UPI 3-node cluster with 'ODF'")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-odf-none.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- None UPI Single node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-none.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- None UPI Single node cluster with 'OCP Virt'")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-ocpvirt-none.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- None UPI Single node cluster with 'ODF'")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-sno-odf-none.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- vSphere UPI 3-node cluster")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-vsphere.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- vSphere UPI 3-node cluster with RHBK")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-upi-3node-vsphere-rhbk.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                ;;
-            "- Assisted Installer")
-                file="$CLUSTER_VARIABLES_DIR/ansible-vars-assisted-installer.json"
-                tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
-                tmux wait-for vim-done
-                assistedinstaller="true"
-                ;;
-        esac
+    if [ -z "$selected_file" ]; then
+        exit 0
     fi
 
-    if [ -n "$selected_file" ]; then
-        if [[ "$customname" == "Yes" ]]; then
-          clear
-          read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
-          if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
-              echo "Aborted."
-              exit 0
-          fi
-          jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
-          jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
-          if [[ "$assistedinstaller" == "true" ]]; then
-              tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom -a" C-m
-          else
-              tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom" C-m
-          fi
+    file="$CLUSTER_VARIABLES_DIR/$selected_file"
+    
+    # Open file in vim for editing
+    tmux new-window -n "vim $file" "vim $file; tmux wait-for -S vim-done"
+    tmux wait-for vim-done
+    
+    # Check if file name contains "assisted-installer" to set flag
+    assistedinstaller="false"
+    if [[ "$selected_file" == *"assisted-installer"* ]]; then
+        assistedinstaller="true"
+    fi
+    # Check if file name contains "assisted-installer" to set flag
+    assistedinstaller="false"
+    if [[ "$selected_file" == *"assisted-installer"* ]]; then
+        assistedinstaller="true"
+    fi
+
+    # Execute cluster creation
+    if [[ "$customname" == "Yes" ]]; then
+        clear
+        read -p "Do you want to create the cluster \"$cluster_name_custom\"? (y/N): " confirm
+        if [[ "$confirm" == "n" || "$confirm" == "N" || $confirm == "" ]]; then
+            echo "Aborted."
+            exit 0
+        fi
+        jq '.deleteiffailed = "true"' $file > $file.tmp && mv $file.tmp $file
+        jq '.createcertfiles = "true"' $file > $file.tmp && mv $file.tmp $file
+        if [[ "$assistedinstaller" == "true" ]]; then
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom -a" C-m
         else
-          jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
-          jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
-          if [[ "$assistedinstaller" == "true" ]]; then
-            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -a true" C-m
-          else
-            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file" C-m
-          fi
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -n $cluster_name_custom" C-m
         fi
     else
-    #    tmux display -d 3000 "No file selected"
-        exit 0
+        jq '.deleteiffailed = "false"' $file > $file.tmp && mv $file.tmp $file
+        jq '.createcertfiles = "false"' $file > $file.tmp && mv $file.tmp $file
+        if [[ "$assistedinstaller" == "true" ]]; then
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file -a true" C-m
+        else
+            tmux send-keys "$OPENSHIFT4_AUTOMATION_PATH/createcluster.py -i $file" C-m
+        fi
     fi
 }
 
