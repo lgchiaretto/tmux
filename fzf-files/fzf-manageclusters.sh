@@ -71,24 +71,20 @@ fi
 
 selected_action=$(
   echo -e "$selection_list" | fzf-tmux \
-    --header=$'┌─────────────────── Cluster creation ────────────────────┬──────────────────────── Cluster actions ────────────────────────┐
-│                                                         │                                                                 │
-│  [c]........Create cluster                              │    [s]........Start cluster (multi-select with TAB)             │
-│  [e]........Edit cluster install config files           │    [S]........Stop cluster (multi-select with TAB)              │
-│                                                         │    [d]........Destroy cluster (multi-select with TAB)           │
-│  [m]........Mirror to quay.chiaret.to (chiarettolabs)   │    [U]........Upgrade cluster                                   │
-│                                                         │    [t]........Tmuxp sessions                                    │
-├─────────────────── OpenShift Tools ─────────────────────┤    [p]........Copy kubeadmin password to clipboard              │
-│                                                         │    [k]........kubeconfig for cluster (multi-select with TAB)    │
-│  [C]........Check latest OCP Versions available         │    [f]........Enter cluster files directory                     │
-│  [u]........Show OpenShift update path                  │    [r]........Recreate cluster                                  │
-│  [D]........Copy or download and install OpenShift      │    [E]........Edit cluster JSON file with vim                   │
-│             client                                      │                                                                 │
-│  [l]........OpenShift/Operators Lifecycle               │    [Enter]....Login with kubeadmin user                         │
-│                                                         │                                                                 │
-│  [Esc]......Exit                                        │    [TAB].......Select multiple clusters                         │
-│                                                         │                                                                 │
-└─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
+    --header=$'┌──────────────────── Cluster actions ──────────────────────┬──────────────────────── OpenShift Tools ───────────────────────┐
+│                                                           │                                                                │
+│  [K]........kubeconfig (nova sessão tmux, multi-select)   │    [C]........Check latest OCP Versions available              │
+│  [U]........Upgrade cluster                               │    [O]........Show OpenShift update path                       │
+│  [P]........Copy kubeadmin password to clipboard          │    [D]........Copy or download and install OpenShift client    │
+│  [T]........Tmuxp sessions                                │    [L]........OpenShift/Operators Lifecycle                    │
+│  [E]........Edit cluster JSON file with vim               │                                                                │
+│                                                           │                                                                │
+│  [Enter]....Login with kubeadmin user                     │    [TAB]......Select multiple clusters                        │
+│  [Esc]......Exit                                          │                                                                │
+│                                                           │                                                                │
+│  Type to filter clusters by name                          │                                                                │
+│                                                           │                                                                │
+└───────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────┘
 Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created At   vlan     Infra    Description
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────' \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
@@ -99,25 +95,16 @@ Cluster Name    Version  Type    SNO?   Platform   Workers  Datastore  Created A
     --border=rounded \
     -p "63%,55%" \
     --sort \
-    --no-input \
     --multi \
-    --bind 'c:execute-silent(tmux send-keys "/usr/local/bin/ocpcreatecluster" C-m)+abort' \
-    --bind 'C:execute-silent(tmux send-keys /usr/local/share/tmux-ocp/fzf-files/fzf-ocpversions.sh C-m)+abort' \
-    --bind 'd:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpdestroycluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
-    --bind 's:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpstartcluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
-    --bind 'S:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster; tmux send-keys -t $cluster "/usr/local/bin/ocpstopcluster $cluster" C-m; done; tmux switch-client -t {1})+abort' \
-    --bind 'k:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster -e KUBECONFIG="'$CLUSTERS_BASE_PATH'/$cluster/auth/kubeconfig"; tmux send-keys -t $cluster "cd '$CLUSTERS_BASE_PATH'/$cluster" C-m; done; tmux switch-client -t {1})+abort' \
-    --bind 'e:execute-silent(tmux send-keys /usr/local/bin/ocpvariablesfiles C-m)+abort' \
-    --bind 'E:execute-silent(tmux send-keys "vim '$CLUSTERS_BASE_PATH'/"{1}"/{1}.json" C-m)+abort' \
+    --bind 'K:execute-silent(for cluster in {+1}; do tmux has-session -t $cluster 2>/dev/null || tmux new-session -d -s $cluster -e KUBECONFIG="'$CLUSTERS_BASE_PATH'/$cluster/auth/kubeconfig"; tmux send-keys -t $cluster "cd '$CLUSTERS_BASE_PATH'/$cluster" C-m; done; tmux switch-client -t {1})+abort' \
     --bind 'U:execute-silent(tmux send-keys "/usr/local/bin/ocpupgradecluster "{1} C-m)+abort' \
-    --bind 'u:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
+    --bind 'P:execute-silent(tmux send-keys "cat '$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
+    --bind 'T:execute-silent(tmux send-keys "/usr/local/share/tmux-ocp/fzf-files/fzf-tmuxp.sh " {1} C-m)+abort' \
+    --bind 'E:execute-silent(tmux send-keys "vim '$CLUSTERS_BASE_PATH'/"{1}"/{1}.json" C-m)+abort' \
+    --bind 'C:execute-silent(tmux send-keys /usr/local/share/tmux-ocp/fzf-files/fzf-ocpversions.sh C-m)+abort' \
+    --bind 'O:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort' \
     --bind 'D:execute-silent(tmux send-keys /usr/local/bin/ocpgetclient C-m)+abort' \
-    --bind 'f:execute-silent(tmux send-keys "cd '$CLUSTERS_BASE_PATH'/"{1} C-m)+abort' \
-    --bind 't:execute-silent(tmux send-keys "/usr/local/share/tmux-ocp/fzf-files/fzf-tmuxp.sh " {1} C-m)+abort' \
-    --bind 'p:execute-silent(tmux send-keys "cat '$CLUSTERS_BASE_PATH'/"{1}"/auth/kubeadmin-password | xclip -selection clipboard -i" C-m)+abort' \
-    --bind 'l:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
-    --bind 'r:execute-silent(tmux send-keys "/usr/local/bin/ocprecreatecluster "{1} C-m)+abort' \
-    --bind 'm:execute-silent(tmux has-session -t oc-mirror-session 2>/dev/null || tmux new-session -d -s oc-mirror-session; tmux switch-client -t oc-mirror-session; tmux send-keys "ocp-oc-mirror.sh" C-m)+abort' \
+    --bind 'L:execute-silent(tmux send-keys /usr/local/bin/ocplifecycle C-m)+abort' \
     --expect=enter 
 )
 
