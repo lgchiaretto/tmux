@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 project_name=$(oc project -q)
 
@@ -15,25 +16,25 @@ elif [ -z "$project_name" -a $? -eq 1 ]; then
     exit 0
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Show pod(s) logs" \
+  "[Tab]       Select pod to show log" \
+  "[Esc]       Exit"
+)
+_allpod_data=$(oc get pods -A --field-selector=status.phase=Running --no-headers -o jsonpath="{range .items[*]}{.metadata.namespace}{'\t'}{.metadata.name}{'\n'}{end}" | column -t -s $'\t')
+_pw=$(fzf_header_popup_width "$_hdr" "$_allpod_data")
+_ph=$(fzf_header_popup_height "$_hdr" "$_allpod_data")
 mapfile -t selected_pods_and_namespaces < <(
-    oc get pods -A --field-selector=status.phase=Running --no-headers -o jsonpath="{range .items[*]}{.metadata.namespace}{'\t'}{.metadata.name}{'\n'}{end}" |
-        column -t -s $'\t' |
+    echo "$_allpod_data" |
         fzf-tmux \
-        --header=$'┌──────────────────────────────────────────────────── Help ─────────────────────────────────────────────────────┐
-│                                                                                                               │
-│  [Enter]     Show pod(s) logs                                                                                 │
-│  [Tab]       Select pod to show log                                                                           │
-│  [Esc]       Exit                                                                                             │
-│                                                                                                               │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
+        --header="$_hdr" \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
         --multi \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 \
-        -p "58%,50%" \
+        -p "${_pw},${_ph}" \
         --exact \
         | awk '{print $1 " " $2}'
 )
@@ -77,13 +78,17 @@ for line in "${selected_pods_and_namespaces[@]}"; do
         if [[ $container_count -eq 1 ]]; then
             first_container="${containers[0]}"
         else
+            _chdr=$(fzf_header "Container: $pod" "[Enter]     Select container" "[Esc]       Exit")
+            _cpw=$(fzf_header_popup_width "$_chdr")
+            _cph=$(fzf_header_popup_height "$_chdr" "$final_containers")
             first_container=$(echo "$final_containers" | fzf-tmux \
-                --header="Select the container for pod $pod in namespace $namespace:" \
+                --header="$_chdr" \
                 --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
-                --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \                
-                --color=marker:#a9b665,spinner:#a9b665,header:#7c6f64 \
+                --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
+                --border-label=" $FZF_BORDER_LABEL " \
+                --border-label-pos=center \
                 --layout=reverse \
-                -h 40 -p "100%,50%")
+                -p "${_cpw},${_cph}")
             [[ -z "$first_container" ]] && continue
         fi
 

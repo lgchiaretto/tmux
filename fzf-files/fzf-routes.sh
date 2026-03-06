@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 
 content=$(timeout 2s oc get routes -A -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,URL:.spec.host --no-headers | grep -v '<none>')
@@ -13,22 +14,22 @@ if [ -z "$content" ]; then
     exit 0
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Open route on Chrome" \
+  "[Tab]       Print route hostname" \
+  "[Ctrl-e]    Run \"oc edit <route>\"" \
+  "[Ctrl-d]    Run \"oc describe <route>\"" \
+  "[Ctrl-o]    open the route on Chrome" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$content")
+_ph=$(fzf_header_popup_height "$_hdr" "$content")
 chosen=$(echo "$content" | fzf-tmux \
-     --header=$'┌───────────────────────────────── Help ─────────────────────────────────┐
-│                                                                        │
-│  [Enter]     Open route on Chrome                                      │
-│  [Tab]       Print route hostname                                      │
-│  [Ctrl-e]    Run "oc edit <route>"                                     │
-│  [Ctrl-d]    Run "oc describe <route>"                                 │
-│  [Ctrl-o]    open the route on Chrome                                  │
-│  [Esc]       Exit                                                      │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘\n\n' \
+     --header="$_hdr" \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
-    -h 40 \
-    -p "100%,50%" \
+    -p "${_pw},${_ph}" \
     --exact \
     --with-nth=1,2,3 \
     --bind 'tab:execute-silent(

@@ -6,7 +6,7 @@ from datetime import datetime
 import re
 import os
 
-channels = ["4.14", "4.16", "4.17", "4.18", "4.19", "4.20"]
+channels = ["4.14", "4.16", "4.17", "4.18", "4.19", "4.20", "4.21"]
 
 def get_release_info(version):
     release_url = f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{version}/release.txt"

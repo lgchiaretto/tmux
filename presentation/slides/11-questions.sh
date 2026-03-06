@@ -1,23 +1,22 @@
-#!/bin/bash
-# Slide 11: QUESTIONS
+#!/usr/bin/env bash
+# Slide 11: Questions
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "Questions/Comments/Feedback" "$C_GREEN"
+    slide_title_blank
+    slide_title_rich "${C_TITLE_BD}Slack: ${C_TEXT}@chiaretto"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_bottom
+}
 
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│               \033[38;5;142mQuestions/Comments/Feedback\033[38;5;214m             │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                    \033[38;5;214mSlack: \033[38;5;223m@chiaretto\033[38;5;214m                  │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
-
-
+slide_present build_slide

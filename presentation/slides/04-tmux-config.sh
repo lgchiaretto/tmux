@@ -1,56 +1,51 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slide 4: Tmux Configuration
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "CUSTOM TMUX CONFIGURATION"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_section "dotfiles/tmux.conf - Key Customizations"
+    slide_blank
+    slide_label "Prefix Key:" "" 6
+    slide_code "set-option -g prefix C-s" "Change from C-b to C-s"
+    slide_code "unbind-key C-b" "Remove default binding"
+    slide_blank
+    slide_label "Window Management:" "" 6
+    slide_code "bind-key -n C-t new-window" "Create window"
+    slide_code "bind-key -n S-Left/Right" "Navigate windows"
+    slide_code "bind-key -n C-S-Left/Right" "Move window position"
+    slide_blank
+    slide_label "Pane Management:" "" 6
+    slide_code "bind-key -n C-\\" "Split horizontal (no prefix)"
+    slide_code "bind-key - split-window -v" "Split vertical (C-s)"
+    slide_code "bind-key -n C-Arrow" "Navigate panes (no prefix)"
+    slide_code "bind-key a synchronize-panes" "Sync panes (needs C-s)"
+    slide_blank
+    slide_blank
+    slide_section "Dynamic Status Bar (ocp-cluster.tmux)"
+    slide_blank
+    slide_text "Auto-detects cluster context:" "" 6
+    slide_text "1. Check \$CLUSTERS_BASE_PATH/\$SESSION_NAME/auth/kubeconfig" "" 8
+    slide_text "2. Fallback to 'oc whoami' for active context" "" 8
+    slide_blank
+    slide_text "Display format:" "" 6
+    slide_text "4.19.19:(k):openshift-config" "$C_CODE" 8
+    slide_text "└─ version ─┘└ user ┘└── project ──┘" "" 8
+    slide_blank
+    slide_text "Error states: N/A | <no-project> | <deleted>" "" 6
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│               CUSTOM TMUX CONFIGURATION               │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  dotfiles/tmux.conf - Key Customizations                          \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mPrefix Key:\033[38;5;223m                                                            │"
-echo -e "    │      \033[38;5;214mset-option -g prefix C-s       \033[38;5;109m# Change from C-b to C-s\033[38;5;223m              │"
-echo -e "    │      \033[38;5;214munbind-key C-b                 \033[38;5;109m# Remove default binding\033[38;5;223m              │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mWindow Management:\033[38;5;223m                                                     │"
-echo -e "    │      \033[38;5;214mbind-key -n C-t new-window     \033[38;5;109m# Create window\033[38;5;223m                       │"
-echo -e "    │      \033[38;5;214mbind-key -n S-Left/Right       \033[38;5;109m# Navigate windows\033[38;5;223m                    │"
-echo -e "    │      \033[38;5;214mbind-key -n C-S-Left/Right     \033[38;5;109m# Move window position\033[38;5;223m                │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mPane Management:\033[38;5;223m                                                       │"
-echo -e "    │      \033[38;5;214mbind-key -n C-\                \033[38;5;109m# Split horizontal (no prefix)\033[38;5;223m        │"
-echo -e "    │      \033[38;5;214mbind-key - split-window -v     \033[38;5;109m# Split vertical (C-s)\033[38;5;223m                │"
-echo -e "    │      \033[38;5;214mbind-key -n C-Arrow            \033[38;5;109m# Navigate panes (no prefix)\033[38;5;223m          │"
-echo -e "    │      \033[38;5;214mbind-key a synchronize-panes   \033[38;5;109m# Sync panes (needs C-s)\033[38;5;223m              │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Dynamic Status Bar (ocp-cluster.tmux)                            \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    Auto-detects cluster context:                                          │"
-echo -e "    │      1. Check \$CLUSTERS_BASE_PATH/\$SESSION_NAME/auth/kubeconfig                         │"
-echo -e "    │      2. Fallback to 'oc whoami' for active context                        │"
-echo -e "    │                                                                           │"
-echo -e "    │    Display format:                                                        │"
-echo -e "    │      4.19.19:(k):openshift-config                                         │"
-echo -e "    │      └─ version ─┘└ user ┘└── project ──┘                                 │"
-echo -e "    │                                                                           │"
-echo -e "    │    Error states: N/A | <no-project> | <deleted>                           │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

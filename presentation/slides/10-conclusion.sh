@@ -1,38 +1,37 @@
-#!/bin/bash
-# Slide 10: CONCLUSION
+#!/usr/bin/env bash
+# Slide 10: Conclusion
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "CONCLUSION"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_highlight "What We Covered" 4
+    slide_blank
+    slide_check "Tmux fundamentals and custom configuration" 6
+    slide_check "FZF integration for interactive resource browsing" 6
+    slide_check "OpenShift integration" 6
+    slide_check "Dynamic status bar with context awareness" 6
+    slide_blank
+    slide_blank
+    slide_blank
+    slide_blank
+    slide_highlight "Getting Started" 4
+    slide_blank
+    slide_text "1. Clone repository: git clone https://github.com/lgchiaretto/tmux.git" "" 4
+    slide_text "2. Explore the configuration files" "" 4
+    slide_text "3. Run: ./configure-local.sh" "" 4
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                   CONCLUSION                          │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mWhat We Covered\033[38;5;223m                                                          │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Tmux fundamentals and custom configuration                           │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m FZF integration for interactive resource browsing                    │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m OpenShift integration                                                │"
-echo -e "    │    \033[38;5;208m✓\033[38;5;223m Dynamic status bar with context awareness                            │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mGetting Started\033[38;5;223m                                                          │"
-echo -e "    │                                                                           │"
-echo -e "    │  1. Clone repository: git clone https://github.com/lgchiaretto/tmux.git   │"
-echo -e "    │  2. Explore the configuration files                                       │"
-echo -e "    │  3. Run: ./configure-local.sh                                             │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

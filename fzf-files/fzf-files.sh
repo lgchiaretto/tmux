@@ -4,20 +4,21 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Open file or directory" \
+  "[Ctrl-c]    Copy the content of the file to clipboard" \
+  "[Ctrl-a]    Execute oc apply -f on the file" \
+  "[Ctrl-p]    Print the file or directory name in the terminal" \
+  "[Ctrl-f]    Change directory to the file's directory" \
+  "[Tab]       Open using Visual Studio Code" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr")
 selected_file=$(
     locate -i "" | fzf-tmux \
-        --header=$'┌───────────────────────────────── Help ─────────────────────────────────────┐
-│                                                                            │
-│  [Enter]     Open file or directory                                        │
-│  [Ctrl-c]    Copy the content of the file to clipboard                     │
-│  [Ctrl-a]    Execute oc apply -f on the file                               │
-│  [Ctrl-p]    Print the file or directory name in the terminal              │
-│  [Ctrl-f]    Change directory to the file\'s directory                      │
-│  [Tab]       Open using Visual Studio Code                                 │
-│  [Esc]       Exit                                                          │
-│                                                                            │
-└────────────────────────────────────────────────────────────────────────────┘\n\n' \
+        --header="$_hdr" \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \

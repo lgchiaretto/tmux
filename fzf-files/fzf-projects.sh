@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 projects=$(timeout 2s oc get namespaces -o custom-columns=NAME:.metadata.name --no-headers)
 
@@ -12,19 +13,19 @@ if [ -z "$projects" ]; then
     exit 0
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]           Change to project" \
+  "[Tab]             Print project name" \
+  "[Esc]             Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$projects")
+_ph=$(fzf_header_popup_height "$_hdr" "$projects")
 selected_project=$(echo "$projects" | fzf-tmux \
-     --header=$'┌───────────────────────────────── Help ─────────────────────────────────┐
-│                                                                        │
-│  [Enter]           Change to project                                   │
-│  [Tab]             Print project name                                  │
-│  [Esc]             Exit                                                │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘\n\n' \
+     --header="$_hdr" \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
-    -h 40 \
-    -p "40%,70%" \
+    -p "${_pw},${_ph}" \
     --exact \
     --bind "tab:execute-silent(tmux send-keys '{}')+abort" \
     --bind "ctrl-p:execute-silent(tmux send-keys 'oc project {}' C-m)+abort" \

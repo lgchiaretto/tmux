@@ -53,10 +53,10 @@ create_presentation_session() {
         if [[ -f "$SLIDES_DIR/$slide_script" ]]; then
             if [[ $i -eq 0 ]]; then
                 tmux rename-window -t "$SESSION_NAME:0" "$window_name"
-                tmux send-keys -t "$SESSION_NAME:0" "PS1=\"\" bash $SLIDES_DIR/$slide_script" C-m
+                tmux send-keys -t "$SESSION_NAME:0" "bash $SLIDES_DIR/$slide_script" C-m
             else
                 tmux new-window -t "$SESSION_NAME:$window_index" -n "$window_name"
-                tmux send-keys -t "$SESSION_NAME:$window_index" "PS1=\"\" bash $SLIDES_DIR/$slide_script" C-m
+                tmux send-keys -t "$SESSION_NAME:$window_index" "bash $SLIDES_DIR/$slide_script" C-m
             fi
         fi
     done

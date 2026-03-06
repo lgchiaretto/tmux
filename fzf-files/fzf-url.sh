@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 content=$(tmux capture-pane -J -p -e -S - | \
     sed -r 's/\x1B\[[0-9;]*[mK]//g' | \
@@ -15,20 +16,20 @@ if [ -z "$content" ]; then
     exit
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Open the URL or IP in Chrome" \
+  "[Tab]       Print the URL or IP" \
+  "[Ctrl-c]    Copy the URL or IP to clipboard" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$content")
+_ph=$(fzf_header_popup_height "$_hdr" "$content")
 chosen=$(echo "$content" | fzf-tmux \
-  --header=$'┌───────────────────────────────────────── Help ─────────────────────────────────────────┐
-│                                                                                        │
-│  [Enter]     Open the URL or IP in Chrome                                              │
-│  [Tab]       Print the URL or IP                                                       │
-│  [Ctrl-c]    Copy the URL or IP to clipboard                                           │
-│  [Esc]       Exit                                                                      │
-│                                                                                        │
-└────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
+  --header="$_hdr" \
   --layout=reverse \
   --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \
-  -h 40 \
-  -p "58%,50%" \
+  -p "${_pw},${_ph}" \
   --exact \
   --bind 'ctrl-c:execute-silent(echo -n {} | wl-copy && tmux set-buffer {} && tmux display "Copied")+abort' \
   --bind 'ctrl-o:execute-silent($BROWSER {} &>/dev/null &)+abort' \

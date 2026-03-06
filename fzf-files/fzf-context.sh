@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 if [[ -z "$KUBECONFIG" ]]; then
    KUBECONFIG=~/.kube/config
@@ -55,12 +56,20 @@ if [[ ! -s /tmp/clusters_projects.$$ ]]; then
     exit 0
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Switch to context/project" \
+  "[Tab]       Switch to context/project" \
+  "[Esc]       Exit"
+)
+_ctx_data=$(cat /tmp/clusters_projects.$$)
+_pw=$(fzf_header_popup_width "$_hdr" "$_ctx_data")
+_ph=$(fzf_header_popup_height "$_hdr" "$_ctx_data")
 selected_cluster_project=$(fzf-tmux \
-    --header="Select the OCP context" \
+    --header="$_hdr" \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
-    -h 40 -p "50%,50%" \
+    -p "${_pw},${_ph}" \
     --query="$FILTER" \
     --bind 'tab:accept' \
     --exact < /tmp/clusters_projects.$$ \

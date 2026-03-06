@@ -1,39 +1,38 @@
-#!/bin/bash
-# Slide 07: BASH CUSTOMIZATION
+#!/usr/bin/env bash
+# Slide 6: Bash Customization
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "BASH CUSTOMIZATION"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_highlight "Custom Prompt (Gruvbox Theme)" 4
+    slide_blank
+    slide_text "PS1 with color-coded elements: user@host:path (git-branch)\$" "" 4
+    slide_blank
+    slide_bullet "User in green (#142)" 6
+    slide_bullet "Host in orange (#214)" 6
+    slide_bullet "Path in blue (#109)" 6
+    slide_bullet "Git branch in purple (#175)" 6
+    slide_blank
+    slide_blank
+    slide_highlight "Environment Variables" 4
+    slide_blank
+    slide_bullet "GOVC_* variables for VMware automation" 6
+    slide_bullet "Unlimited history (HISTSIZE & HISTFILESIZE empty)" 6
+    slide_bullet "FZF_DEFAULT_OPTS with Gruvbox color scheme" 6
+    slide_blank
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│              BASH CUSTOMIZATION                       │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mCustom Prompt (Gruvbox Theme)\033[38;5;223m                                            │"
-echo -e "    │                                                                           │"
-echo -e "    │  PS1 with color-coded elements: user@host:path (git-branch)$              │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m User in green (#142)                                                 │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m Host in orange (#214)                                                │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m Path in blue (#109)                                                  │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m Git branch in purple (#175)                                          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mEnvironment Variables\033[38;5;223m                                                    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m GOVC_* variables for VMware automation                               │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m Unlimited history (HISTSIZE & HISTFILESIZE empty)                    │"
-echo -e "    │    \033[38;5;208m•\033[38;5;223m FZF_DEFAULT_OPTS with Gruvbox color scheme                           │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

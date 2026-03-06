@@ -1,50 +1,47 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slide 2: What is tmux?
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "WHAT IS TMUX?"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_highlight "Terminal Multiplexer" 4
+    slide_bullet "Manage multiple windows in one terminal" 6
+    slide_bullet "Allows multiple terminals within a single SSH connection" 6
+    slide_bullet "Can be detached and reattached later" 6
+    slide_bullet "Split windows into multiple panes" 6
+    slide_bullet "FZF integration for interactive resource browsing" 6
+    slide_blank
+    slide_blank
+    slide_section "Key Capabilities"
+    slide_blank
+    slide_label "Session Management" "" 6
+    slide_bullet "Detach/reattach sessions - survive SSH disconnects" 8
+    slide_bullet "Background processes continue running" 8
+    slide_bullet "Named sessions for different projects" 8
+    slide_blank
+    slide_label "Window Management" "" 6
+    slide_bullet "Multiple windows in one session (like browser tabs)" 8
+    slide_bullet "Split windows into panes (horizontal/vertical)" 8
+    slide_bullet "Navigate between windows/panes with keybindings" 8
+    slide_blank
+    slide_label "Scriptability" "" 6
+    slide_bullet "Create complex layouts programmatically" 8
+    slide_bullet "Automate terminal workflows" 8
+    slide_bullet "Integration with other tools (FZF, scripts, automation)" 8
+    slide_blank
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                   WHAT IS TMUX?                       │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mTerminal Multiplexer\033[38;5;223m                                                     │"
-echo -e "    │    • Manage multiple windows in one terminal                              │"
-echo -e "    │    • Allows multiple terminals within a single SSH connection             │"
-echo -e "    │    • Can be detached and reattached later                                 │"
-echo -e "    │    • Split windows into multiple panes                                    │"
-echo -e "    │    • FZF integration for interactive resource browsing                    │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Key Capabilities                                                 \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mSession Management\033[38;5;223m                                                     │"
-echo -e "    │      • Detach/reattach sessions - survive SSH disconnects                 │"
-echo -e "    │      • Background processes continue running                              │"
-echo -e "    │      • Named sessions for different projects                              │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mWindow Management\033[38;5;223m                                                      │"
-echo -e "    │      • Multiple windows in one session (like browser tabs)                │"
-echo -e "    │      • Split windows into panes (horizontal/vertical)                     │"
-echo -e "    │      • Navigate between windows/panes with keybindings                    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mScriptability\033[38;5;223m                                                          │"
-echo -e "    │      • Create complex layouts programmatically                            │"
-echo -e "    │      • Automate terminal workflows                                        │"
-echo -e "    │      • Integration with other tools (FZF, scripts, automation)            │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

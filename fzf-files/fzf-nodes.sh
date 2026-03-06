@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 nodes=$(timeout 2s oc get nodes -o "custom-columns=NOME:.metadata.name,STATUS:.status.conditions[?(@.type=='Ready')].status" --no-headers)
 
@@ -61,24 +62,24 @@ colored_nodes=$(echo "$nodes" | awk '{
     }
 }' | column -t) 
 
+_hdr=$(fzf_header "Help" \
+  "[Enter]     Print node name" \
+  "[Tab]       Select node" \
+  "[Ctrl-a]    Select all nodes" \
+  "[Ctrl-d]    Run \"oc describe <node>\" in new tmux window" \
+  "[Ctrl-e]    Run \"oc edit <node>\" in new tmux window" \
+  "[Ctrl-s]    SSH to node in new tmux window" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$colored_nodes")
+_ph=$(fzf_header_popup_height "$_hdr" "$colored_nodes")
 selected_nodes=$(
     echo -e "$colored_nodes" | fzf-tmux \
-        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
-│                                                                                                                   │
-│  [Enter]     Print node name                                                                                      │
-│  [Tab]       Select node                                                                                          │
-│  [Ctrl-a]    Select all nodes                                                                                     │
-│  [Ctrl-d]    Run "oc describe <node>" in new tmux window                                                          │
-│  [Ctrl-e]    Run "oc edit <node>" in new tmux window                                                              │
-│  [Ctrl-s]    SSH to node in new tmux window                                                                       │
-│  [Esc]       Exit                                                                                                 │
-│                                                                                                                   │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
+        --header="$_hdr" \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 \
-        -p "58%,50%" \
+        -p "${_pw},${_ph}" \
         --exact \
         --with-nth=1,2 \
         --ansi \

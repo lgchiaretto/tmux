@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 oc_logs_fzf() {
     local pod="$1"
@@ -58,23 +59,23 @@ colored_pods=$(echo "$pods" | awk '{
     }
 }' | column -t)
 
+_hdr=$(fzf_header "Help" \
+  "[Enter]     Print pod name" \
+  "[Tab]       Print pod name" \
+  "[Ctrl-d]    Run \"oc describe <pod>\" in new tmux window" \
+  "[Ctrl-e]    Run \"oc edit <pod>\" in new tmux window" \
+  "[Ctrl-l]    Run \"oc logs <pod>\" in new tmux window" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$colored_pods")
+_ph=$(fzf_header_popup_height "$_hdr" "$colored_pods")
 selected_pod=$(
     echo -e "$colored_pods" | fzf-tmux \
-        --header=$'┌────────────────────────────────────────────────────── Help ───────────────────────────────────────────────────────┐
-│                                                                                                                   │
-│  [Enter]     Print pod name                                                                                       │
-│  [Tab]       Print pod name                                                                                       │
-│  [Ctrl-d]    Run "oc describe <pod>" in new tmux window                                                           │
-│  [Ctrl-e]    Run "oc edit <pod>" in new tmux window                                                               │
-│  [Ctrl-l]    Run "oc logs <pod>" in new tmux window                                                               │
-│  [Esc]       Exit                                                                                                 │
-│                                                                                                                   │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
+        --header="$_hdr" \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 \
-        -p "58%,50%" \
+        -p "${_pw},${_ph}" \
         --exact \
         --with-nth=1,2,3 \
         --ansi \

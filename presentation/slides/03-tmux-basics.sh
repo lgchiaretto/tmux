@@ -1,60 +1,55 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slide 3: Tmux Basics
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "TMUX BASIC CONCEPTS"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_section "Hierarchy: Session > Window > Pane"
+    slide_blank
+    slide_text "${C_HI}Session${C_TEXT} (live-demo)" "" 6
+    slide_text "├── ${C_HI}Window 1:${C_TEXT} watch-cluster" "" 6
+    slide_text "│   ├── ${C_CODE}Pane 1: watch oc get pods" "" 6
+    slide_text "│   └── ${C_CODE}Pane 2: watch oc get clusteroperators" "" 6
+    slide_text "├── ${C_HI}Window 2:${C_TEXT} logs:etcd-pod" "" 6
+    slide_text "│   └── ${C_CODE}Pane 1: oc logs -f" "" 6
+    slide_text "└── ${C_HI}Window 3:${C_TEXT} bash" "" 6
+    slide_text "    └── ${C_CODE}Pane 1: interactive shell" "" 6
+    slide_blank
+    slide_blank
+    slide_section "Custom Prefix: C-s (NOT default C-b)"
+    slide_blank
+    slide_label "Session Management:" "" 6
+    slide_key "C-s d" "Detach session"
+    slide_key "C-s N" "Create new session"
+    slide_key "tmux attach" "Reattach to session"
+    slide_blank
+    slide_label "Window Management:" "" 6
+    slide_key "C-t" "Create new window"
+    slide_key "S-Left/Right" "Navigate between windows"
+    slide_key "C-s ," "Rename window"
+    slide_key "C-S-Left/Right" "Move window left/right"
+    slide_blank
+    slide_label "Pane Management:" "" 6
+    slide_key "C-\\" "Split horizontal"
+    slide_key "C-s -" "Split vertical"
+    slide_key "C-Arrow" "Navigate between panes"
+    slide_key "M-S-Arrow" "Resize pane"
+    slide_key "C-s z" "Zoom/unzoom pane"
+    slide_key "C-s a" "Toggle synchronized panes"
+    slide_blank
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                  TMUX BASIC CONCEPTS                  │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Hierarchy: Session → Window → Pane                               \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │      \033[38;5;208mSession\033[38;5;223m (live-demo)                                                  │"
-echo -e "    │      ├── \033[38;5;208mWindow 1:\033[38;5;223m watch-cluster                                          │"
-echo -e "    │      │   ├── \033[38;5;109mPane 1: watch oc get pods\033[38;5;223m                                    │"
-echo -e "    │      │   └── \033[38;5;109mPane 2: watch oc get clusteroperators\033[38;5;223m                        │"
-echo -e "    │      ├── \033[38;5;208mWindow 2:\033[38;5;223m logs:etcd-pod                                          │"
-echo -e "    │      │   └── \033[38;5;109mPane 1: oc logs -f\033[38;5;223m                                           │"
-echo -e "    │      └── \033[38;5;208mWindow 3:\033[38;5;223m bash                                                   │"
-echo -e "    │          └── \033[38;5;109mPane 1: interactive shell\033[38;5;223m                                    │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Custom Prefix: C-s (NOT default C-b)                             \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mSession Management:\033[38;5;223m                                                    │"
-echo -e "    │      \033[38;5;214mC-s d         \033[38;5;223m Detach session                                        │"
-echo -e "    │      \033[38;5;214mC-s N         \033[38;5;223m Create new session                                    │"
-echo -e "    │      \033[38;5;214mtmux attach   \033[38;5;223m Reattach to session                                   │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mWindow Management:\033[38;5;223m                                                     │"
-echo -e "    │      \033[38;5;214mC-t           \033[38;5;223m Create new window                                     │"
-echo -e "    │      \033[38;5;214mS-Left/Right  \033[38;5;223m Navigate between windows                              │"
-echo -e "    │      \033[38;5;214mC-s ,         \033[38;5;223m Rename window                                         │"
-echo -e "    │      \033[38;5;214mC-S-Left/Right\033[38;5;223m Move window left/right                                │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mPane Management:\033[38;5;223m                                                       │"
-echo -e "    │      \033[38;5;214mC-\           \033[38;5;223m Split horizontal                                      │"
-echo -e "    │      \033[38;5;214mC-s -         \033[38;5;223m Split vertical                                        │"
-echo -e "    │      \033[38;5;214mC-Arrow       \033[38;5;223m Navigate between panes                                │"
-echo -e "    │      \033[38;5;214mM-S-Arrow     \033[38;5;223m Resize pane                                           │"
-echo -e "    │      \033[38;5;214mC-s z         \033[38;5;223m Zoom/unzoom pane                                      │"
-echo -e "    │      \033[38;5;214mC-s a         \033[38;5;223m Toggle synchronized panes                             │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

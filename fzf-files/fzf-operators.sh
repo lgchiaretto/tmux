@@ -4,6 +4,7 @@
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 
 operators=$(timeout 2s oc get clusteroperators -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .status.conditions[?(@.type=="Available")]}{.status}{"\t"}{end}{range .status.conditions[?(@.type=="Progressing")]}{.status}{"\t"}{end}{range .status.conditions[?(@.type=="Degraded")]}{.status}{"\n"}{end}{end}' | awk -F'\t' '{if ($3=="True" || $4=="True") print "\033[31m"$0"\033[0m"; else print $0}' | column -t -s $'\t' 2>/dev/null)
 
@@ -12,25 +13,25 @@ if [ -z "$operators" ]; then
     exit 0
 fi
 
+_hdr=$(fzf_header "" \
+  "[Enter]     Print cluster operator name" \
+  "[Tab]       Print cluster operator name" \
+  "[Ctrl-d]    Run \"oc describe <cluster operator>\"" \
+  "[Ctrl-e]    Run \"oc edit <cluster operator>\"" \
+  "[Esc]       Exit"
+)
+_pw=$(fzf_header_popup_width "$_hdr" "$operators")
+_ph=$(fzf_header_popup_height "$_hdr" "$operators")
 selected_operator=$(
     echo "$operators" | fzf-tmux \
         --ansi \
-        --header=$'┌───────────────────────── Help ───────────────────────────┐
-│                                                          │
-│  [Enter]     Print cluster operator name                 │
-│  [Tab]       Print cluster operator name                 │
-│  [Ctrl-d]    Run "oc describe <cluster operator>"        │
-│  [Ctrl-e]    Run "oc edit <cluster operator>"            │
-│  [Esc]       Exit                                        │
-│                                                          │
-└──────────────────────────────────────────────────────────┘\n\n' \
+        --header="$_hdr" \
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665 \
-        -h 40 \
-        -p "32%,45" \
+        -p "${_pw},${_ph}" \
         --exact \
         --bind 'tab:accept' \
         --bind 'ctrl-d:execute-silent(

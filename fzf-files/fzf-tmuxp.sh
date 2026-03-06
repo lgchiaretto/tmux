@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$HOME/.tmux/config.sh" ]; then
     source "$HOME/.tmux/config.sh"
 fi
+source "$SCRIPT_DIR/../common/fzf-header.sh"
 
 error_exit() {
     echo -e "ERROR: $1" >&2
@@ -13,15 +14,18 @@ error_exit() {
 
 clustername=$1
 
-tmuxpfile=$(echo -e "$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml\n$CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml" | fzf-tmux \
-  --layout=reverse -p "55%,50%" \
+_hdr=$(fzf_header "" \
+  "[Enter]     Open tmuxp sessions file" \
+  "[Esc]       Exit"
+)
+_tmuxp_data="$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml
+$CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml"
+_pw=$(fzf_header_popup_width "$_hdr" "$_tmuxp_data")
+_ph=$(fzf_header_popup_height "$_hdr" "$_tmuxp_data")
+tmuxpfile=$(echo -e "$_tmuxp_data" | fzf-tmux \
+  --layout=reverse -p "${_pw},${_ph}" \
   --no-input \
-  --header=$'┌────────────────────────────────────────────────── Help ───────────────────────────────────────────────────┐
-│                                                                                                           │
-│  [Enter]     Open tmuxp sessions file                                                                     │
-│  [Esc]       Exit                                                                                         │
-│                                                                                                           │
-└───────────────────────────────────────────────────────────────────────────────────────────────────────────┘\n\n' \
+  --header="$_hdr" \
   --height=40% --border \
   --border-label=" $FZF_BORDER_LABEL " \
   --border-label-pos=center \

@@ -1,43 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slide 5: Project Overview
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "PROJECT ARCHITECTURE OVERVIEW"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_section "Component Layers"
+    slide_blank
+    slide_label "1. Core Configuration" "" 6
+    slide_accent "(dotfiles/, configure-local.sh)" 9
+    slide_bullet "Customized Tmux config file" 9
+    slide_bullet "Customized Bashrc with Gruvbox theme and persistent history" 9
+    slide_bullet "Installation script with dependencies" 9
+    slide_blank
+    slide_label "2. FZF Integration Layer" "" 6
+    slide_accent "(fzf-files/)" 9
+    slide_bullet "Seamless integration for managing and navigating resources" 9
+    slide_bullet "Interactive menus for resources using fzf-tmux" 9
+    slide_bullet "Action wrappers for batch operations" 9
+    slide_blank
+    slide_label "3. Session Templates" "" 6
+    slide_accent "(tmux-sessions/*.yaml)" 9
+    slide_bullet "Tmuxp YAML for cluster monitoring layouts" 9
+    slide_blank
+    slide_label "4. Dynamic Status Bar" "" 6
+    slide_accent "(ocp-cluster.tmux, ocp-project.tmux)" 9
+    slide_bullet "Context-aware cluster detection" 9
+    slide_bullet "Live version/user/project display" 9
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│            PROJECT ARCHITECTURE OVERVIEW              │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142m┌───────────────────────────────────────────────────────────────────┐\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m│\033[38;5;223m  Component Layers                                                 \033[38;5;142m│\033[38;5;223m    │"
-echo -e "    │  \033[38;5;142m└───────────────────────────────────────────────────────────────────┘\033[38;5;223m    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m1. Core Configuration\033[38;5;223m \033[38;5;109m(dotfiles/, configure-local.sh)\033[38;5;223m                  │"
-echo -e "    │       • Customized Tmux config file                                       │"
-echo -e "    │       • Customized Bashrc with Gruvbox theme and persistent history       │"
-echo -e "    │       • Installation script with dependencies                             │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m2. FZF Integration Layer\033[38;5;223m \033[38;5;109m(fzf-files/)\033[38;5;223m                                  │"
-echo -e "    │       • Seamless integration for managing and navigating resources        │"
-echo -e "    │       • Interactive menus for resources using fzf-tmux                    │"
-echo -e "    │       • Action wrappers for batch operations                              │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m3. Session Templates\033[38;5;223m \033[38;5;109m(tmux-sessions/*.yaml)\033[38;5;223m                            │"
-echo -e "    │       • Tmuxp YAML for cluster monitoring layouts                         │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208m4. Dynamic Status Bar\033[38;5;223m \033[38;5;109m(ocp-cluster.tmux, ocp-project.tmux)\033[38;5;223m             │"
-echo -e "    │       • Context-aware cluster detection                                   │"
-echo -e "    │       • Live version/user/project display                                 │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

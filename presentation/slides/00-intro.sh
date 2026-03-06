@@ -1,48 +1,41 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Slide 0: Introduction
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "TMUX"
+    slide_title_blank
+    slide_title_text "Empowering Your Terminal" "$C_GREEN"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_section "What You'll Learn Today"
+    slide_blank
+    slide_check "Productivity" 5
+    slide_check "What is tmux, why and how to use it" 5
+    slide_check "Core tmux concepts and features" 5
+    slide_check "About this project" 5
+    slide_check "FZF Fuzzy Finder integration" 5
+    slide_check "OpenShift integration" 5
+    slide_check "Live demonstration" 5
+    slide_blank
+    slide_blank
+    slide_section "What I expect from you"
+    slide_blank
+    slide_check "Open Your Mind!" 5
+    slide_blank
+    slide_center "Luiz Gustavo Chiaretto" "$C_GREEN"
+    slide_center "chiarettolabs.com.br" "$C_CODE"
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                                                       │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│\033[0m                        \033[1;38;5;214mTMUX\033[0m\033[38;5;223m                           \033[38;5;214m│\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                                                       │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│\033[0m              \033[38;5;142mEmpowering Your Terminal\033[0m\033[38;5;223m                 \033[38;5;214m│\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│                                                       │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │                    \033[38;5;142m┌─────────────────────────────┐\033[38;5;223m                        │"
-echo -e "    │                    \033[38;5;142m│\033[38;5;223m   What You'll Learn Today   \033[38;5;142m│\033[38;5;223m                        │"
-echo -e "    │                    \033[38;5;142m└─────────────────────────────┘\033[38;5;223m                        │"
-echo -e "    │                                                                           │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m Productivity                                            │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m What is tmux, why and how to use it                     │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m Core tmux concepts and features                         │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m About this project                                      │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m FZF Fuzzy Finder integration                            │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m OpenShift integration                                   │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m Live demonstration                                      │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │                    \033[38;5;142m┌─────────────────────────────┐\033[38;5;223m                        │"
-echo -e "    │                    \033[38;5;142m│\033[38;5;223m   What I expect from you    \033[38;5;142m│\033[38;5;223m                        │"
-echo -e "    │                    \033[38;5;142m└─────────────────────────────┘\033[38;5;223m                        │"
-echo -e "    │                                                                           │"
-echo -e "    │                 \033[38;5;208m✓\033[38;5;223m Open Your Mind!                                         │"
-echo -e "    │                                                                           │"
-echo -e "    │                       \033[38;5;142mLuiz Gustavo Chiaretto\033[38;5;223m                              │"
-echo -e "    │                        \033[38;5;109mchiarettolabs.com.br\033[38;5;223m                               │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide

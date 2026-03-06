@@ -1,40 +1,39 @@
-#!/bin/bash
-# Slide 08: RESOURCE BROWSERS
+#!/usr/bin/env bash
+# Slide 8: Resource Browsers
 
-# Source centering helper
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../lib/center-content.sh"
+source "$SCRIPT_DIR/../lib/render-slide.sh"
 
-clear
+build_slide() {
+    slide_init
+    slide_top
+    slide_blank
+    slide_title_open
+    slide_title_blank
+    slide_title_text "RESOURCE BROWSERS"
+    slide_title_blank
+    slide_title_close
+    slide_blank
+    slide_blank
+    slide_section "Tmux FZF Bindings & Actions"
+    slide_blank
+    slide_label "Pods (C-s p):" "" 6
+    slide_text "Multi-select: Ctrl-a to toggle all" "" 8
+    slide_key "Ctrl-l: Logs" "Creates window: \"logs:podname\"" 8
+    slide_key "Ctrl-d: Describe" "Creates window: \"desc:podname\"" 8
+    slide_key "Ctrl-e: Edit" "Creates window: \"edit:podname\"" 8
+    slide_blank
+    slide_label "Nodes (C-s n):" "" 6
+    slide_key "Ctrl-d" "Describe node" 8
+    slide_key "Ctrl-e" "Edit node" 8
+    slide_key "Ctrl-s" "SSH to node (oc debug pod)" 8
+    slide_blank
+    slide_label "Operators (C-s O):" "" 6
+    slide_key "Ctrl-d" "Describe cluster operator" 8
+    slide_key "Ctrl-e" "Edit cluster operator" 8
+    slide_blank
+    slide_blank
+    slide_bottom
+}
 
-
-{
-echo -e "    ┌───────────────────────────────────────────────────────────────────────────┐"
-echo -e "    │                                                                           │"
-echo -e "    │        \033[38;5;214m┌───────────────────────────────────────────────────────┐\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m│              RESOURCE BROWSERS                        │\033[38;5;223m          │"
-echo -e "    │        \033[38;5;214m└───────────────────────────────────────────────────────┘\033[38;5;223m          │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    │  \033[38;5;142mTmux FZF Bindings & Actions\033[38;5;223m                                              │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mPods (C-s p):\033[38;5;223m                                                          │"
-echo -e "    │      Multi-select: Ctrl-a to toggle all                                   │"
-echo -e "    │      \033[38;5;214mCtrl-l: Logs     → Creates window: \"logs:podname\"\033[38;5;223m                    │"
-echo -e "    │      \033[38;5;214mCtrl-d: Describe → Creates window: \"desc:podname\"\033[38;5;223m                    │"
-echo -e "    │      \033[38;5;214mCtrl-e: Edit     → Creates window: \"edit:podname\"\033[38;5;223m                    │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mNodes (C-s n):\033[38;5;223m                                                         │"
-echo -e "    │      \033[38;5;214mCtrl-d: Describe node\033[38;5;223m                                                │"
-echo -e "    │      \033[38;5;214mCtrl-e: Edit node\033[38;5;223m                                                    │"
-echo -e "    │      \033[38;5;214mCtrl-s: SSH to node (oc debug pod)\033[38;5;223m                                   │"
-echo -e "    │                                                                           │"
-echo -e "    │    \033[38;5;208mOperators (C-s O):\033[38;5;223m                                                     │"
-echo -e "    │      \033[38;5;214mCtrl-d: Describe cluster operator\033[38;5;223m                                    │"
-echo -e "    │      \033[38;5;214mCtrl-e: Edit cluster operator\033[38;5;223m                                        │"
-echo -e "    │                                                                           │"
-echo -e "    │                                                                           │"
-echo -e "    └───────────────────────────────────────────────────────────────────────────┘"
-} | center_content
-
-PS1="" exec bash --norc --noprofile
+slide_present build_slide
