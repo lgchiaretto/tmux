@@ -37,6 +37,7 @@ clusters() {
   local platform=$(_jv '.platform')
   local n_worker=$(_jv '.n_worker')
   local infra=$(_jv '.infra')
+  local owner_username=$(_jv '.owner_username')
   local created_at
   created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
   [[ -z "$created_at" ]] && created_at="-"
@@ -47,12 +48,12 @@ clusters() {
   local name="$dir"
   [[ -f "$started_file" ]] && name="$dir *"
 
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$name" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$name" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username"
 }
 
 # Prepend column header so column -t aligns everything together
-_col_header=$'Cluster Name\tVersion\tType\tSNO\tPlatform\tWorkers\tCreated At\tInfra'
+_col_header=$'Cluster Name\tVersion\tType\tSNO\tPlatform\tWorkers\tCreated At\tInfra\tOwner'
 selection_list=$(
   {
     printf '%s\n' "$_col_header"
