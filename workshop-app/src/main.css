@@ -1,7 +1,0 @@
-/* PatternFly Core Styles */
-@import '@patternfly/patternfly/patternfly.css';
-@import '@patternfly/patternfly/patternfly-addons.css';
-
-/* Custom Workshop Styles */
-@import './index.css';
-
