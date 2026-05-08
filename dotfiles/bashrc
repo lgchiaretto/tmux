@@ -23,20 +23,20 @@ elif [ -f "$HOME/git/tmux/config.sh" ]; then
     source "$HOME/git/tmux/config.sh"
 fi
 
-# vSphere/govc credentials (use config.sh values or defaults)
-#export GOVC_USERNAME="${VSPHERE_USERNAME:-administrator@vsphere.local}"
-#export GOVC_PASSWORD="${VSPHERE_PASSWORD:-your-password-here}"
-#export GOVC_URL="${GOVC_URL:-https://vcsa.example.com}"
-#export GOVC_INSECURE=true
-
-# GOVC insecure flag
-export GOVC_INSECURE="${GOVC_INSECURE:-true}"
-
-# GOVC username
-export GOVC_USERNAME=$VSPHERE_USERNAME
-
-#GOVC password
-export GOVC_PASSWORD=$VSPHERE_PASSWORD
+## vSphere/govc credentials (use config.sh values or defaults)
+##export GOVC_USERNAME="${VSPHERE_USERNAME:-administrator@vsphere.local}"
+##export GOVC_PASSWORD="${VSPHERE_PASSWORD:-your-password-here}"
+##export GOVC_URL="${GOVC_URL:-https://vcsa.example.com}"
+##export GOVC_INSECURE=true
+#
+## GOVC insecure flag
+#export GOVC_INSECURE="${GOVC_INSECURE:-true}"
+#
+## GOVC username
+#export GOVC_USERNAME=$VSPHERE_USERNAME
+#
+##GOVC password
+#export GOVC_PASSWORD=$VSPHERE_PASSWORD
 
 # -------------------- Shell Options --------------------
 shopt -s checkwinsize
@@ -70,12 +70,24 @@ if [ -x /usr/bin/dircolors ]; then
 fi
 
 # -------------------- FZF Configuration --------------------
-# Load global fzf installation
+# Auto-install fzf if not available
+if ! command -v fzf &>/dev/null; then
+    if [ ! -d "$HOME/.fzf" ]; then
+        git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" 2>/dev/null
+    fi
+    if [ -d "$HOME/.fzf" ] && [ ! -f "$HOME/.fzf/bin/fzf" ]; then
+        "$HOME/.fzf/install" --bin 2>/dev/null
+    fi
+fi
+
+# Load fzf: prefer system-wide, fallback to user install
 if [ -f /usr/local/share/fzf/shell/completion.bash ]; then
     source /usr/local/share/fzf/shell/completion.bash
-fi
-if [ -f /usr/local/share/fzf/shell/key-bindings.bash ]; then
     source /usr/local/share/fzf/shell/key-bindings.bash
+elif [ -f "$HOME/.fzf/shell/completion.bash" ]; then
+    export PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
+    source "$HOME/.fzf/shell/completion.bash"
+    source "$HOME/.fzf/shell/key-bindings.bash"
 fi
 
 # -------------------- Tmux Smart Attach --------------------
@@ -114,7 +126,9 @@ fi
 # -------------------- Miscellaneous --------------------
 umask 022
 eval $(dircolors -b $HOME/.dircolors)
-bind -x '"\e[A": __fzf_history__'
+if type __fzf_history__ &>/dev/null; then
+    bind -x '"\e[A": __fzf_history__'
+fi
 
 # -------------------- First Login Setup --------------------
 # Auto-install vim plugins on first login
