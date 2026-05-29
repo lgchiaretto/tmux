@@ -30,6 +30,15 @@
 # 
 export CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/labs}"
 
+# Additional cluster directories for the managed clusters view (prefix + m)
+# Space-separated entries with owner/cluster/ nesting (depth 2).
+#   "LABEL:sshhost:path" → remote directory via SSH
+#   "LABEL::path"        → local nested directory (no SSH)
+# Leave empty to only scan CLUSTERS_BASE_PATH locally.
+# Example: "PRD:bastion:/home/labs/prd INT:bastion:/home/labs/int"
+# Example: "PRD::/home/labs/prd INT::/home/labs/int"  (local)
+export CLUSTERS_MANAGED_PATHS="${CLUSTERS_MANAGED_PATHS:-}"
+
 # Cache directory for OCP clients and other cached data
 export OCP_CACHE_DIR="${OCP_CACHE_DIR:-${CLUSTERS_BASE_PATH}/.cache}"
 

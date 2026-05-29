@@ -7,6 +7,7 @@ if [ -f "$HOME/.tmux/config.sh" ]; then
 fi
 
 cluster_name="$1"
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$cluster_name}"
 # -----------------------------------------------------
 
 # Exit if not running on bastion.chiaret.to
@@ -17,7 +18,7 @@ if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
     fi
 fi
 
-config_base_path="$CLUSTERS_BASE_PATH/$cluster_name/$cluster_name"
+config_base_path="$CLUSTER_DIR/$cluster_name"
 config_file=""
 
 if [[ -f "${config_base_path}.json" ]]; then

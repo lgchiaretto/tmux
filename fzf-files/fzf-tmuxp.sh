@@ -13,13 +13,14 @@ error_exit() {
 }
 
 clustername=$1
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$clustername}"
 
 _hdr=$(fzf_header "" \
   "[Enter]     Open tmuxp sessions file" \
   "[Esc]       Exit"
 )
-_tmuxp_data="$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml
-$CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml"
+_tmuxp_data="$CLUSTER_DIR/create-tmuxp.yaml
+$CLUSTER_DIR/upgrade-tmuxp.yaml"
 _pw=$(fzf_header_popup_width "$_hdr" "$_tmuxp_data")
 _ph=$(fzf_header_popup_height "$_hdr" "$_tmuxp_data")
 tmuxpfile=$(echo -e "$_tmuxp_data" | fzf-tmux \
@@ -38,13 +39,13 @@ if [ -z "$tmuxpfile" ]; then
 fi
 
 case "$tmuxpfile" in
-  "$CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml")
-    tmuxp load $CLUSTERS_BASE_PATH/$clustername/create-tmuxp.yaml -y
+  "$CLUSTER_DIR/create-tmuxp.yaml")
+    tmuxp load "$CLUSTER_DIR/create-tmuxp.yaml" -y
     ;;
-  "$CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml")
+  "$CLUSTER_DIR/upgrade-tmuxp.yaml")
     connected_cluster=$(oc whoami --show-server | awk -F'.' '{print $2}')
     [ "$connected_cluster" != "$clustername" ] && error_exit "The connected cluster '$connected_cluster' does not match the selected cluster '$clustername'"
 
-    tmuxp load $CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml -y
+    tmuxp load "$CLUSTER_DIR/upgrade-tmuxp.yaml" -y
     ;;
 esac

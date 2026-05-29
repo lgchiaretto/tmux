@@ -18,7 +18,7 @@ if [ -z "$1" ]; then
 fi
 
 CLUSTER_NAME="$1"
-CLUSTER_DIR="$CLUSTERS_BASE_PATH/$CLUSTER_NAME"
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$CLUSTER_NAME}"
 CLUSTER_JSON="$CLUSTER_DIR/$CLUSTER_NAME.json"
 
 # Check if cluster directory exists

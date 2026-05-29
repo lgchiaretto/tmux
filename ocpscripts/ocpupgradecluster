@@ -19,6 +19,7 @@ error_exit() {
 timeout 2s oc whoami &> /dev/null || error_exit "You are not connected to any OpenShift cluster or the 'oc' command is not available."
 
 clustername=$1
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$clustername}"
 
 CURRENT_VERSION=$(oc get clusterversions version -o jsonpath='{.status.desired.version}')
 CURRENT_CHANNEL=$(oc get clusterversions version -o jsonpath='{.spec.channel}')
@@ -106,6 +107,6 @@ if [ $? -ne 0 ]; then
 fi
 
 CURRENT_VERSION=$(oc get clusterversion -o jsonpath='{.items[0].status.desired.version}')
-sed -i "s/$CURRENT_VERSION/$SELECTED_VERSION/" $CLUSTERS_BASE_PATH/$clustername/$clustername.json
+sed -i "s/$CURRENT_VERSION/$SELECTED_VERSION/" "$CLUSTER_DIR/$clustername.json"
 
-yes | tmuxp load $CLUSTERS_BASE_PATH/$clustername/upgrade-tmuxp.yaml
+yes | tmuxp load "$CLUSTER_DIR/upgrade-tmuxp.yaml"
