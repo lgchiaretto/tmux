@@ -13,9 +13,9 @@ _cache_dir="${_cache_dir:-/tmp}"
 mkdir -p "$_cache_dir" 2>/dev/null
 _cache_lookup="$_cache_dir/mc-lookup.cache"
 _cache_display="$_cache_dir/mc-display.cache"
-_cache_ttl="${MC_CACHE_TTL:-300}"  # seconds (default 5 min)
+_cache_ttl="${MC_CACHE_TTL:-300}"
 
-# ── Cache scan logic (extracted so it can run standalone for bg refresh) ──
+# ── Scan logic ───────────────────────────────────────────────
 _do_scan() {
   local lkp_file="$1" dsp_file="$2"
   > "$lkp_file"
@@ -23,21 +23,26 @@ _do_scan() {
 
   # Local clusters (flat: CLUSTERS_BASE_PATH/cluster/)
   if [[ -n "$CLUSTERS_BASE_PATH" && -d "$CLUSTERS_BASE_PATH" ]]; then
-    while read -r dir; do
-      [[ -z "$dir" ]] && continue
-      json="$CLUSTERS_BASE_PATH/$dir/$dir.json"
-      [[ ! -f "$json" ]] && continue
+    find "$CLUSTERS_BASE_PATH/" -mindepth 2 -maxdepth 2 -name '*.json' \
+        -not -name 'metadata.json' -not -name 'install-config.yaml' \
+        -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
+        -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
+        -not -path '*/backup*' -not -path '*-files*' -not -path '*/quay*' \
+        -not -path '*/archived*' -not -path '*/multiclusterfiles*' \
+        -not -path '*/.cache*' -not -path '*/createcerts*' \
+        -not -path '*/isos*' -not -path '*/variables-files*' \
+        -not -path '*/dockerconfig-*' -not -path '*/rtm*' \
+      2>/dev/null | while IFS= read -r json; do
+      dir=$(basename "$(dirname "$json")")
+      bname=$(basename "$json" .json)
+      [[ "$dir" != "$bname" ]] && continue
 
-      _jv() { local v; v=$(jq -r "$1 // empty" "$json" 2>/dev/null); echo "${v:--}"; }
+      IFS=$'\t' read -r ocpversion clustertype sno platform n_worker infra owner_username basedomain < <(
+        jq -r '[(.ocpversion // "-"), (.clustertype // "-"), (.sno // "-"), (.platform // "-"), (.n_worker // "-"), (.infra // "-"), (.owner_username // "-"), (.basedomain // "-")] | @tsv' "$json" 2>/dev/null
+      )
+      [[ -z "$ocpversion" ]] && continue
 
-      ocpversion=$(_jv '.ocpversion')
-      clustertype=$(_jv '.clustertype' | tr '[:lower:]' '[:upper:]')
-      sno=$(_jv '.sno')
-      platform=$(_jv '.platform')
-      n_worker=$(_jv '.n_worker')
-      infra=$(_jv '.infra')
-      owner_username=$(_jv '.owner_username')
-      basedomain=$(_jv '.basedomain')
+      clustertype="${clustertype^^}"
       created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
       [[ -z "$created_at" ]] && created_at="-"
 
@@ -47,59 +52,70 @@ _do_scan() {
       echo "${dir}|LOCAL||${CLUSTERS_BASE_PATH}/${dir}|${basedomain}|${infra}" >> "$lkp_file"
       printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
         "$name" "LOCAL" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username" >> "$dsp_file"
-    done < <(find "$CLUSTERS_BASE_PATH/" -mindepth 1 -maxdepth 1 -type d \
-        ! -name 'backup*' ! -name '*-files*' ! -name 'quay*' ! -name 'archived' \
-        ! -name 'multiclusterfiles' ! -name '.cache' ! -name 'createcerts' \
-        ! -name 'isos' ! -name 'variables-files*' ! -name 'dockerconfig-*' ! -name 'rtm' \
-        -exec basename {} \;)
+    done
   fi
 
   # Managed clusters (nested: basepath/owner/cluster/)
   if [[ -n "$CLUSTERS_MANAGED_PATHS" ]]; then
+    # Run all managed path scans in parallel
+    local _pids=() _tmpfiles=()
     for entry in $CLUSTERS_MANAGED_PATHS; do
       IFS=':' read -r label host path <<< "$entry"
       [[ -z "$label" || -z "$path" ]] && continue
 
-      if [[ -z "$host" ]]; then
-        # Local nested directory
-        _managed_out=$(_scan_nested_local "$path" "$label")
-      else
-        # Remote via SSH
-        _managed_out=$(ssh -o ConnectTimeout=5 -o BatchMode=yes "$host" bash -s -- "$path" "$label" 2>/dev/null <<'REMOTESCRIPT'
+      local _tmpout=$(mktemp /tmp/tmux-mc-mp.XXXXXX)
+      _tmpfiles+=("$_tmpout")
+
+      (
+        if [[ -z "$host" ]]; then
+          _scan_nested_local "$path" "$label"
+        else
+          ssh -o ConnectTimeout=5 -o BatchMode=yes "$host" bash -s -- "$path" "$label" 2>/dev/null <<'REMOTESCRIPT'
 base="$1"; label="$2"
 [[ ! -d "$base" ]] && exit 0
-for owner_dir in "$base"/*/; do
-  [[ ! -d "$owner_dir" ]] && continue
-  for cluster_dir in "$owner_dir"/*/; do
-    [[ ! -d "$cluster_dir" ]] && continue
-    dir=$(basename "$cluster_dir")
-    json="$cluster_dir/$dir.json"
-    [[ ! -f "$json" ]] && continue
+find "$base" -mindepth 3 -maxdepth 3 -name '*.json' \
+    -not -name 'metadata.json' -not -name 'install-config.yaml' \
+    -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
+    -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
+  2>/dev/null | while IFS= read -r json; do
+  cluster_dir=$(dirname "$json")
+  dir=$(basename "$cluster_dir")
+  bname=$(basename "$json" .json)
+  [[ "$dir" != "$bname" ]] && continue
 
-    _jv() { local v; v=$(jq -r "$1 // empty" "$json" 2>/dev/null); echo "${v:--}"; }
+  IFS=$'\t' read -r ocpversion clustertype sno platform n_worker infra owner_username basedomain < <(
+    jq -r '[(.ocpversion // "-"), (.clustertype // "-"), (.sno // "-"), (.platform // "-"), (.n_worker // "-"), (.infra // "-"), (.owner_username // "-"), (.basedomain // "-")] | @tsv' "$json" 2>/dev/null
+  )
+  [[ -z "$ocpversion" ]] && continue
 
-    ocpversion=$(_jv '.ocpversion')
-    clustertype=$(_jv '.clustertype' | tr '[:lower:]' '[:upper:]')
-    sno=$(_jv '.sno')
-    platform=$(_jv '.platform')
-    n_worker=$(_jv '.n_worker')
-    infra=$(_jv '.infra')
-    owner_username=$(_jv '.owner_username')
-    basedomain=$(_jv '.basedomain')
-    created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
-    [[ -z "$created_at" ]] && created_at="-"
+  clustertype="${clustertype^^}"
+  created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
+  [[ -z "$created_at" ]] && created_at="-"
 
-    name="$dir"
-    [[ -f "$cluster_dir/started" ]] && name="$dir *"
+  name="$dir"
+  [[ -f "$cluster_dir/started" ]] && name="$dir *"
 
-    echo "LKP:${dir}|${cluster_dir%/}|${basedomain}|${infra}"
-    printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-      "$name" "$label" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username"
-  done
+  echo "LKP:${dir}|${cluster_dir}|${basedomain}|${infra}"
+  printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$name" "$label" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username"
 done
 REMOTESCRIPT
-        )
-      fi
+        fi
+      ) > "$_tmpout" &
+      _pids+=($!)
+    done
+
+    # Wait for all parallel jobs
+    for pid in "${_pids[@]}"; do
+      wait "$pid" 2>/dev/null
+    done
+
+    # Parse results
+    local _idx=0
+    for entry in $CLUSTERS_MANAGED_PATHS; do
+      IFS=':' read -r label host path <<< "$entry"
+      [[ -z "$label" || -z "$path" ]] && continue
+      [[ $_idx -ge ${#_tmpfiles[@]} ]] && break
 
       while IFS= read -r line; do
         case "$line" in
@@ -113,7 +129,9 @@ REMOTESCRIPT
             echo "${line#DSP:}" >> "$dsp_file"
             ;;
         esac
-      done <<< "$_managed_out"
+      done < "${_tmpfiles[$_idx]}"
+      rm -f "${_tmpfiles[$_idx]}"
+      _idx=$((_idx + 1))
     done
   fi
 }
@@ -121,52 +139,44 @@ REMOTESCRIPT
 _scan_nested_local() {
   local base="$1" label="$2"
   [[ ! -d "$base" ]] && return
-  for owner_dir in "$base"/*/; do
-    [[ ! -d "$owner_dir" ]] && continue
-    for cluster_dir in "$owner_dir"/*/; do
-      [[ ! -d "$cluster_dir" ]] && continue
-      dir=$(basename "$cluster_dir")
-      json="$cluster_dir/$dir.json"
-      [[ ! -f "$json" ]] && continue
+  find "$base" -mindepth 3 -maxdepth 3 -name '*.json' \
+      -not -name 'metadata.json' -not -name 'install-config.yaml' \
+      -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
+      -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
+    2>/dev/null | while IFS= read -r json; do
+    cluster_dir=$(dirname "$json")
+    dir=$(basename "$cluster_dir")
+    bname=$(basename "$json" .json)
+    [[ "$dir" != "$bname" ]] && continue
 
-      _jv() { local v; v=$(jq -r "$1 // empty" "$json" 2>/dev/null); echo "${v:--}"; }
+    IFS=$'\t' read -r ocpversion clustertype sno platform n_worker infra owner_username basedomain < <(
+      jq -r '[(.ocpversion // "-"), (.clustertype // "-"), (.sno // "-"), (.platform // "-"), (.n_worker // "-"), (.infra // "-"), (.owner_username // "-"), (.basedomain // "-")] | @tsv' "$json" 2>/dev/null
+    )
+    [[ -z "$ocpversion" ]] && continue
 
-      ocpversion=$(_jv '.ocpversion')
-      clustertype=$(_jv '.clustertype' | tr '[:lower:]' '[:upper:]')
-      sno=$(_jv '.sno')
-      platform=$(_jv '.platform')
-      n_worker=$(_jv '.n_worker')
-      infra=$(_jv '.infra')
-      owner_username=$(_jv '.owner_username')
-      basedomain=$(_jv '.basedomain')
-      created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
-      [[ -z "$created_at" ]] && created_at="-"
+    clustertype="${clustertype^^}"
+    created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
+    [[ -z "$created_at" ]] && created_at="-"
 
-      name="$dir"
-      [[ -f "$cluster_dir/started" ]] && name="$dir *"
+    name="$dir"
+    [[ -f "$cluster_dir/started" ]] && name="$dir *"
 
-      echo "LKP:${dir}|${cluster_dir%/}|${basedomain}|${infra}"
-      printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$name" "$label" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username"
-    done
+    echo "LKP:${dir}|${cluster_dir}|${basedomain}|${infra}"
+    printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+      "$name" "$label" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username"
   done
 }
 
-# ── Handle --refresh flag (used for background refresh) ──────
+# ── Handle --refresh flag (background/manual refresh) ────────
 if [[ "$1" == "--refresh" ]]; then
   _do_scan "$_cache_lookup" "$_cache_display"
   exit 0
 fi
 
-# ── Load from cache or scan ──────────────────────────────────
-_cache_fresh=false
-if [[ -f "$_cache_lookup" && -f "$_cache_display" ]]; then
-  _age=$(( $(date +%s) - $(stat -c %Y "$_cache_lookup") ))
-  if (( _age < _cache_ttl )); then
-    _cache_fresh=true
-  fi
-fi
-
+# ── Load cache or scan ───────────────────────────────────────
+# Strategy: if cache exists (any age), use it instantly.
+# If stale, trigger background refresh for next time.
+# Only do a blocking scan if no cache exists at all (first run).
 _lookup=$(mktemp /tmp/tmux-mc-lkp.XXXXXX)
 _display=$(mktemp /tmp/tmux-mc-dsp.XXXXXX)
 _helper=$(mktemp /tmp/tmux-mc-hlp.XXXXXX)
@@ -184,18 +194,20 @@ mc_resolve() {
 }
 HELPEREOF
 
-if $_cache_fresh; then
+if [[ -s "$_cache_lookup" && -s "$_cache_display" ]]; then
+  # Cache exists → use immediately (instant)
   cp "$_cache_lookup" "$_lookup"
   cp "$_cache_display" "$_display"
+  # If stale, refresh in background for next time
+  _age=$(( $(date +%s) - $(stat -c %Y "$_cache_lookup") ))
+  if (( _age >= _cache_ttl )); then
+    (nohup bash "$0" --refresh >/dev/null 2>&1 &)
+  fi
 else
+  # No cache (first run) → blocking scan
   _do_scan "$_lookup" "$_display"
   cp "$_lookup" "$_cache_lookup"
   cp "$_display" "$_cache_display"
-fi
-
-# ── Trigger background refresh for next invocation ───────────
-if $_cache_fresh; then
-  (nohup bash "$0" --refresh >/dev/null 2>&1 &)
 fi
 
 # ── Build selection list ─────────────────────────────────────
@@ -319,7 +331,6 @@ if [ -n "$selected_action" ]; then
 
   if [[ -z "$KUBECONFIG" ]]; then
     if [[ -n "$MC_HOST" ]]; then
-      # Remote cluster
       _pw=$(ssh -o ConnectTimeout=3 "$MC_HOST" "cat '$MC_PATH/auth/kubeadmin-password'" 2>/dev/null)
       tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u kubeadmin -p '$_pw' --insecure-skip-tls-verify" C-m
     elif [ "$MC_INFRA" == "kvm" ]; then
