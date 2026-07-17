@@ -13,47 +13,12 @@ _cache_dir="${_cache_dir:-/tmp}"
 mkdir -p "$_cache_dir" 2>/dev/null
 _cache_lookup="$_cache_dir/mc-lookup.cache"
 _cache_display="$_cache_dir/mc-display.cache"
-_cache_ttl="${MC_CACHE_TTL:-300}"
 
 # ── Scan logic ───────────────────────────────────────────────
 _do_scan() {
   local lkp_file="$1" dsp_file="$2"
   > "$lkp_file"
   > "$dsp_file"
-
-  # Local clusters (flat: CLUSTERS_BASE_PATH/cluster/)
-  if [[ -n "$CLUSTERS_BASE_PATH" && -d "$CLUSTERS_BASE_PATH" ]]; then
-    find "$CLUSTERS_BASE_PATH/" -mindepth 2 -maxdepth 2 -name '*.json' \
-        -not -name 'metadata.json' -not -name 'install-config.yaml' \
-        -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
-        -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
-        -not -path '*/backup*' -not -path '*-files*' -not -path '*/quay*' \
-        -not -path '*/archived*' -not -path '*/multiclusterfiles*' \
-        -not -path '*/.cache*' -not -path '*/createcerts*' \
-        -not -path '*/isos*' -not -path '*/variables-files*' \
-        -not -path '*/dockerconfig-*' -not -path '*/rtm*' \
-      2>/dev/null | while IFS= read -r json; do
-      dir=$(basename "$(dirname "$json")")
-      bname=$(basename "$json" .json)
-      [[ "$dir" != "$bname" ]] && continue
-
-      IFS=$'\t' read -r ocpversion clustertype sno platform n_worker infra owner_username basedomain < <(
-        jq -r '[(.ocpversion // "-"), (.clustertype // "-"), (.sno // "-"), (.platform // "-"), (.n_worker // "-"), (.infra // "-"), (.owner_username // "-"), (.basedomain // "-")] | @tsv' "$json" 2>/dev/null
-      )
-      [[ -z "$ocpversion" ]] && continue
-
-      clustertype="${clustertype^^}"
-      created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
-      [[ -z "$created_at" ]] && created_at="-"
-
-      name="$dir"
-      [[ -f "$CLUSTERS_BASE_PATH/$dir/started" ]] && name="$dir *"
-
-      echo "${dir}|LOCAL||${CLUSTERS_BASE_PATH}/${dir}|${basedomain}|${infra}" >> "$lkp_file"
-      printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$name" "LOCAL" "$ocpversion" "$clustertype" "$sno" "$platform" "$n_worker" "$created_at" "$infra" "$owner_username" >> "$dsp_file"
-    done
-  fi
 
   # Managed clusters (nested: basepath/owner/cluster/)
   if [[ -n "$CLUSTERS_MANAGED_PATHS" ]]; then
@@ -70,10 +35,10 @@ _do_scan() {
         if [[ -z "$host" ]]; then
           _scan_nested_local "$path" "$label"
         else
-          ssh -o ConnectTimeout=5 -o BatchMode=yes "$host" bash -s -- "$path" "$label" 2>/dev/null <<'REMOTESCRIPT'
-base="$1"; label="$2"
+          ssh -o ConnectTimeout=5 -o BatchMode=yes "$host" bash -s -- "$path" "$label" "${DEFAULT_BASEDOMAIN:-tamlab.rdu2.redhat.com}" 2>/dev/null <<'REMOTESCRIPT'
+base="$1"; label="$2"; default_bd="$3"
 [[ ! -d "$base" ]] && exit 0
-find "$base" -mindepth 3 -maxdepth 3 -name '*.json' \
+find "$base" -mindepth 2 -maxdepth 3 -name '*.json' \
     -not -name 'metadata.json' -not -name 'install-config.yaml' \
     -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
     -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
@@ -89,6 +54,18 @@ find "$base" -mindepth 3 -maxdepth 3 -name '*.json' \
   [[ -z "$ocpversion" ]] && continue
 
   clustertype="${clustertype^^}"
+  if [[ "$basedomain" == "-" || -z "$basedomain" ]]; then
+    basedomain=$(grep -m1 '^baseDomain:' "$cluster_dir/install-config.yaml" 2>/dev/null | awk '{print $2}')
+    if [[ -z "$basedomain" ]]; then
+      _parent=$(dirname "$cluster_dir")
+      _owner=$(basename "$_parent")
+      if [[ "$_parent" != "$base" ]]; then
+        basedomain="${_owner}.${default_bd}"
+      else
+        basedomain="$default_bd"
+      fi
+    fi
+  fi
   created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
   [[ -z "$created_at" ]] && created_at="-"
 
@@ -134,12 +111,20 @@ REMOTESCRIPT
       _idx=$((_idx + 1))
     done
   fi
+
+  # Deduplicate by cluster name (first occurrence wins, preserving label priority)
+  if [[ -s "$lkp_file" ]]; then
+    awk -F'|' '!seen[$1]++' "$lkp_file" > "${lkp_file}.tmp" && mv "${lkp_file}.tmp" "$lkp_file"
+  fi
+  if [[ -s "$dsp_file" ]]; then
+    awk -F'\t' '{ key=$1; gsub(/ \*$/, "", key); } !seen[key]++' "$dsp_file" > "${dsp_file}.tmp" && mv "${dsp_file}.tmp" "$dsp_file"
+  fi
 }
 
 _scan_nested_local() {
   local base="$1" label="$2"
   [[ ! -d "$base" ]] && return
-  find "$base" -mindepth 3 -maxdepth 3 -name '*.json' \
+  find "$base" -mindepth 2 -maxdepth 3 -name '*.json' \
       -not -name 'metadata.json' -not -name 'install-config.yaml' \
       -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
       -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
@@ -155,6 +140,19 @@ _scan_nested_local() {
     [[ -z "$ocpversion" ]] && continue
 
     clustertype="${clustertype^^}"
+    if [[ "$basedomain" == "-" || -z "$basedomain" ]]; then
+      local _dflt="${DEFAULT_BASEDOMAIN:-tamlab.rdu2.redhat.com}"
+      basedomain=$(grep -m1 '^baseDomain:' "$cluster_dir/install-config.yaml" 2>/dev/null | awk '{print $2}')
+      if [[ -z "$basedomain" ]]; then
+        local _parent; _parent=$(dirname "$cluster_dir")
+        local _owner; _owner=$(basename "$_parent")
+        if [[ "$_parent" != "$base" ]]; then
+          basedomain="${_owner}.${_dflt}"
+        else
+          basedomain="$_dflt"
+        fi
+      fi
+    fi
     created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
     [[ -z "$created_at" ]] && created_at="-"
 
@@ -173,14 +171,12 @@ if [[ "$1" == "--refresh" ]]; then
   exit 0
 fi
 
-# ── Load cache or scan ───────────────────────────────────────
-# Strategy: if cache exists (any age), use it instantly.
-# If stale, trigger background refresh for next time.
-# Only do a blocking scan if no cache exists at all (first run).
+# ── Scan and display ─────────────────────────────────────────
 _lookup=$(mktemp /tmp/tmux-mc-lkp.XXXXXX)
 _display=$(mktemp /tmp/tmux-mc-dsp.XXXXXX)
 _helper=$(mktemp /tmp/tmux-mc-hlp.XXXXXX)
-trap 'rm -f "$_lookup" "$_display" "$_helper"' EXIT
+_reloader=$(mktemp /tmp/tmux-mc-rld.XXXXXX)
+trap 'rm -f "$_lookup" "$_display" "$_helper" "$_reloader"' EXIT
 
 cat > "$_helper" <<'HELPEREOF'
 mc_resolve() {
@@ -194,21 +190,10 @@ mc_resolve() {
 }
 HELPEREOF
 
-if [[ -s "$_cache_lookup" && -s "$_cache_display" ]]; then
-  # Cache exists → use immediately (instant)
-  cp "$_cache_lookup" "$_lookup"
-  cp "$_cache_display" "$_display"
-  # If stale, refresh in background for next time
-  _age=$(( $(date +%s) - $(stat -c %Y "$_cache_lookup") ))
-  if (( _age >= _cache_ttl )); then
-    (nohup bash "$0" --refresh >/dev/null 2>&1 &)
-  fi
-else
-  # No cache (first run) → blocking scan
-  _do_scan "$_lookup" "$_display"
-  cp "$_lookup" "$_cache_lookup"
-  cp "$_display" "$_cache_display"
-fi
+# Always do a blocking scan for fresh data
+_do_scan "$_lookup" "$_display"
+cp "$_lookup" "$_cache_lookup"
+cp "$_display" "$_cache_display"
 
 # ── Build selection list ─────────────────────────────────────
 _col_header=$'Cluster Name\tEnv\tVersion\tType\tSNO\tPlatform\tWorkers\tCreated At\tInfra\tOwner'
@@ -227,10 +212,20 @@ if [ -z "$selection_list" ]; then
     selection_list="No clusters found"
 fi
 
+# ── Reload script for Ctrl-R inside fzf ──────────────────────
+cat > "$_reloader" <<REOF
+#!/usr/bin/env bash
+bash "$0" --refresh >/dev/null 2>&1
+cp "$_cache_lookup" "$_lookup"
+_hdr=$'$_col_header'
+{ printf '%s\n' "\$_hdr"; cat "$_cache_display"; } | column -t -s \$'\t' | tail -n +2
+REOF
+chmod +x "$_reloader"
+
 # ── FZF header ───────────────────────────────────────────────
 _mc_header=$(fzf_header_2col \
   "Cluster actions" "OpenShift Tools" \
-  "[K]........kubeconfig (nova sessão tmux, multi-select)" "[C]........Check latest OCP Versions available" \
+  "[K]........kubeconfig (nova janela tmux, multi-select)" "[C]........Check latest OCP Versions available" \
   "[U]........Upgrade cluster" "[O]........Show OpenShift update path" \
   "[P]........Copy kubeadmin password to clipboard" "[D]........Copy or download and install OpenShift client" \
   "[T]........Tmuxp sessions" "[L]........OpenShift/Operators Lifecycle" \
@@ -258,21 +253,24 @@ selected_action=$(
     -p "${_mc_pw},${_mc_ph}" \
     --sort \
     --multi \
-    --bind "ctrl-r:execute-silent(bash '$0' --refresh)+abort" \
+    --bind "ctrl-r:reload(bash '$_reloader')" \
     --bind "K:execute-silent(
       source '$_helper'
+      _first=''
       for cluster in {+1}; do
         cluster=\"\${cluster% \\*}\"
+        [[ -z \"\$_first\" ]] && _first=\"\$cluster\"
         mc_resolve \"\$cluster\" '$_lookup'
-        if [[ -z \"\$MC_HOST\" ]]; then
-          tmux has-session -t \$cluster 2>/dev/null || tmux new-session -d -s \$cluster -e KUBECONFIG=\"\$MC_PATH/auth/kubeconfig\"
-          tmux send-keys -t \$cluster \"cd \$MC_PATH\" C-m
-        else
-          tmux has-session -t \$cluster 2>/dev/null || tmux new-session -d -s \$cluster
-          tmux send-keys -t \$cluster \"ssh \$MC_HOST -t 'export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH; bash -l'\" C-m
+        if ! tmux list-windows -F '#{window_name}' | grep -qx \"\$cluster\"; then
+          tmux new-window -d -n \"\$cluster\"
+          if [[ -n \"\$MC_HOST\" ]]; then
+            tmux send-keys -t \":\$cluster\" \"ssh \$MC_HOST -t 'export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH; bash -l'\" C-m
+          else
+            tmux send-keys -t \":\$cluster\" \"export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH\" C-m
+          fi
         fi
       done
-      tmux switch-client -t {1}
+      [[ -n \"\$_first\" ]] && tmux select-window -t \":\$_first\"
     )+abort" \
     --bind "U:execute-silent(
       source '$_helper'
