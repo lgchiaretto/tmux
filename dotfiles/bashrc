@@ -9,7 +9,8 @@ case $- in
 esac
 
 # -------------------- Environment Variables --------------------
-export TERM=xterm-256color
+# Keep tmux's TERM inside panes; forcing xterm breaks readline/fzf key handling.
+[[ -z "${TMUX-}" ]] && export TERM=xterm-256color
 export EDITOR=vim
 export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin:~/.local/bin/
@@ -107,6 +108,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 --cycle \
 --exact
 "
+# History picker runs inside tmux panes; --height 100% breaks returning the selection.
+export FZF_CTRL_R_OPTS="${FZF_CTRL_R_OPTS-} --height 40%"
 
 # -------------------- Additional Scripts --------------------
 if [ -f ~/.bash_aliases ]; then
@@ -127,7 +130,9 @@ fi
 umask 022
 eval $(dircolors -b $HOME/.dircolors)
 if type __fzf_history__ &>/dev/null; then
-    bind -x '"\e[A": __fzf_history__'
+    # bind -x (not backticks) so READLINE_LINE is updated after fzf closes in tmux.
+    bind -x '"\e[A": __fzf_history__'   # xterm/up
+    bind -x '"\eOA": __fzf_history__'   # tmux application cursor mode
 fi
 
 # -------------------- First Login Setup --------------------

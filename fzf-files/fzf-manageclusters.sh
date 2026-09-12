@@ -20,6 +20,24 @@ _do_scan() {
   > "$lkp_file"
   > "$dsp_file"
 
+  # SSH ControlMaster: reuse a single TCP connection per unique remote host,
+  # so parallel scans to the same host don't each need a full SSH handshake
+  # (which often fails/times out over VPN when done concurrently).
+  local _cm_dir="/tmp/tmux-mc-cm-$$"
+  local _cm_connected=""
+  mkdir -p "$_cm_dir" 2>/dev/null
+  for entry in $CLUSTERS_MANAGED_PATHS; do
+    IFS=':' read -r _l _h _p <<< "$entry"
+    [[ -z "$_h" ]] && continue
+    [[ "$_cm_connected" == *"|$_h|"* ]] && continue
+    _cm_connected="${_cm_connected}|$_h|"
+    ssh -o ConnectTimeout=10 -o BatchMode=yes \
+        -o ControlMaster=yes -o ControlPath="$_cm_dir/$_h" \
+        -o ControlPersist=60 -fN "$_h" 2>/dev/null
+    # ssh -f returns before the socket file is created; spin-wait until ready
+    local _i=0; while ! [[ -S "$_cm_dir/$_h" ]] && (( ++_i < 30 )); do sleep 0.1; done
+  done
+
   # Managed clusters (nested: basepath/owner/cluster/)
   if [[ -n "$CLUSTERS_MANAGED_PATHS" ]]; then
     # Run all managed path scans in parallel
@@ -35,7 +53,9 @@ _do_scan() {
         if [[ -z "$host" ]]; then
           _scan_nested_local "$path" "$label"
         else
-          ssh -o ConnectTimeout=5 -o BatchMode=yes "$host" bash -s -- "$path" "$label" "${DEFAULT_BASEDOMAIN:-tamlab.rdu2.redhat.com}" 2>/dev/null <<'REMOTESCRIPT'
+          ssh -o ConnectTimeout=5 -o BatchMode=yes \
+              -o ControlMaster=auto -o ControlPath="$_cm_dir/$host" \
+              "$host" bash -s -- "$path" "$label" "${DEFAULT_BASEDOMAIN:-tamlab.rdu2.redhat.com}" 2>/dev/null <<'REMOTESCRIPT'
 base="$1"; label="$2"; default_bd="$3"
 [[ ! -d "$base" ]] && exit 0
 find "$base" -mindepth 2 -maxdepth 3 -name '*.json' \
@@ -111,6 +131,12 @@ REMOTESCRIPT
       _idx=$((_idx + 1))
     done
   fi
+
+  # Close SSH ControlMaster sockets
+  for _s in "$_cm_dir"/*; do
+    [[ -S "$_s" ]] && ssh -O exit -o ControlPath="$_s" "$(basename "$_s")" 2>/dev/null
+  done
+  rm -rf "$_cm_dir" 2>/dev/null
 
   # Deduplicate by cluster name (first occurrence wins, preserving label priority)
   if [[ -s "$lkp_file" ]]; then
@@ -239,6 +265,13 @@ _mc_header=$(fzf_header_2col \
 _mc_header+=$'\n'"$_col_hdr_line"
 _mc_pw=$(fzf_header_popup_width "$_mc_header" "$selection_list")
 _mc_ph=$(fzf_header_popup_height "$_mc_header" "$selection_list")
+# Enforce minimum popup height (default 85% of tmux window)
+_mc_min_pct="${FZF_MANAGECLUSTERS_POPUP_HEIGHT:-85}"
+_term_h=$(tmux display-message -p '#{window_height}' 2>/dev/null) || _term_h=0
+if (( _term_h > 0 )); then
+  _mc_min_h=$(( _term_h * _mc_min_pct / 100 ))
+  (( _mc_ph < _mc_min_h )) && _mc_ph=$_mc_min_h
+fi
 
 # ── FZF ──────────────────────────────────────────────────────
 selected_action=$(
