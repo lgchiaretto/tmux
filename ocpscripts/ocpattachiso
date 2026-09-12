@@ -18,6 +18,7 @@ fi
 CLUSTER_NAME="$1"
 CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$CLUSTER_NAME}"
 CLUSTER_JSON="$CLUSTER_DIR/$CLUSTER_NAME.json"
+TMP_JSON="/tmp/${CLUSTER_NAME}.json"
 
 if [ ! -f "$CLUSTER_JSON" ]; then
     echo "Error: Cluster JSON not found: $CLUSTER_JSON"
@@ -47,12 +48,47 @@ if [ ! -f "$PLAYBOOK" ]; then
     exit 1
 fi
 
+# Persist iso_file in cluster variables for future reference
+jq --arg url "$iso_url" '.iso_file = $url' "$CLUSTER_JSON" > "${CLUSTER_JSON}.tmp" \
+    && mv "${CLUSTER_JSON}.tmp" "$CLUSTER_JSON"
+cp "$CLUSTER_JSON" "$TMP_JSON"
+
 echo ""
 echo "Attaching ISO and powering on VMs for cluster: $CLUSTER_NAME"
 echo "ISO: $iso_url"
 echo ""
 
+START_TIME=$(date +%s)
+
 ansible-playbook "$PLAYBOOK" \
     -e "@$CLUSTER_JSON" \
     -e "clustername=$CLUSTER_NAME" \
     -e "iso_file=$iso_url"
+
+if [ $? -ne 0 ]; then
+    echo "Error: VM playbook failed"
+    exit 1
+fi
+
+END_TIME=$(date +%s)
+EXECUTION_TIME=$((END_TIME - START_TIME))
+EXECUTION_TIME_FMT=$(printf '%dm%02ds' $((EXECUTION_TIME / 60)) $((EXECUTION_TIME % 60)))
+
+echo ""
+echo "Running post-install playbooks..."
+
+if [ ! -f "$CLUSTER_DIR/0-chiaretto.conf" ]; then
+    ansible-playbook "$OPENSHIFT4_AUTOMATION_PATH/configure-vpn.yaml" \
+        -e "@$CLUSTER_JSON" \
+        -e "clustername=$CLUSTER_NAME"
+else
+    echo "VPN config already exists, skipping configure-vpn.yaml"
+fi
+
+ansible-playbook "$OPENSHIFT4_AUTOMATION_PATH/send_mail_creation.yaml" \
+    -e "@$CLUSTER_JSON" \
+    -e "clustername=$CLUSTER_NAME" \
+    -e "execution_time=$EXECUTION_TIME_FMT"
+
+echo ""
+echo "Assisted Installer deploy complete for $CLUSTER_NAME"
