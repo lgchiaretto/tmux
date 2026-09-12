@@ -306,10 +306,11 @@ chmod +x "$_reloader"
 # ── FZF header ───────────────────────────────────────────────
 _mc_header=$(fzf_header_2col \
   "Cluster actions" "OpenShift Tools" \
-  "[s]........Start cluster (TAB multi-select)" "[C]........Check latest OCP Versions available" \
-  "[S]........Stop cluster (TAB multi-select)" "[O]........Show OpenShift update path" \
-  "[d]........Destroy cluster (TAB multi-select)" "[D]........Copy or download and install OpenShift client" \
-  "[K]........kubeconfig (nova janela tmux, multi-select)" "[L]........OpenShift/Operators Lifecycle" \
+  "[c]........Create cluster" "[C]........Check latest OCP Versions available" \
+  "[s]........Start cluster (TAB multi-select)" "[O]........Show OpenShift update path" \
+  "[S]........Stop cluster (TAB multi-select)" "[D]........Copy or download and install OpenShift client" \
+  "[d]........Destroy cluster (TAB multi-select)" "[L]........OpenShift/Operators Lifecycle" \
+  "[K]........kubeconfig (nova janela tmux, multi-select)" "" \
   "[U]........Upgrade cluster" "" \
   "[P]........Copy kubeadmin password to clipboard" "" \
   "[T]........Tmuxp sessions" "" \
@@ -345,6 +346,7 @@ selected_action=$(
     --sort \
     --multi \
     --bind "ctrl-r:reload(bash '$_reloader')" \
+    --bind "c:execute-silent(tmux send-keys /usr/local/bin/ocpcreatecluster C-m)+abort" \
     --bind "s:execute-silent(
       source '$_helper'
       mc_run_in_sessions /usr/local/bin/ocpstartcluster '$_lookup' {+1}
