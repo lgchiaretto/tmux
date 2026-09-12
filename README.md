@@ -315,7 +315,7 @@ The installation configures two systemd timers for automated maintenance:
    - Service: `update-ocp-cache.service`
    - Script: `/usr/local/bin/update_ocp_cache.py`
    - Cache file: `/opt/.ocp_versions_cache`
-   - Fetches latest releases from mirror.openshift.com for versions 4.14-4.20
+   - Fetches latest releases from mirror.openshift.com for versions 4.14-4.22 and 5.0 (including RCs)
 
 2. **updatedb.timer** - Updates mlocate file database hourly
    - Service: `updatedb.service`

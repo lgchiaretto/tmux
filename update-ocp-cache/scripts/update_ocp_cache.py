@@ -6,9 +6,51 @@ from datetime import datetime
 import re
 import os
 
-channels = ["4.14", "4.16", "4.17", "4.18", "4.19", "4.20", "4.21"]
+GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
+channels = ["4.16","4.18", "4.19", "4.20", "4.21", "4.22", "5.0"]
 
-def get_release_info(version):
+def version_sort_key(version):
+    parts = []
+    for segment in version.split("."):
+        if "-rc." in segment:
+            base, rc = segment.split("-rc.", 1)
+            parts.append((int(base), int(rc), 1))
+        elif segment.isdigit():
+            parts.append((int(segment), 0, 0))
+        else:
+            parts.append((segment,))
+    return parts
+
+def fetch_stable_versions(channel):
+    try:
+        response = requests.get(
+            GRAPH_URL,
+            params={"channel": f"stable-{channel}", "arch": "amd64"},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return {node["version"] for node in response.json().get("nodes", [])}
+    except requests.exceptions.RequestException:
+        return set()
+
+def load_stable_versions_by_channel():
+    stable_by_channel = {}
+    with ThreadPoolExecutor(max_workers=len(channels)) as executor:
+        futures = {executor.submit(fetch_stable_versions, channel): channel for channel in channels}
+        for future in futures:
+            stable_by_channel[futures[future]] = future.result()
+    return stable_by_channel
+
+def find_channel_versions(channel, releases_html):
+    if channel == "5.0":
+        suffixes = re.findall(r'href="5\.0\.(0-rc\.[0-9]+)/"', releases_html)
+        return [f"5.0.{suffix}" for suffix in suffixes]
+
+    patch_levels = re.findall(rf'href="{re.escape(channel)}\.([0-9]+)/"', releases_html)
+    return [f"{channel}.{patch}" for patch in patch_levels]
+
+def get_release_info(version, stable_versions=None):
+    stable_marker = "(s)" if stable_versions and version in stable_versions else "   "
     release_url = f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{version}/release.txt"
     try:
         response = requests.get(release_url, timeout=10)
@@ -23,26 +65,32 @@ def get_release_info(version):
                         created_date = datetime.strptime(created_date_str, "%a %b %d %H:%M:%S %Z %Y")
                     except ValueError:
                         created_date = datetime.strptime(created_date_str.replace(" UTC", ""), "%a %b %d %H:%M:%S %Y")
-                return f"{version:<10} {created_date.strftime('%c'):<30}"
+                return f"{version:<14} {stable_marker}  {created_date.strftime('%c'):<30}"
     except requests.exceptions.RequestException as e:
         return f"Error fetching {version}: {e}"
     except ValueError:
         return f"Error parsing date for {version}"
-    return f"{version:<10} Creation date not found"
+    return f"{version:<14} {stable_marker}  Creation date not found"
 
-def process_channel(channel):
+def process_channel(channel, stable_by_channel):
     channel_output = []
     try:
         response = requests.get(f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/", timeout=10)
         response.raise_for_status()
         releases_html = response.text
 
-        found_versions = re.findall(rf'href="{re.escape(channel)}\.([0-9]+)/"', releases_html)
-        numeric_versions = sorted([int(v) for v in found_versions], reverse=True)[:5]
-        latest_versions = [f"{channel}.{v}" for v in sorted(numeric_versions)]
+        all_versions = find_channel_versions(channel, releases_html)
+        latest_versions = sorted(
+            sorted(all_versions, key=version_sort_key, reverse=True)[:5],
+            key=version_sort_key,
+        )
 
-        with ThreadPoolExecutor(max_workers=5) as executor: 
-            results = list(executor.map(get_release_info, latest_versions))
+        stable_versions = stable_by_channel.get(channel, set())
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            results = list(executor.map(
+                lambda version: get_release_info(version, stable_versions),
+                latest_versions,
+            ))
             channel_output.extend(results)
 
     except requests.exceptions.RequestException as e:
@@ -53,11 +101,15 @@ def process_channel(channel):
 
 if __name__ == "__main__":
     header = []
+    stable_by_channel = load_stable_versions_by_channel()
 
     all_outputs = header[:]
 
     with ThreadPoolExecutor(max_workers=len(channels)) as executor:
-        results_per_channel = list(executor.map(process_channel, channels))
+        results_per_channel = list(executor.map(
+            lambda channel: process_channel(channel, stable_by_channel),
+            channels,
+        ))
         for output_list in results_per_channel:
             all_outputs.extend(output_list)
 
@@ -67,4 +119,4 @@ if __name__ == "__main__":
     cache_file_path = os.path.expanduser("/opt/.ocp_versions_cache")
     with open(cache_file_path, "w", encoding="utf-8") as f:
         for line in all_outputs:
-            f.write(line.replace("    ", "        ") + "\n")
+            f.write(line + "\n")

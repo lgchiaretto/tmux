@@ -9,6 +9,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../common" && pwd)/fzf-header.sh"
 CACHE_FILE="/opt/.ocp_versions_cache"
 
 if [ -f "$CACHE_FILE" ]; then
+    _ver_data=$(cat "$CACHE_FILE")
+    _col_hdr=$(printf '%-14s %-3s  %-19s' 'Version' '' 'Release Date')
     _hdr=$(fzf_header "" \
       "[r]       Release notes" \
       "[d]       Documentation" \
@@ -16,11 +18,12 @@ if [ -f "$CACHE_FILE" ]; then
       "[Enter]   Print release name" \
       "[Esc]     Exit" \
       "" \
-      "Version             Release Date"
+      "(s) = stable channel" \
+      "$_col_hdr"
     )
-    _pw=$(fzf_header_popup_width "$_hdr")
-    _ver_data=$(cat "$CACHE_FILE")
     [[ -z "$_ver_data" ]] && exit 0
+    _pw=$(fzf_header_popup_width "$_hdr" "$_ver_data")
+    _pw=$(( _pw * 90 / 100 ))
     _ph=$(fzf_header_popup_height "$_hdr" "$_ver_data")
     selected_version=$(echo "$_ver_data" | fzf-tmux \
                        --header="$_hdr" \

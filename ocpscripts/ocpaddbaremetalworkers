@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Add baremetal worker VMs on VMware and register them in redfish-vmware.
+#
+# Usage: ocpaddbaremetalworkers <cluster-name> [cluster-path]
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+OPENSHIFT4_AUTOMATION_PATH="${OPENSHIFT4_AUTOMATION_PATH:-$HOME/git/openshift4-automation}"
+
+if [ -z "$1" ]; then
+    echo "Error: Cluster name is required"
+    echo "Usage: ocpaddbaremetalworkers <cluster-name> [cluster-path]"
+    exit 1
+fi
+
+CLUSTER_NAME="$1"
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$CLUSTER_NAME}"
+CLUSTER_JSON="$CLUSTER_DIR/$CLUSTER_NAME.json"
+
+if [ ! -f "$CLUSTER_JSON" ]; then
+    echo "Error: Cluster JSON not found: $CLUSTER_JSON"
+    exit 1
+fi
+
+PLATFORM=$(jq -r '.platform // ""' "$CLUSTER_JSON")
+CURRENT_WORKERS=$(jq -r '.n_worker // "0"' "$CLUSTER_JSON")
+
+if [ "$PLATFORM" != "baremetal" ]; then
+    echo "Error: Cluster '$CLUSTER_NAME' is platform='$PLATFORM' (expected baremetal)"
+    exit 1
+fi
+
+read -rp "Total worker VMs desired (current n_worker=${CURRENT_WORKERS}): " N_WORKER
+
+if [ -z "$N_WORKER" ]; then
+    echo "Error: Worker count is required"
+    exit 1
+fi
+
+if ! [[ "$N_WORKER" =~ ^[0-9]+$ ]] || [ "$N_WORKER" -le 0 ]; then
+    echo "Error: Worker count must be a positive integer"
+    exit 1
+fi
+
+PLAYBOOK="$OPENSHIFT4_AUTOMATION_PATH/add-baremetal-workers.yaml"
+if [ ! -f "$PLAYBOOK" ]; then
+    echo "Error: Playbook not found: $PLAYBOOK"
+    exit 1
+fi
+
+echo ""
+echo "Adding baremetal workers for cluster: $CLUSTER_NAME"
+echo "Target total workers: $N_WORKER"
+echo ""
+
+ansible-playbook "$PLAYBOOK" \
+    -e "@$CLUSTER_JSON" \
+    -e "clustername=$CLUSTER_NAME" \
+    -e "n_worker=$N_WORKER"
