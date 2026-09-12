@@ -25,11 +25,17 @@ if [ ! -f "$CLUSTER_JSON" ]; then
     exit 1
 fi
 
+CONSOLE_INFO="$CLUSTER_DIR/assisted-console-info.txt"
 ASSISTED_HOSTS="$CLUSTER_DIR/assisted-hosts.json"
-if [ -f "$ASSISTED_HOSTS" ]; then
+
+if [ -f "$CONSOLE_INFO" ]; then
+    cat "$CONSOLE_INFO"
+    echo ""
+elif [ -f "$ASSISTED_HOSTS" ]; then
     echo "Assisted Installer hosts for $CLUSTER_NAME:"
     echo "---"
-    jq -r '.hosts[] | "  \(.name)  \(.mac)"' "$ASSISTED_HOSTS" 2>/dev/null
+    jq -r '.hosts[] | . as $h | $h.interfaces[]? | "  \($h.name)  \(.guest_name // .nic)  \(.mac)"' "$ASSISTED_HOSTS" 2>/dev/null \
+        || jq -r '.hosts[] | "  \(.name)  \(.mac // "")"' "$ASSISTED_HOSTS" 2>/dev/null
     echo "---"
     echo ""
 fi
