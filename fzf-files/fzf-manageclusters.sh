@@ -251,6 +251,24 @@ mc_resolve() {
   MC_BASEDOMAIN=$(echo "$line" | cut -d'|' -f5)
   MC_INFRA=$(echo "$line" | cut -d'|' -f6)
 }
+mc_run_in_sessions() {
+  local script="$1" lookup="$2"
+  shift 2
+  local _first='' cluster
+  for cluster in "$@"; do
+    cluster="${cluster% \*}"
+    [[ -z "$cluster" ]] && continue
+    [[ -z "$_first" ]] && _first="$cluster"
+    mc_resolve "$cluster" "$lookup"
+    tmux has-session -t "$cluster" 2>/dev/null || tmux new-session -d -s "$cluster"
+    if [[ -n "$MC_HOST" ]]; then
+      tmux send-keys -t "$cluster" "ssh $MC_HOST -t '$script $cluster $MC_PATH'" C-m
+    else
+      tmux send-keys -t "$cluster" "$script $cluster $MC_PATH" C-m
+    fi
+  done
+  [[ -n "$_first" ]] && tmux switch-client -t "$_first"
+}
 HELPEREOF
 
 # Always do a blocking scan for fresh data
@@ -288,10 +306,13 @@ chmod +x "$_reloader"
 # ── FZF header ───────────────────────────────────────────────
 _mc_header=$(fzf_header_2col \
   "Cluster actions" "OpenShift Tools" \
-  "[K]........kubeconfig (nova janela tmux, multi-select)" "[C]........Check latest OCP Versions available" \
-  "[U]........Upgrade cluster" "[O]........Show OpenShift update path" \
-  "[P]........Copy kubeadmin password to clipboard" "[D]........Copy or download and install OpenShift client" \
-  "[T]........Tmuxp sessions" "[L]........OpenShift/Operators Lifecycle" \
+  "[s]........Start cluster (TAB multi-select)" "[C]........Check latest OCP Versions available" \
+  "[S]........Stop cluster (TAB multi-select)" "[O]........Show OpenShift update path" \
+  "[d]........Destroy cluster (TAB multi-select)" "[D]........Copy or download and install OpenShift client" \
+  "[K]........kubeconfig (nova janela tmux, multi-select)" "[L]........OpenShift/Operators Lifecycle" \
+  "[U]........Upgrade cluster" "" \
+  "[P]........Copy kubeadmin password to clipboard" "" \
+  "[T]........Tmuxp sessions" "" \
   "[E]........Edit cluster JSON file with vim" "" \
   "[W]........Open Web Console" "" \
   "[Enter]....Login with kubeadmin user" "[TAB]......Select multiple clusters" \
@@ -324,6 +345,18 @@ selected_action=$(
     --sort \
     --multi \
     --bind "ctrl-r:reload(bash '$_reloader')" \
+    --bind "s:execute-silent(
+      source '$_helper'
+      mc_run_in_sessions /usr/local/bin/ocpstartcluster '$_lookup' {+1}
+    )+abort" \
+    --bind "S:execute-silent(
+      source '$_helper'
+      mc_run_in_sessions /usr/local/bin/ocpstopcluster '$_lookup' {+1}
+    )+abort" \
+    --bind "d:execute-silent(
+      source '$_helper'
+      mc_run_in_sessions /usr/local/bin/ocpdestroycluster '$_lookup' {+1}
+    )+abort" \
     --bind "K:execute-silent(
       source '$_helper'
       _first=''
