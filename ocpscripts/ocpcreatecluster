@@ -44,7 +44,8 @@ function createVphereCluster() {
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 -p "55%,46%" \
+        -p "55%,85%" \
+        --no-input \
         --no-sort \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
@@ -118,7 +119,8 @@ function createKVMCluster(){
         --layout=reverse \
         --border-label=" $FZF_BORDER_LABEL " \
         --border-label-pos=center \
-        -h 40 -p "55%,46%" \
+        -p "55%,85%" \
+        --no-input \
         --no-sort \
         --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
         --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
@@ -160,7 +162,7 @@ selected_infra=$(echo -e "$infra" | fzf-tmux \
     --layout=reverse \
     --border-label=" $FZF_BORDER_LABEL " \
     --border-label-pos=center \
-    -h 40 -p "55%,46%" \
+    -p "55%,85%" \
     --no-input \
     --no-sort \
     --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \

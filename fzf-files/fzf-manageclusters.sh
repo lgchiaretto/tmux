@@ -343,7 +343,7 @@ _mc_header=$(fzf_header_2col \
   "[Enter]....Login with kubeadmin user" "[TAB]......Select multiple clusters" \
   "[Esc]......Exit" "[Ctrl-R]...Refresh cluster list" \
   "" "" \
-  "Type to filter clusters by name" ""
+  "" ""
 )
 _mc_header+=$'\n'"$_col_hdr_line"
 _mc_pw=$(fzf_header_popup_width "$_mc_header" "$selection_list")
@@ -367,6 +367,7 @@ selected_action=$(
     --border-label-pos=center \
     --border=rounded \
     -p "${_mc_pw},${_mc_ph}" \
+    --no-input \
     --sort \
     --multi \
     --bind "ctrl-r:reload(bash '$_reloader')" \
