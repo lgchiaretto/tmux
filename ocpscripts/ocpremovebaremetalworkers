@@ -35,7 +35,11 @@ if [ "$PLATFORM" != "baremetal" ]; then
     exit 1
 fi
 
-read -rp "Total worker VMs desired after removal (current n_worker=${CURRENT_WORKERS}): " N_WORKER
+echo "Current n_worker in cluster JSON: ${CURRENT_WORKERS}"
+echo "Enter the total worker count you want AFTER removal."
+echo "Example: enter 0 to remove all ${CURRENT_WORKERS} worker VM(s)."
+echo ""
+read -rp "Target n_worker (must be less than ${CURRENT_WORKERS}): " N_WORKER
 
 if [ -z "$N_WORKER" ]; then
     echo "Error: Worker count is required"
@@ -47,24 +51,30 @@ if ! [[ "$N_WORKER" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+if [ "$CURRENT_WORKERS" -eq 0 ]; then
+    echo "Error: n_worker is already 0; no baremetal workers to remove."
+    exit 1
+fi
+
+if [ "$N_WORKER" -ge "$CURRENT_WORKERS" ]; then
+    echo "Error: Target n_worker (${N_WORKER}) must be lower than current n_worker (${CURRENT_WORKERS})."
+    echo "To remove all workers, enter 0."
+    exit 1
+fi
+
 PLAYBOOK="$OPENSHIFT4_AUTOMATION_PATH/remove-baremetal-workers.yaml"
 if [ ! -f "$PLAYBOOK" ]; then
     echo "Error: Playbook not found: $PLAYBOOK"
     exit 1
 fi
 
-if [ "$N_WORKER" -ge "$CURRENT_WORKERS" ]; then
-    echo "Warning: Target n_worker (${N_WORKER}) is not lower than JSON n_worker (${CURRENT_WORKERS})."
-    echo "The playbook uses the current VMware worker VM count as source of truth."
-fi
-
-WORKERS_TO_REMOVE_MSG="up to $((CURRENT_WORKERS - N_WORKER)) based on JSON n_worker"
+WORKERS_TO_REMOVE=$((CURRENT_WORKERS - N_WORKER))
 
 echo ""
 echo "Removing baremetal workers for cluster: $CLUSTER_NAME"
 echo "Current n_worker: ${CURRENT_WORKERS}"
 echo "Target n_worker: ${N_WORKER}"
-echo "Workers to remove: ${WORKERS_TO_REMOVE_MSG}"
+echo "Workers to remove: ${WORKERS_TO_REMOVE}"
 echo ""
 read -rp "Continue? [y/N]: " CONFIRM
 
