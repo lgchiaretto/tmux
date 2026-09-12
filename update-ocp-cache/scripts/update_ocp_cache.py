@@ -7,7 +7,12 @@ import re
 import os
 
 GRAPH_URL = "https://api.openshift.com/api/upgrades_info/graph"
-channels = ["4.16","4.18", "4.19", "4.20", "4.21", "4.22", "5.0"]
+channels = ["4.16", "4.18", "4.19", "4.20", "4.21", "4.22", "5.0"]
+MIRROR_URLS = {
+    4: "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/",
+    5: "https://mirror.openshift.com/pub/openshift-v5/x86_64/clients/ocp/",
+}
+
 
 def version_sort_key(version):
     parts = []
@@ -15,11 +20,25 @@ def version_sort_key(version):
         if "-rc." in segment:
             base, rc = segment.split("-rc.", 1)
             parts.append((int(base), int(rc), 1))
+        elif "-ec." in segment:
+            base, ec = segment.split("-ec.", 1)
+            parts.append((int(base), int(ec), 2))
         elif segment.isdigit():
             parts.append((int(segment), 0, 0))
         else:
             parts.append((segment,))
     return parts
+
+
+def mirror_url_for_channel(channel):
+    major = int(channel.split(".")[0])
+    return MIRROR_URLS.get(major, MIRROR_URLS[4])
+
+
+def mirror_url_for_version(version):
+    major = int(version.split(".")[0])
+    return MIRROR_URLS.get(major, MIRROR_URLS[4])
+
 
 def fetch_stable_versions(channel):
     try:
@@ -33,6 +52,7 @@ def fetch_stable_versions(channel):
     except requests.exceptions.RequestException:
         return set()
 
+
 def load_stable_versions_by_channel():
     stable_by_channel = {}
     with ThreadPoolExecutor(max_workers=len(channels)) as executor:
@@ -41,17 +61,20 @@ def load_stable_versions_by_channel():
             stable_by_channel[futures[future]] = future.result()
     return stable_by_channel
 
+
 def find_channel_versions(channel, releases_html):
+    major = channel.split(".")[0]
     if channel == "5.0":
-        suffixes = re.findall(r'href="5\.0\.(0-rc\.[0-9]+)/"', releases_html)
+        suffixes = re.findall(r'href="5\.0\.(0(?:-rc|-ec)\.[0-9]+)/"', releases_html)
         return [f"5.0.{suffix}" for suffix in suffixes]
 
     patch_levels = re.findall(rf'href="{re.escape(channel)}\.([0-9]+)/"', releases_html)
     return [f"{channel}.{patch}" for patch in patch_levels]
 
+
 def get_release_info(version, stable_versions=None):
     stable_marker = "(s)" if stable_versions and version in stable_versions else "   "
-    release_url = f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{version}/release.txt"
+    release_url = f"{mirror_url_for_version(version)}{version}/release.txt"
     try:
         response = requests.get(release_url, timeout=10)
         response.raise_for_status()
@@ -72,10 +95,11 @@ def get_release_info(version, stable_versions=None):
         return f"Error parsing date for {version}"
     return f"{version:<14} {stable_marker}  Creation date not found"
 
+
 def process_channel(channel, stable_by_channel):
     channel_output = []
     try:
-        response = requests.get(f"https://mirror.openshift.com/pub/openshift-v4/clients/ocp/", timeout=10)
+        response = requests.get(mirror_url_for_channel(channel), timeout=10)
         response.raise_for_status()
         releases_html = response.text
 
@@ -98,6 +122,7 @@ def process_channel(channel, stable_by_channel):
 
     channel_output.append("---------------------------------------")
     return channel_output
+
 
 if __name__ == "__main__":
     header = []

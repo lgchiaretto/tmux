@@ -8,8 +8,6 @@ fi
 # Set defaults if not configured
 OCP_CACHE_DIR="${OCP_CACHE_DIR:-/vms/clusters/.cache}"
 
-URL="https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
-
 selected_os=$(echo -e "rhel9\nrhel8" | fzf-tmux \
   --layout=reverse -p "31%,40%" \
   --no-input \
@@ -37,14 +35,15 @@ fzf-tmux --prompt="Choose a client version: " \
 ----------------------------------------------------------\n\n' \
   --layout=reverse -p "31%,40%" \
   --height=40% \
-  --bind "ctrl-c:execute-silent(echo -n '$URL/{}'/openshift-client-linux-amd64-$selected_os.tar.gz | wl-copy && tmux set-buffer {} && tmux display 'Copied')+abort" \
+  --bind "ctrl-c:execute-silent(major=\$(echo {} | cut -d. -f1); echo -n \"https://mirror.openshift.com/pub/openshift-v\${major}/x86_64/clients/ocp/{}/openshift-client-linux-amd64-$selected_os.tar.gz\" | wl-copy && tmux set-buffer {} && tmux display 'Copied')+abort" \
   --border\
   --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
   --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
   )
 
 if [ -n "$selected_version" ]; then
-    url="$URL/$selected_version/openshift-client-linux-amd64-$selected_os-$selected_version.tar.gz"
+    ocp_major="${selected_version%%.*}"
+    url="https://mirror.openshift.com/pub/openshift-v${ocp_major}/x86_64/clients/ocp/$selected_version/openshift-client-linux-amd64-$selected_os-$selected_version.tar.gz"
     echo "The following URL was selected: $url"
     read -p "Do you want to proceed with the download and install? (y/n): " confirm
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
