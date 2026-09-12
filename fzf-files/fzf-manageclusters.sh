@@ -15,6 +15,23 @@ _cache_lookup="$_cache_dir/mc-lookup.cache"
 _cache_display="$_cache_dir/mc-display.cache"
 
 # ── Scan logic ───────────────────────────────────────────────
+_cluster_is_installing() {
+  local dir="$1"
+  tmux has-session -t "install-${dir}" 2>/dev/null && return 0
+  [[ -f "/tmp/playbook_pids_${dir}.txt" ]] && return 0
+  return 1
+}
+
+_cluster_display_name() {
+  local dir="$1" cluster_dir="$2" name="$dir"
+  if _cluster_is_installing "$dir"; then
+    name="$dir ~"
+  elif [[ -f "$cluster_dir/started" ]]; then
+    name="$dir *"
+  fi
+  printf '%s' "$name"
+}
+
 _do_scan() {
   local lkp_file="$1" dsp_file="$2"
   > "$lkp_file"
@@ -107,7 +124,11 @@ find "$base" -mindepth 2 -maxdepth 3 -name '*.json' \
   [[ -z "$created_at" ]] && created_at="-"
 
   name="$dir"
-  [[ -f "$cluster_dir/started" ]] && name="$dir *"
+  if tmux has-session -t "install-${dir}" 2>/dev/null || [[ -f "/tmp/playbook_pids_${dir}.txt" ]]; then
+    name="$dir ~"
+  elif [[ -f "$cluster_dir/started" ]]; then
+    name="$dir *"
+  fi
 
   echo "LKP:${dir}|${cluster_dir}|${basedomain}|${infra}"
   printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
@@ -160,7 +181,7 @@ REMOTESCRIPT
     awk -F'|' '!seen[$1]++' "$lkp_file" > "${lkp_file}.tmp" && mv "${lkp_file}.tmp" "$lkp_file"
   fi
   if [[ -s "$dsp_file" ]]; then
-    awk -F'\t' '{ key=$1; gsub(/ \*$/, "", key); } !seen[key]++' "$dsp_file" > "${dsp_file}.tmp" && mv "${dsp_file}.tmp" "$dsp_file"
+    awk -F'\t' '{ key=$1; gsub(/ [\*~]$/, "", key); } !seen[key]++' "$dsp_file" > "${dsp_file}.tmp" && mv "${dsp_file}.tmp" "$dsp_file"
   fi
 }
 
@@ -219,8 +240,7 @@ _scan_cluster_json_lines() {
     created_at=$(stat -c %y "$json" 2>/dev/null | cut -d' ' -f1)
     [[ -z "$created_at" ]] && created_at="-"
 
-    name="$dir"
-    [[ -f "$cluster_dir/started" ]] && name="$dir *"
+    name=$(_cluster_display_name "$dir" "$cluster_dir")
 
     echo "LKP:${dir}|${cluster_dir}|${basedomain}|${infra}"
     printf 'DSP:%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
@@ -244,6 +264,8 @@ trap 'rm -f "$_lookup" "$_display" "$_helper" "$_reloader"' EXIT
 cat > "$_helper" <<'HELPEREOF'
 mc_resolve() {
   local c="${1% \*}" f="$2" line
+  c="${c% ~}"
+  MC_NAME="$c"
   line=$(grep "^${c}|" "$f" | head -1)
   MC_ENV=$(echo "$line" | cut -d'|' -f2)
   MC_HOST=$(echo "$line" | cut -d'|' -f3)
@@ -257,6 +279,7 @@ mc_run_in_sessions() {
   local _first='' cluster
   for cluster in "$@"; do
     cluster="${cluster% \*}"
+    cluster="${cluster% ~}"
     [[ -z "$cluster" ]] && continue
     [[ -z "$_first" ]] && _first="$cluster"
     mc_resolve "$cluster" "$lookup"
@@ -309,7 +332,8 @@ _mc_header=$(fzf_header_2col \
   "[c]........Create cluster" "[C]........Check latest OCP Versions available" \
   "[s]........Start cluster (TAB multi-select)" "[O]........Show OpenShift update path" \
   "[S]........Stop cluster (TAB multi-select)" "[D]........Copy or download and install OpenShift client" \
-  "[d]........Destroy cluster (TAB multi-select)" "[L]........OpenShift/Operators Lifecycle" \
+  "[x]........Cancel deployment (TAB multi-select, ~ = installing)" "[L]........OpenShift/Operators Lifecycle" \
+  "[d]........Destroy cluster (TAB multi-select)" "" \
   "[K]........kubeconfig (nova janela tmux, multi-select)" "" \
   "[U]........Upgrade cluster" "" \
   "[P]........Copy kubeadmin password to clipboard" "" \
@@ -355,6 +379,10 @@ selected_action=$(
       source '$_helper'
       mc_run_in_sessions /usr/local/bin/ocpstopcluster '$_lookup' {+1}
     )+abort" \
+    --bind "x:execute-silent(
+      source '$_helper'
+      mc_run_in_sessions /usr/local/bin/ocpcancelcluster '$_lookup' {+1}
+    )+abort" \
     --bind "d:execute-silent(
       source '$_helper'
       mc_run_in_sessions /usr/local/bin/ocpdestroycluster '$_lookup' {+1}
@@ -363,15 +391,14 @@ selected_action=$(
       source '$_helper'
       _first=''
       for cluster in {+1}; do
-        cluster=\"\${cluster% \\*}\"
-        [[ -z \"\$_first\" ]] && _first=\"\$cluster\"
         mc_resolve \"\$cluster\" '$_lookup'
-        if ! tmux list-windows -F '#{window_name}' | grep -qx \"\$cluster\"; then
-          tmux new-window -d -n \"\$cluster\"
+        [[ -z \"\$_first\" ]] && _first=\"\$MC_NAME\"
+        if ! tmux list-windows -F '#{window_name}' | grep -qx \"\$MC_NAME\"; then
+          tmux new-window -d -n \"\$MC_NAME\"
           if [[ -n \"\$MC_HOST\" ]]; then
-            tmux send-keys -t \":\$cluster\" \"ssh \$MC_HOST -t 'export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH; bash -l'\" C-m
+            tmux send-keys -t \":\$MC_NAME\" \"ssh \$MC_HOST -t 'export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH; bash -l'\" C-m
           else
-            tmux send-keys -t \":\$cluster\" \"export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH\" C-m
+            tmux send-keys -t \":\$MC_NAME\" \"export KUBECONFIG=\$MC_PATH/auth/kubeconfig; cd \$MC_PATH\" C-m
           fi
         fi
       done
@@ -379,14 +406,12 @@ selected_action=$(
     )+abort" \
     --bind "U:execute-silent(
       source '$_helper'
-      cluster='{1}'; cluster=\"\${cluster% \\*}\"
-      mc_resolve \"\$cluster\" '$_lookup'
-      tmux send-keys \"/usr/local/bin/ocpupgradecluster \$cluster \$MC_PATH\" C-m
+      mc_resolve '{1}' '$_lookup'
+      tmux send-keys \"/usr/local/bin/ocpupgradecluster \$MC_NAME \$MC_PATH\" C-m
     )+abort" \
     --bind "P:execute-silent(
       source '$_helper'
-      cluster='{1}'; cluster=\"\${cluster% \\*}\"
-      mc_resolve \"\$cluster\" '$_lookup'
+      mc_resolve '{1}' '$_lookup'
       if [[ -z \"\$MC_HOST\" ]]; then
         tmux send-keys \"cat \$MC_PATH/auth/kubeadmin-password | xclip -selection clipboard -i\" C-m
       else
@@ -397,25 +422,22 @@ selected_action=$(
     )+abort" \
     --bind "T:execute-silent(
       source '$_helper'
-      cluster='{1}'; cluster=\"\${cluster% \\*}\"
-      mc_resolve \"\$cluster\" '$_lookup'
-      tmux send-keys \"/usr/local/share/tmux-ocp/fzf-files/fzf-tmuxp.sh \$cluster \$MC_PATH\" C-m
+      mc_resolve '{1}' '$_lookup'
+      tmux send-keys \"/usr/local/share/tmux-ocp/fzf-files/fzf-tmuxp.sh \$MC_NAME \$MC_PATH\" C-m
     )+abort" \
     --bind "E:execute-silent(
       source '$_helper'
-      cluster='{1}'; cluster=\"\${cluster% \\*}\"
-      mc_resolve \"\$cluster\" '$_lookup'
+      mc_resolve '{1}' '$_lookup'
       if [[ -z \"\$MC_HOST\" ]]; then
-        tmux send-keys \"vim \$MC_PATH/\$cluster.json\" C-m
+        tmux send-keys \"vim \$MC_PATH/\$MC_NAME.json\" C-m
       else
-        tmux send-keys \"ssh \$MC_HOST -t vim \$MC_PATH/\$cluster.json\" C-m
+        tmux send-keys \"ssh \$MC_HOST -t vim \$MC_PATH/\$MC_NAME.json\" C-m
       fi
     )+abort" \
     --bind "W:execute-silent(
       source '$_helper'
-      cluster='{1}'; cluster=\"\${cluster% \\*}\"
-      mc_resolve \"\$cluster\" '$_lookup'
-      xdg-open \"https://console-openshift-console.apps.\$cluster.\$MC_BASEDOMAIN\" &
+      mc_resolve '{1}' '$_lookup'
+      xdg-open \"https://console-openshift-console.apps.\$MC_NAME.\$MC_BASEDOMAIN\" &
     )+abort" \
     --bind "C:execute-silent(tmux send-keys /usr/local/share/tmux-ocp/fzf-files/fzf-ocpversions.sh C-m)+abort" \
     --bind "O:execute-silent(tmux send-keys /usr/local/bin/ocpupdate_path C-m)+abort" \
@@ -427,7 +449,6 @@ selected_action=$(
 # ── Handle Enter: login to cluster ───────────────────────────
 if [ -n "$selected_action" ]; then
   clustername=$(echo "$selected_action" | tail -1 | awk '{print $1}')
-  clustername="${clustername% \*}"
 
   source "$_helper"
   mc_resolve "$clustername" "$_lookup"
@@ -435,11 +456,11 @@ if [ -n "$selected_action" ]; then
   if [[ -z "$KUBECONFIG" ]]; then
     if [[ -n "$MC_HOST" ]]; then
       _pw=$(ssh -o ConnectTimeout=3 "$MC_HOST" "cat '$MC_PATH/auth/kubeadmin-password'" 2>/dev/null)
-      tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u kubeadmin -p '$_pw' --insecure-skip-tls-verify" C-m
+      tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u kubeadmin -p '$_pw' --insecure-skip-tls-verify" C-m
     elif [ "$MC_INFRA" == "kvm" ]; then
-      tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u kubeadmin -p \$(cat $MC_PATH/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+      tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u kubeadmin -p \$(cat $MC_PATH/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
     elif [ "$MC_INFRA" == "rhdp" ]; then
-      tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u admin -p \$(cat $MC_PATH/admin-password) --insecure-skip-tls-verify" C-m
+      tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u admin -p \$(cat $MC_PATH/admin-password) --insecure-skip-tls-verify" C-m
     else
       _usr_hdr=$(fzf_header "" \
           "[Enter]     Select user to connect to cluster" \
@@ -467,12 +488,12 @@ kubeadmin"
       if [ -z "$selected_user" ]; then
           exit 0
       elif [ "$selected_user" == "kubeadmin" ]; then
-          tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u kubeadmin -p \$(cat $MC_PATH/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
+          tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u kubeadmin -p \$(cat $MC_PATH/auth/kubeadmin-password) --insecure-skip-tls-verify" C-m
       else
         if [ -z "$OCP_PASSWORD" ]; then
-            tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u $OCP_USERNAME --insecure-skip-tls-verify" C-m
+            tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u $OCP_USERNAME --insecure-skip-tls-verify" C-m
         else
-            tmux send-keys "oc login https://api.$clustername.$MC_BASEDOMAIN:6443 -u $OCP_USERNAME -p \"$OCP_PASSWORD\" --insecure-skip-tls-verify" C-m
+            tmux send-keys "oc login https://api.$MC_NAME.$MC_BASEDOMAIN:6443 -u $OCP_USERNAME -p \"$OCP_PASSWORD\" --insecure-skip-tls-verify" C-m
         fi
       fi
     fi

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Load configuration (global first, then user override)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+# Set defaults if not configured
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+OPENSHIFT4_AUTOMATION_PATH="${OPENSHIFT4_AUTOMATION_PATH:-$HOME/git/openshift4-automation}"
+
+# Exit if not running on bastion when CHECK_BASTION_HOST is enabled
+if [ "${CHECK_BASTION_HOST:-false}" = "true" ]; then
+    if [ "$(hostname)" != "${BASTION_HOSTNAME:-bastion.chiaret.to}" ]; then
+        echo "This script must be run on ${BASTION_HOSTNAME:-bastion.chiaret.to}. Exiting."
+        exit 1
+    fi
+fi
+
+if [ -z "$1" ]; then
+    echo "Error: Cluster name is required"
+    echo "Usage: ocpcancelcluster <cluster-name> [cluster-dir]"
+    exit 1
+fi
+
+CLUSTER_NAME="$1"
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$CLUSTER_NAME}"
+KILL_SCRIPT="$OPENSHIFT4_AUTOMATION_PATH/kill-playbooks.py"
+
+if [ ! -d "$CLUSTER_DIR" ]; then
+    echo "Error: Cluster directory not found: $CLUSTER_DIR"
+    exit 1
+fi
+
+if [ ! -f "$KILL_SCRIPT" ]; then
+    echo "Error: kill-playbooks.py not found at $KILL_SCRIPT"
+    exit 1
+fi
+
+echo "Cancelling deployment for cluster: $CLUSTER_NAME"
+python3 "$KILL_SCRIPT" "$CLUSTER_NAME"
