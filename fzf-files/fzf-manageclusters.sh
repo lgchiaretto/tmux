@@ -20,6 +20,23 @@ _do_scan() {
   > "$lkp_file"
   > "$dsp_file"
 
+  # Local clusters (flat: CLUSTERS_BASE_PATH/cluster/)
+  if [[ -n "$CLUSTERS_BASE_PATH" && -d "$CLUSTERS_BASE_PATH" ]]; then
+    while IFS= read -r line; do
+      case "$line" in
+        LKP:*)
+          data="${line#LKP:}"
+          cname="${data%%|*}"
+          rest="${data#*|}"
+          echo "${cname}|LOCAL||${rest}" >> "$lkp_file"
+          ;;
+        DSP:*)
+          echo "${line#DSP:}" >> "$dsp_file"
+          ;;
+      esac
+    done < <(_scan_flat_local "$CLUSTERS_BASE_PATH" "LOCAL")
+  fi
+
   # SSH ControlMaster: reuse a single TCP connection per unique remote host,
   # so parallel scans to the same host don't each need a full SSH handshake
   # (which often fails/times out over VPN when done concurrently).
@@ -147,6 +164,21 @@ REMOTESCRIPT
   fi
 }
 
+_scan_flat_local() {
+  local base="$1" label="$2"
+  [[ ! -d "$base" ]] && return
+  find "$base/" -mindepth 2 -maxdepth 2 -name '*.json' \
+      -not -name 'metadata.json' -not -name 'install-config.yaml' \
+      -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
+      -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
+      -not -path '*/backup*' -not -path '*-files*' -not -path '*/quay*' \
+      -not -path '*/archived*' -not -path '*/multiclusterfiles*' \
+      -not -path '*/.cache*' -not -path '*/createcerts*' \
+      -not -path '*/isos*' -not -path '*/variables-files*' \
+      -not -path '*/dockerconfig-*' -not -path '*/rtm*' \
+    2>/dev/null | _scan_cluster_json_lines "$base" "$label"
+}
+
 _scan_nested_local() {
   local base="$1" label="$2"
   [[ ! -d "$base" ]] && return
@@ -154,7 +186,12 @@ _scan_nested_local() {
       -not -name 'metadata.json' -not -name 'install-config.yaml' \
       -not -name '*.tfvars.json' -not -name '.openshift_install_state.json' \
       -not -name 'bootstrap*' -not -name 'master*' -not -name 'pre-*' \
-    2>/dev/null | while IFS= read -r json; do
+    2>/dev/null | _scan_cluster_json_lines "$base" "$label"
+}
+
+_scan_cluster_json_lines() {
+  local base="$1" label="$2"
+  while IFS= read -r json; do
     cluster_dir=$(dirname "$json")
     dir=$(basename "$cluster_dir")
     bname=$(basename "$json" .json)
