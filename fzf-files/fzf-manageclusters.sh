@@ -334,6 +334,7 @@ _mc_header=$(fzf_header_2col \
   "[S]........Stop cluster (TAB multi-select)" "[D]........Copy or download and install OpenShift client" \
   "[x]........Cancel deployment (TAB multi-select, ~ = installing)" "[L]........OpenShift/Operators Lifecycle" \
   "[d]........Destroy cluster (TAB multi-select)" "" \
+  "[I]........Attach ISO (Assisted Installer)" "" \
   "[K]........kubeconfig (nova janela tmux, multi-select)" "" \
   "[U]........Upgrade cluster" "" \
   "[P]........Copy kubeadmin password to clipboard" "" \
@@ -387,6 +388,11 @@ selected_action=$(
     --bind "d:execute-silent(
       source '$_helper'
       mc_run_in_sessions /usr/local/bin/ocpdestroycluster '$_lookup' {+1}
+    )+abort" \
+    --bind "I:execute-silent(
+      source '$_helper'
+      mc_resolve '{1}' '$_lookup'
+      tmux send-keys \"/usr/local/bin/ocpattachiso \$MC_NAME \$MC_PATH\" C-m
     )+abort" \
     --bind "K:execute-silent(
       source '$_helper'

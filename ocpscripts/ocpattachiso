@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Load configuration (global first, then user override)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$HOME/.tmux/config.sh" ]; then
+    source "$HOME/.tmux/config.sh"
+fi
+
+CLUSTERS_BASE_PATH="${CLUSTERS_BASE_PATH:-/vms/clusters}"
+OPENSHIFT4_AUTOMATION_PATH="${OPENSHIFT4_AUTOMATION_PATH:-$HOME/git/openshift4-automation}"
+
+if [ -z "$1" ]; then
+    echo "Error: Cluster name is required"
+    echo "Usage: ocpattachiso <cluster-name> [cluster-path]"
+    exit 1
+fi
+
+CLUSTER_NAME="$1"
+CLUSTER_DIR="${2:-$CLUSTERS_BASE_PATH/$CLUSTER_NAME}"
+CLUSTER_JSON="$CLUSTER_DIR/$CLUSTER_NAME.json"
+
+if [ ! -f "$CLUSTER_JSON" ]; then
+    echo "Error: Cluster JSON not found: $CLUSTER_JSON"
+    exit 1
+fi
+
+ASSISTED_HOSTS="$CLUSTER_DIR/assisted-hosts.json"
+if [ -f "$ASSISTED_HOSTS" ]; then
+    echo "Assisted Installer hosts for $CLUSTER_NAME:"
+    echo "---"
+    jq -r '.hosts[] | "  \(.name)  \(.mac)"' "$ASSISTED_HOSTS" 2>/dev/null
+    echo "---"
+    echo ""
+fi
+
+read -rp "Assisted Installer ISO URL: " iso_url
+
+if [ -z "$iso_url" ]; then
+    echo "Error: ISO URL is required"
+    exit 1
+fi
+
+PLAYBOOK="$OPENSHIFT4_AUTOMATION_PATH/create-master-vms-assisted-installer.yaml"
+
+if [ ! -f "$PLAYBOOK" ]; then
+    echo "Error: Playbook not found: $PLAYBOOK"
+    exit 1
+fi
+
+echo ""
+echo "Attaching ISO and powering on VMs for cluster: $CLUSTER_NAME"
+echo "ISO: $iso_url"
+echo ""
+
+ansible-playbook "$PLAYBOOK" \
+    -e "@$CLUSTER_JSON" \
+    -e "clustername=$CLUSTER_NAME" \
+    -e "iso_file=$iso_url"
