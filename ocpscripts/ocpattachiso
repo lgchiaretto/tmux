@@ -91,7 +91,7 @@ else
     echo "VPN config already exists, skipping configure-vpn.yaml"
 fi
 
-ansible-playbook "$OPENSHIFT4_AUTOMATION_PATH/send_mail_creation.yaml" \
+ansible-playbook "$OPENSHIFT4_AUTOMATION_PATH/send_mail_assisted_creation.yaml" \
     -e "@$CLUSTER_JSON" \
     -e "clustername=$CLUSTER_NAME" \
     -e "execution_time=$EXECUTION_TIME_FMT"
