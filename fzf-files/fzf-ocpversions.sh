@@ -35,7 +35,7 @@ if [ -f "$CACHE_FILE" ]; then
                        --bind "r:execute-silent(/usr/local/bin/ocpreleasenotes {1})" \
                        --bind "d:execute-silent(/usr/local/bin/ocpdocumentation {1})" \
                        --bind "m:execute-silent(tmux new-session -d -s imageset-{1} '/usr/local/bin/ocp-createimageset {1}'; tmux attach-session -t imageset-{1})+abort" \
-                       --bind "enter:ignore" \
+                       --bind "enter:execute-silent(tmux send-keys {1})+abort" \
                        --color=fg:#ffffff,bg:#1d2021,hl:#d8a657 \
                        --color=fg+:#a9b665,bg+:#1d2021,hl+:#a9b665
                        )
